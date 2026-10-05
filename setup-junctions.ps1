@@ -73,7 +73,27 @@ if (-not (Test-Path $pluginUserProfileAgents)) {
     Write-Host "[+] Created Junction: $pluginUserProfileAgents -> $sourceAgents" -ForegroundColor Green
 }
 
-# 4. Setup Junction for Plugins (with fallback if root plugins folder is locked by process)
+# 4. Setup Junction for Tools
+$targetTools = Join-Path $configDir "tools"
+$sourceTools = Join-Path $repoRoot "tools"
+
+if (Test-Path $targetTools) {
+    $item = Get-Item $targetTools
+    if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+        Write-Host "[=] Junction already exists: $targetTools" -ForegroundColor Green
+    } else {
+        $backupTools = Join-Path $configDir "tools_backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+        Write-Host "[!] Moving existing tools to $backupTools" -ForegroundColor Yellow
+        Move-Item -Path $targetTools -Destination $backupTools
+        New-Item -ItemType Junction -Path $targetTools -Target $sourceTools | Out-Null
+        Write-Host "[+] Created Junction: $targetTools -> $sourceTools" -ForegroundColor Green
+    }
+} else {
+    New-Item -ItemType Junction -Path $targetTools -Target $sourceTools | Out-Null
+    Write-Host "[+] Created Junction: $targetTools -> $sourceTools" -ForegroundColor Green
+}
+
+# 5. Setup Junction for Plugins (with fallback if root plugins folder is locked by process)
 $targetPlugins = Join-Path $configDir "plugins"
 $sourcePlugins = Join-Path $repoRoot "plugins"
 

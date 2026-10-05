@@ -87,7 +87,7 @@ if ($agyCmd) {
 Write-Host ""
 # 2. Directory Junctions
 Write-Host "2. Directory Junctions Integrity" -ForegroundColor Cyan
-$junctions = @("skills", "agents", "plugins")
+$junctions = @("skills", "agents", "tools", "plugins")
 foreach ($j in $junctions) {
     $targetPath = Join-Path $configDir $j
     if (-not (Test-Path $targetPath)) {
@@ -191,7 +191,7 @@ foreach ($a in $expectedAgents) {
     if (Test-Path $aFile) {
         $aRaw = Get-Content $aFile -Raw -Encoding UTF8
         $hasModel = ($aRaw -match "model:\s*$($a.ExpectedModel)")
-        $hasPersona = ($aRaw -match "การสื่อสาร.*หนู.*ค่ะ")
+        $hasPersona = ($aRaw -match "หนู" -and $aRaw -match "ค่ะ" -and $aRaw -match "พี่ A")
         if (-not ($hasModel -and $hasPersona)) {
             $allAgentsOk = $false
             Report-Check "WARN" "Subagent $($a.Name)" "Model or persona tag mismatch" "Review $($a.Name).md"
