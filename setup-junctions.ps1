@@ -46,7 +46,34 @@ if (Test-Path $targetSkills) {
     Write-Host "[+] Created Junction: $targetSkills -> $sourceSkills" -ForegroundColor Green
 }
 
-# 3. Setup Junction for Plugins (with fallback if root plugins folder is locked by process)
+# 3. Setup Junction for Agents (Custom Subagents)
+$targetAgents = Join-Path $configDir "agents"
+$sourceAgents = Join-Path $repoRoot "agents"
+
+if (Test-Path $targetAgents) {
+    $item = Get-Item $targetAgents
+    if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+        Write-Host "[=] Junction already exists: $targetAgents" -ForegroundColor Green
+    } else {
+        $backupAgents = Join-Path $configDir "agents_backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+        Write-Host "[!] Moving existing agents to $backupAgents" -ForegroundColor Yellow
+        Move-Item -Path $targetAgents -Destination $backupAgents
+        New-Item -ItemType Junction -Path $targetAgents -Target $sourceAgents | Out-Null
+        Write-Host "[+] Created Junction: $targetAgents -> $sourceAgents" -ForegroundColor Green
+    }
+} else {
+    New-Item -ItemType Junction -Path $targetAgents -Target $sourceAgents | Out-Null
+    Write-Host "[+] Created Junction: $targetAgents -> $sourceAgents" -ForegroundColor Green
+}
+
+# Ensure plugins/user-profile/agents also has a junction for plugin discovery
+$pluginUserProfileAgents = Join-Path $repoRoot "plugins\user-profile\agents"
+if (-not (Test-Path $pluginUserProfileAgents)) {
+    New-Item -ItemType Junction -Path $pluginUserProfileAgents -Target $sourceAgents | Out-Null
+    Write-Host "[+] Created Junction: $pluginUserProfileAgents -> $sourceAgents" -ForegroundColor Green
+}
+
+# 4. Setup Junction for Plugins (with fallback if root plugins folder is locked by process)
 $targetPlugins = Join-Path $configDir "plugins"
 $sourcePlugins = Join-Path $repoRoot "plugins"
 

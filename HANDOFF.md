@@ -42,9 +42,10 @@ powershell -ExecutionPolicy Bypass -File .\setup-junctions.ps1
 ```
 
 ### Step 3: ตรวจสอบความถูกต้อง
-สคริปต์จะสร้าง Directory Junction สำหรับ `skills/` และโฟลเดอร์ใน `plugins/` เข้าไปยัง `~/.gemini/config/` โดยอัตโนมัติ:
+สคริปต์จะสร้าง Directory Junction สำหรับ `skills/`, `agents/` และโฟลเดอร์ใน `plugins/` เข้าไปยัง `~/.gemini/config/` โดยอัตโนมัติ:
 ```powershell
 Get-Item "$env:USERPROFILE\.gemini\config\skills" | Select-Object FullName, LinkType, Target
+Get-Item "$env:USERPROFILE\.gemini\config\agents" | Select-Object FullName, LinkType, Target
 Get-ChildItem "$env:USERPROFILE\.gemini\config\plugins" | Select-Object Name, LinkType, Target
 ```
 *(ต้องแสดง `LinkType = Junction` และชี้กลับมาที่โฟลเดอร์ repo นี้)*

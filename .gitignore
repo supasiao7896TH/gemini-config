@@ -46,3 +46,6 @@ desktop.ini
 
 # ── Synced skills cache ───────────────────────────────────────────────
 skills/synced/
+
+# ── Local junction symlinks ───────────────────────────────────────────
+plugins/user-profile/agents/
