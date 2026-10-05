@@ -17,6 +17,9 @@
     },
     "modern-web-guidance-plugin": {
       "enabled": true
+    },
+    "user-profile": {
+      "enabled": true
     }
   },
   "userSettings": {
