@@ -88,9 +88,13 @@ Sync-Gemini
 
 ```text
 gemini-config/
+├── .github/
+│   └── workflows/ci.yml    → GitHub Actions CI Pipeline (Prettier, Secretlint, Standards)
 ├── config.json             → การตั้งค่า Plugins, Remote Control Hostname, Dark Theme
 ├── hooks.json              → Life-cycle hooks (Windows SAPI Voice alerts & Security Gate)
 ├── mcp_config.json         → MCP Servers (Firebase, Puppeteer, BigQuery)
+├── package.json            → Scripts & devDependencies สำหรับ CI/CD (Prettier & Secretlint)
+├── .secretlintrc.json      → กฎการตรวจจับ Secret / Key หลุดในโค้ด
 ├── .geminiignore           → Ignore rules สำหรับ Gemini CLI
 ├── .gitignore              → Strict Gitignore (ตัด /brain, /logs, credentials, node_modules)
 ├── .prettierrc / .ignore   → มาตรฐานการจัดฟอร์แมตโค้ด
@@ -100,6 +104,7 @@ gemini-config/
 │   ├── doctor.ps1          → สคริปต์วินิจฉัยสุขภาพระบบ Antigravity (14 จุดตรวจ)
 │   ├── security-gate.ps1   → PreToolUse Hook ป้องกันไฟล์หลุดและคำสั่งอันตราย
 │   ├── new-vibe-project.ps1→ สคริปต์สร้างโปรเจกต์ใหม่ Supasit.A Starter อัตโนมัติ
+│   ├── check-standards.mjs → Node.js CI Doctor สำหรับรันบน GitHub Actions runner
 │   └── powershell-profile-snippet.ps1 → ชุดคำสั่งลัดสำหรับวางใน $PROFILE
 ├── branding/               → Brand Identity ชุด A(i)CODER 2025 & Supasit.A Studio (SVG/Fonts)
 ├── assets/                 → Assets องค์กร GC-M PTA (โลโก้บริษัทสำหรับ Web Tools)

@@ -1,0 +1,20 @@
+{
+  "name": "gemini-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Supasit.A Antigravity CLI (Gemini) configuration, skills, agents, and tooling",
+  "scripts": {
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
+    "secrets": "secretlint \"**/*\"",
+    "standards": "node tools/check-standards.mjs",
+    "check": "npm run lint && npm run secrets && npm run standards"
+  },
+  "devDependencies": {
+    "@secretlint/secretlint-rule-pattern": "13.0.5",
+    "@secretlint/secretlint-rule-preset-recommend": "13.0.5",
+    "prettier": "3.9.6",
+    "secretlint": "13.0.5"
+  }
+}
