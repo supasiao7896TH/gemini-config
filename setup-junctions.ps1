@@ -46,24 +46,56 @@ if (Test-Path $targetSkills) {
     Write-Host "[+] Created Junction: $targetSkills -> $sourceSkills" -ForegroundColor Green
 }
 
-# 3. Setup Junction for Plugins
+# 3. Setup Junction for Plugins (with fallback if root plugins folder is locked by process)
 $targetPlugins = Join-Path $configDir "plugins"
 $sourcePlugins = Join-Path $repoRoot "plugins"
 
+$pluginsJunctioned = $false
 if (Test-Path $targetPlugins) {
     $item = Get-Item $targetPlugins
     if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
         Write-Host "[=] Junction already exists: $targetPlugins" -ForegroundColor Green
+        $pluginsJunctioned = $true
     } else {
-        $backupPlugins = Join-Path $configDir "plugins_backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
-        Write-Host "[!] Moving existing plugins to $backupPlugins" -ForegroundColor Yellow
-        Move-Item -Path $targetPlugins -Destination $backupPlugins
-        New-Item -ItemType Junction -Path $targetPlugins -Target $sourcePlugins | Out-Null
-        Write-Host "[+] Created Junction: $targetPlugins -> $sourcePlugins" -ForegroundColor Green
+        try {
+            $backupPlugins = Join-Path $configDir "plugins_backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+            Move-Item -Path $targetPlugins -Destination $backupPlugins -ErrorAction Stop
+            New-Item -ItemType Junction -Path $targetPlugins -Target $sourcePlugins | Out-Null
+            Write-Host "[+] Created Junction: $targetPlugins -> $sourcePlugins" -ForegroundColor Green
+            $pluginsJunctioned = $true
+        } catch {
+            Write-Host "[!] Note: plugins folder is currently locked by a running Antigravity process." -ForegroundColor Yellow
+            Write-Host "[+] Falling back to per-plugin folder junctions..." -ForegroundColor Cyan
+        }
     }
 } else {
     New-Item -ItemType Junction -Path $targetPlugins -Target $sourcePlugins | Out-Null
     Write-Host "[+] Created Junction: $targetPlugins -> $sourcePlugins" -ForegroundColor Green
+    $pluginsJunctioned = $true
+}
+
+if (-not $pluginsJunctioned) {
+    # Junction individual plugins inside plugins folder
+    Get-ChildItem -Directory -Path $sourcePlugins | ForEach-Object {
+        $pluginName = $_.Name
+        $targetSinglePlugin = Join-Path $targetPlugins $pluginName
+        $sourceSinglePlugin = $_.FullName
+
+        if (Test-Path $targetSinglePlugin) {
+            $pItem = Get-Item $targetSinglePlugin
+            if ($pItem.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+                Write-Host "[=] Per-plugin junction already exists: $pluginName" -ForegroundColor Green
+            } else {
+                $pBackup = Join-Path $targetPlugins "${pluginName}_backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+                Move-Item -Path $targetSinglePlugin -Destination $pBackup
+                New-Item -ItemType Junction -Path $targetSinglePlugin -Target $sourceSinglePlugin | Out-Null
+                Write-Host "[+] Created Junction for plugin: $pluginName" -ForegroundColor Green
+            }
+        } else {
+            New-Item -ItemType Junction -Path $targetSinglePlugin -Target $sourceSinglePlugin | Out-Null
+            Write-Host "[+] Created Junction for plugin: $pluginName" -ForegroundColor Green
+        }
+    }
 }
 
 # 4. Copy Configurations (Non-destructive)
