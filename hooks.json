@@ -3,13 +3,13 @@
     "PreInvocation": [
       {
         "type": "command",
-        "command": "powershell -NoProfile -Command \"(New-Object -ComObject SAPI.SpVoice).Speak('Start') | Out-Null; Write-Output '{}'\""
+        "command": "powershell -NoProfile -Command \"(New-Object -ComObject SAPI.SpVoice).Speak('Start', 1) | Out-Null; Write-Output '{}'\""
       }
     ],
     "Stop": [
       {
         "type": "command",
-        "command": "powershell -NoProfile -Command \"(New-Object -ComObject SAPI.SpVoice).Speak('Stop') | Out-Null; Write-Output '{}'\""
+        "command": "powershell -NoProfile -Command \"(New-Object -ComObject SAPI.SpVoice).Speak('Stop', 1) | Out-Null; Write-Output '{}'\""
       }
     ]
   }
