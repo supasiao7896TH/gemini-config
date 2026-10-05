@@ -8,6 +8,13 @@
         "mcp"
       ]
     },
+    "puppeteer": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
+    },
     "notebooks": {
       "command": "node",
       "args": [

@@ -137,11 +137,23 @@ foreach ($f in $filesToCopy) {
     $srcPath = Join-Path $repoRoot $f.Src
     $destPath = $f.Dest
     if (Test-Path $srcPath) {
-        if (-not (Test-Path $destPath) -or $Force) {
-            Copy-Item -Path $srcPath -Destination $destPath -Force
-            Write-Host "[+] Synced $($f.Src) -> $destPath" -ForegroundColor Green
+        if ($f.Src -eq "mcp_config.json") {
+            # Dynamically replace user path with current $env:USERPROFILE for multi-machine portability
+            $escapedProfile = $env:USERPROFILE -replace '\\', '\\'
+            $content = (Get-Content -Path $srcPath -Raw -Encoding UTF8) -replace '(?i)c:\\\\Users\\\\[^\\]+', $escapedProfile
+            if (-not (Test-Path $destPath) -or $Force) {
+                [IO.File]::WriteAllText($destPath, $content, [Text.Encoding]::UTF8)
+                Write-Host "[+] Synced $($f.Src) (Dynamic User Profile: $env:USERNAME) -> $destPath" -ForegroundColor Green
+            } else {
+                Write-Host "[=] $($f.Src) already exists at destination (use -Force to overwrite)" -ForegroundColor Gray
+            }
         } else {
-            Write-Host "[=] $($f.Src) already exists at destination (use -Force to overwrite)" -ForegroundColor Gray
+            if (-not (Test-Path $destPath) -or $Force) {
+                Copy-Item -Path $srcPath -Destination $destPath -Force
+                Write-Host "[+] Synced $($f.Src) -> $destPath" -ForegroundColor Green
+            } else {
+                Write-Host "[=] $($f.Src) already exists at destination (use -Force to overwrite)" -ForegroundColor Gray
+            }
         }
     }
 }

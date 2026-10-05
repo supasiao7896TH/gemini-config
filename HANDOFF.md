@@ -102,4 +102,4 @@ gemini-config/
 ## 🛡️ 4. กฎความปลอดภัย (Security Checklist)
 - [x] ตรวจสอบ `.gitignore` ว่าตัดโฟลเดอร์ `brain/`, `logs/`, `projects/`, `.env*`, `credentials.json`, `*serviceAccount*.json` เรียบร้อย
 - [x] ไม่เก็บบัญชีรหัสผ่านหรือ Token ส่วนบุคคลลงใน `mcp_config.json` หรือ `config.json`
-- [x] หากเครื่องบ้านมี User profile ชื่ออื่น (เช่น `PC 4000D` แทน `26007294`) ให้ตรวจทาน Path ใน `mcp_config.json` ให้ตรงกับ Extension Directory ของเครื่องนั้นๆ
+- [x] รองรับ Multi-machine อัตโนมัติ: หากเครื่องบ้านมี User profile ชื่ออื่น (เช่น `PC 4000D` แทน `26007294`) สคริปต์ `setup-junctions.ps1` จะแปลง Path ใน `mcp_config.json` ให้ตรงกับ `$env:USERPROFILE` ประจำเครื่องนั้นๆ ให้อัตโนมัติ
