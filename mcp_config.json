@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "firebase-mcp-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firebase-tools@latest",
+        "mcp"
+      ]
+    },
+    "notebooks": {
+      "command": "node",
+      "args": [
+        "c:\\Users\\26007294\\.antigravity-ide\\extensions\\googlecloudtools.datacloud-1.0.0-universal\\mcp_servers\\cli\\mcp_proxy_bundle.js",
+        "notebooks-antigravityide"
+      ]
+    },
+    "visualization": {
+      "command": "node",
+      "args": [
+        "c:\\Users\\26007294\\.antigravity-ide\\extensions\\googlecloudtools.datacloud-1.0.0-universal\\mcp_servers\\cli\\mcp_proxy_bundle.js",
+        "visualization-antigravityide"
+      ]
+    },
+    "context": {
+      "command": "node",
+      "args": [
+        "c:\\Users\\26007294\\.antigravity-ide\\extensions\\googlecloudtools.datacloud-1.0.0-universal\\mcp_servers\\cli\\mcp_proxy_bundle.js",
+        "context-antigravityide"
+      ]
+    },
+    "data-agent-kit": {
+      "command": "node",
+      "args": [
+        "c:\\Users\\26007294\\.antigravity-ide\\extensions\\googlecloudtools.datacloud-1.0.0-universal\\mcp_servers\\cli\\mcp_proxy_bundle.js",
+        "dataAgentKit-antigravityide"
+      ]
+    }
+  }
+}

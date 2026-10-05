@@ -1,0 +1,45 @@
+# ── Antigravity / Gemini CLI Runtime & Brain ───────────────────────────
+brain/
+logs/
+*.log
+antigravity-cli/
+antigravity-browser-profile/
+antigravity-ide/
+projects/
+.migrated
+.datacloud_telemetry_disabled
+
+# ── Node / toolchain ──────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+
+# ── Test results & caches ─────────────────────────────────────────────
+test-results/
+playwright-report/
+.cache/
+
+# ── Cloudflare / Wrangler ─────────────────────────────────────────────
+.wrangler/
+
+# ── Credentials & Secrets ─────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+*serviceAccount*.json
+*firebase-adminsdk*.json
+
+# ── OS / Editor ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+!.vscode/extensions.json
+
+# ── Synced skills cache ───────────────────────────────────────────────
+skills/synced/

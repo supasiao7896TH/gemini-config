@@ -1,0 +1,26 @@
+{
+  "plugins": {
+    "android-cli-plugin": {
+      "enabled": true
+    },
+    "chrome-devtools-plugin": {
+      "enabled": true
+    },
+    "firebase": {
+      "enabled": true
+    },
+    "google-antigravity-sdk": {
+      "enabled": true
+    },
+    "googlecloudtools.datacloud_telemetry": {
+      "enabled": true
+    },
+    "modern-web-guidance-plugin": {
+      "enabled": true
+    }
+  },
+  "userSettings": {
+    "remoteControlHostname": "gcmppc23p1103-polar-meteor",
+    "themeMode": "THEME_MODE_DARK"
+  }
+}

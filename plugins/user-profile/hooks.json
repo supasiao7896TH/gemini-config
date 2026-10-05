@@ -1,0 +1,16 @@
+{
+  "voice-alerts": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "powershell -NoProfile -Command \"(New-Object -ComObject SAPI.SpVoice).Speak('Start') | Out-Null; Write-Output '{}'\""
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "powershell -NoProfile -Command \"(New-Object -ComObject SAPI.SpVoice).Speak('Stop') | Out-Null; Write-Output '{}'\""
+      }
+    ]
+  }
+}
