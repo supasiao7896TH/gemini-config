@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"%USERPROFILE%\\.gemini\\config\\tools\\security-gate.ps1\""
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File %USERPROFILE%\\.gemini\\config\\tools\\security-gate.ps1"
           }
         ]
       }

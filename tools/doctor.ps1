@@ -103,6 +103,21 @@ foreach ($j in $junctions) {
     }
 }
 
+# Tools & Templates
+$newVibeScript = Join-Path $repoRoot "tools\new-vibe-project.ps1"
+if (Test-Path $newVibeScript) {
+    Report-Check "OK" "Tool: New-VibeProject" "Scaffolder script present and ready"
+} else {
+    Report-Check "WARN" "Tool: New-VibeProject" "Script not found at $newVibeScript" "Restore from repo"
+}
+
+$starterTemplate = Join-Path $repoRoot "design-lab\starter-multifile"
+if (Test-Path $starterTemplate) {
+    Report-Check "OK" "Starter Template" "design-lab/starter-multifile available"
+} else {
+    Report-Check "FAIL" "Starter Template" "design-lab/starter-multifile missing" "Restore from git"
+}
+
 Write-Host ""
 # 3. Configurations & MCP Sync
 Write-Host "3. Configurations & MCP Settings" -ForegroundColor Cyan

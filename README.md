@@ -109,6 +109,23 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
 
 ---
 
+## ⚡ PowerShell Shortcuts & CLI Tools
+
+โปรเจกต์นี้มาพร้อมสคริปต์สนับสนุนในโฟลเดอร์ `tools/` และชุดคำสั่งลัดที่ติดตั้งใน `$PROFILE`:
+
+| คำสั่ง / เครื่องมือ | หน้าที่ | วิธีเรียกใช้งาน |
+| :--- | :--- | :--- |
+| `a` | เรียก Antigravity CLI ทันใจ | `a` (ย่อมาจาก `agy`) |
+| `c` | เรียก Claude Code CLI ทันใจ | `c` (ย่อมาจาก `claude`) |
+| `Sync-Gemini` | ดึงโค้ดล่าสุดจาก GitHub และอัปเดต Junctions อัตโนมัติ | `Sync-Gemini` |
+| `Doctor-Gemini` | วินิจฉัยสุขภาพระบบ Antigravity ครบ 14 จุดตรวจ | `Doctor-Gemini` หรือ `.\tools\doctor.ps1` |
+| `New-VibeProject` | สั่งสร้างโปรเจกต์ใหม่ Supasit.A Starter (Multi-File) ในคำสั่งเดียว | `New-VibeProject -ProjectName my-app` |
+| `security-gate.ps1` | PreToolUse Hook คอยดักจับไฟล์ความลับและคำสั่งอันตราย | ทำงานอัตโนมัติผ่าน `hooks.json` |
+
+---
+
 ## 🛡️ Security & Privacy Guidelines
 - **ห้าม Commit:** API Keys, Firebase Service Account JSON, Credentials, และ Session Data
 - **`.gitignore`** ถูกตั้งค่าให้อัตโนมัติ ไม่แทร็กโฟลเดอร์ `brain/`, `antigravity-cli/`, `projects/` และนามสกุลคีย์ที่มีความเสี่ยง
+- **Security Gate:** ดักจับคำสั่งที่แตะไฟล์ Sensitive หรือคำสั่ง Destructive ผ่าน Hook อัตโนมัติ
+

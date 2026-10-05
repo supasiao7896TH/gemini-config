@@ -29,13 +29,37 @@ function Doctor-Gemini {
     }
 }
 
-# 3. ฟังก์ชันซิงค์ Claude Code Config
-function Sync-Claude {
-    $repo = "$env:USERPROFILE\A(i)CODER2025TH\claude-config"
-    if (Test-Path $repo) {
-        Write-Host "Syncing claude-config from GitHub..." -ForegroundColor Cyan
-        git -C $repo pull origin main
+# 4. ฟังก์ชันสร้างโปรเจกต์ใหม่ Supasit.A Multi-File Starter
+function New-VibeProject {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string]$ProjectName,
+        [Parameter(Position = 1)]
+        [string]$Path = (Get-Location).Path,
+        [switch]$NoGit,
+        [switch]$OpenCode,
+        [switch]$Force
+    )
+    $script = "$env:USERPROFILE\.gemini\config\tools\new-vibe-project.ps1"
+    if (-not (Test-Path $script)) {
+        $script = "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\tools\new-vibe-project.ps1"
+    }
+    if (Test-Path $script) {
+        & $script @PSBoundParameters
     } else {
-        Write-Warning "claude-config repository not found at $repo"
+        Write-Warning "new-vibe-project.ps1 not found at $script"
+    }
+}
+
+# 5. ฟังก์ชันซิงค์ Claude Code Config
+function Sync-Claude {
+    $repo = "$env:USERPROFILE\A(i)CODER2025TH\gemini-config"
+    $claudeRepo = "$env:USERPROFILE\A(i)CODER2025TH\claude-config"
+    if (Test-Path $claudeRepo) {
+        Write-Host "Syncing claude-config from GitHub..." -ForegroundColor Cyan
+        git -C $claudeRepo pull origin main
+    } else {
+        Write-Warning "claude-config repository not found at $claudeRepo"
     }
 }
