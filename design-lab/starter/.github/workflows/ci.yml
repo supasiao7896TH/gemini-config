@@ -1,0 +1,76 @@
+name: CI
+
+# ไฟล์นี้ "เฉื่อย" ตอนอยู่ใน claude-config เพราะ GitHub อ่าน .github/workflows
+# เฉพาะที่ root ของ repo — จะมีชีวิตเมื่อโฟลเดอร์นี้ถูก copy ไปเป็น repo ของแอปเอง
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: lint + secret scan + unit + e2e
+        run: npm run check
+
+  cache-guard:
+    # แก้ index.html แล้วลืม bump CACHE_NAME = "deploy สำเร็จแต่ผู้ใช้ยังเห็นของเก่า"
+    # เป็นบักที่เอกสาร 3 skill บันทึกตรงกันว่าเกิดซ้ำ — 5 บรรทัดนี้ปิดมันถาวร
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 2 }
+      - name: index.html เปลี่ยนแล้ว CACHE_NAME ต้องเปลี่ยนด้วย
+        run: |
+          git diff --name-only HEAD^ HEAD | grep -qx 'index.html' || exit 0
+          git diff HEAD^ HEAD -- sw.js | grep -q '^+.*CACHE_NAME' \
+            || { echo "::error file=sw.js::index.html เปลี่ยนแต่ CACHE_NAME ไม่ถูก bump — ผู้ใช้จะยังเห็นของเก่า"; exit 1; }
+
+  deploy:
+    needs: [check, cache-guard]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # ฝัง build stamp เพื่อตอบคำถาม "แก้แล้วขึ้นจริงหรือยัง" ด้วยเครื่อง ไม่ใช่ด้วยความรู้สึก
+      - name: ฝังเวอร์ชันลงหน้า
+        run: |
+          STAMP="${GITHUB_SHA::7} $(date -u +%Y-%m-%d)"
+          sed -i "s|<head>|<head>\n<meta name=\"app-version\" content=\"$STAMP\">|" index.html
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: versions upload
+
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: versions deploy -y
+
+      # ยืนยันว่าสิ่งที่อยู่บน URL จริงคือ commit นี้ ไม่ใช่ของเก่าที่ cache ไว้
+      - name: ตรวจว่า URL จริงเสิร์ฟ commit นี้แล้ว
+        run: |
+          test -n "${{ vars.APP_URL }}" || { echo "ยังไม่ได้ตั้ง repo variable APP_URL — ข้ามการตรวจ"; exit 0; }
+          for i in 1 2 3 4 5; do
+            curl -sf "${{ vars.APP_URL }}" | grep -q "${GITHUB_SHA::7}" && exit 0
+            sleep 10
+          done
+          echo "::error::URL จริงยังไม่เสิร์ฟ ${GITHUB_SHA::7} หลังรอ 50 วินาที"
+          exit 1

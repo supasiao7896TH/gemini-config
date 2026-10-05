@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'">
+<title>ชื่อแอป — Supasit.A</title>
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#F7F9FC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1219" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
+
+<style>
+/* ============================================================
+   SUPASIT.A STUDIO — design token
+   light ชุดเต็มอยู่บน :root เปล่า · dark ต้องมีครบทั้ง 3 สถานะ
+   ============================================================ */
+:root {
+  --bg:#F7F9FC; --surface:#FFFFFF; --surface-2:#EDF1F9; --surface-3:#DFE6F3;
+  --border:#D6DEEE; --border-strong:#B2BFD8;
+  --text:#131829; --text-2:#414A60; --text-3:#5F6980;
+  --accent:#1D4ED8; --accent-hover:#173DA8; --on-accent:#FFFFFF;
+  --accent-soft:#DFE6FA; --accent-soft-text:#15389C;
+  --accent-2:#8A6410; --accent-2-soft:#FBEFCF; --accent-2-text:#6B4E08;
+  --ok:#1A7444; --ok-soft:#D6F0E1; --warn:#8A5A08; --warn-soft:#FBEBCF;
+  --crit:#B3261E; --crit-soft:#FBDEDB; --on-crit:#FFFFFF;
+  --r-sm:6px; --r-md:9px; --r-lg:13px; --r-xl:16px; --r-pill:999px; --r-btn:999px;
+  --shadow-1:0 1px 2px rgba(15,25,50,.06);
+  --shadow-2:0 4px 16px rgba(15,25,50,.11);
+  --topbar-bg:color-mix(in srgb, #F7F9FC 85%, transparent);
+  --ease:cubic-bezier(.4,0,.2,1); --dur:.16s;
+  --font-ui:"Noto Sans Thai", system-ui, -apple-system, sans-serif;
+  --focus-ring:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#0E1219; --surface:#161C27; --surface-2:#1D2431; --surface-3:#262F40;
+    --border:#242C3A; --border-strong:#38455A;
+    --text:#E6EAF3; --text-2:#B0B9CB; --text-3:#868FA3;
+    --accent:#7FA8FF; --accent-hover:#A6C3FF; --on-accent:#141B29;
+    --accent-soft:#1C2538; --accent-soft-text:#DFE9FF;
+    --accent-2:#E0B85C; --accent-2-soft:#332708; --accent-2-text:#F0D69A;
+    --ok:#5FD08D; --ok-soft:#0F2E1D; --warn:#E0AE52; --warn-soft:#32250A;
+    --crit:#F0938A; --crit-soft:#3A1512; --on-crit:#3A0F0A;
+    --shadow-1:0 1px 2px rgba(0,0,0,.5); --shadow-2:0 4px 18px rgba(0,0,0,.55);
+    --topbar-bg:color-mix(in srgb, #0E1219 85%, transparent);
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#0E1219; --surface:#161C27; --surface-2:#1D2431; --surface-3:#262F40;
+  --border:#242C3A; --border-strong:#38455A;
+  --text:#E6EAF3; --text-2:#B0B9CB; --text-3:#868FA3;
+  --accent:#7FA8FF; --accent-hover:#A6C3FF; --on-accent:#141B29;
+  --accent-soft:#1C2538; --accent-soft-text:#DFE9FF;
+  --accent-2:#E0B85C; --accent-2-soft:#332708; --accent-2-text:#F0D69A;
+  --ok:#5FD08D; --ok-soft:#0F2E1D; --warn:#E0AE52; --warn-soft:#32250A;
+  --crit:#F0938A; --crit-soft:#3A1512; --on-crit:#3A0F0A;
+  --shadow-1:0 1px 2px rgba(0,0,0,.5); --shadow-2:0 4px 18px rgba(0,0,0,.55);
+  --topbar-bg:color-mix(in srgb, #0E1219 85%, transparent);
+}
+
+*,*::before,*::after { box-sizing: border-box; }
+body { margin:0; background: var(--bg); color: var(--text);
+  font-family: var(--font-ui); font-size:15px; line-height:1.6;
+  -webkit-text-size-adjust:100%; }
+h1,h2,h3,p,ul { margin:0; } ul { list-style:none; padding:0; }
+
+.topbar { position:sticky; top:0; z-index:20; background:var(--topbar-bg); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; gap:12px; }
+.logo { width:30px; height:30px; border-radius:var(--r-sm); background:var(--accent); color:var(--on-accent);
+  display:grid; place-items:center; font-weight:700; font-size:13px; }
+.app-name { font-weight:600; letter-spacing:-.018em; }
+.topbar .spacer { margin-left:auto; }
+
+main { max-width:1080px; margin:0 auto; padding:24px 20px calc(100px + env(safe-area-inset-bottom) + 24px); display:grid; gap:24px; }
+@media (max-width:720px) { main { padding:16px 16px calc(100px + env(safe-area-inset-bottom) + 16px); } }
+
+.eyebrow { font-size:11.7px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-2); }
+h1 { font-size:clamp(24px,3.4vw,32px); font-weight:600; letter-spacing:-.018em; line-height:1.18; text-wrap:balance; }
+.lede { color:var(--text-2); max-width:62ch; }
+
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+  box-shadow:var(--shadow-1); padding:18px;
+  transition:box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(165px,1fr)); }
+@media (min-width:760px) { .grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media (max-width:720px) { .grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.grid > *, .card { min-width:0; }
+
+.kpi .k-label { font-size:12.3px; color:var(--text-2); }
+.kpi .k-val { font-size:30px; font-weight:700; letter-spacing:-.02em; line-height:1.1;
+  display:flex; align-items:baseline; flex-wrap:wrap; font-variant-numeric:tabular-nums; }
+.kpi .k-unit { font-size:12px; color:var(--text-3); font-weight:400; margin-left:4px; white-space:nowrap; }
+
+.chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:var(--r-pill);
+  font-size:11.7px; font-weight:600; white-space:nowrap; }
+.c-ok{background:var(--ok-soft);color:var(--ok)} .c-warn{background:var(--warn-soft);color:var(--warn)}
+.c-crit{background:var(--crit-soft);color:var(--crit)} .c-ref{background:var(--accent-2-soft);color:var(--accent-2-text)}
+.c-neutral{background:var(--surface-3);color:var(--text-2)}
+
+.btn { font:inherit; font-size:14px; font-weight:600; padding:10px 20px; min-height:44px;
+  border-radius:var(--r-btn); border:1px solid transparent; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:background var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.btn:active { transform:scale(.97); }
+.btn:focus-visible { outline:none; box-shadow:var(--focus-ring); }
+.btn-primary{background:var(--accent);color:var(--on-accent)} .btn-primary:hover{background:var(--accent-hover)}
+.btn-soft{background:var(--accent-soft);color:var(--accent-soft-text)}
+.btn-outline{background:transparent;color:var(--text);border-color:var(--border-strong)}
+.btn-outline:hover{background:var(--surface-2)}
+.btn-ghost{background:transparent;color:var(--text-2)} .btn-ghost:hover{background:var(--surface-2);color:var(--text)}
+.btn-danger{background:var(--crit-soft);color:var(--crit)}
+
+.field { display:grid; gap:6px; }
+.field label { font-size:12.8px; font-weight:500; color:var(--text-2); }
+.field :is(input,select,textarea) { font:inherit; font-size:14.3px; color:var(--text); width:100%;
+  background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--r-md);
+  padding:12px 14px; min-height:46px;
+  transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.field :is(input,select,textarea):focus { outline:none; border-color:var(--accent); box-shadow:var(--focus-ring); }
+.field.err :is(input,textarea) { border-color:var(--crit); }
+.field .hint { font-size:12px; color:var(--text-3); }
+.field.err .hint { color:var(--crit); }
+
+.tbl-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:var(--r-lg); background:var(--surface); min-width:0; }
+table { border-collapse:collapse; width:100%; min-width:520px; }
+thead th { text-align:left; font-size:12px; font-weight:600; color:var(--text-2); background:var(--surface-2);
+  padding:12px 16px; border-bottom:1px solid var(--border); white-space:nowrap; }
+tbody td { padding:13px 16px; font-size:13.8px; border-bottom:1px solid var(--border); }
+tbody tr:last-child td { border-bottom:0; }
+tbody tr:hover td { background:var(--surface-2); }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+
+/* Brand dock — แถบล่างถาวรเต็มความกว้าง แทนทั้ง #bootSplash เดิม (จอเต็มครั้งเดียวตอนบูต)
+   และ .aicoder-badge เดิม (ป้ายมุมสงบ) ตั้งแต่ 2569-08-29 — ดู branding/README.md "D4 — Studio"
+   .tube strike-in เล่นเองครั้งเดียวตอน mount (ให้ผลแบบ boot splash เดิมในตัว ไม่ต้องมี JS)
+   แล้ว .tube-s/.tube-b (infinite) กะพริบต่อเนื่องตลอดที่หน้ายังเปิดอยู่
+   กว้าง 280px ผ่านขั้นต่ำ D1(≥240px)/D2(≥280px) พร้อมกัน — ไม่ใช่ badge เล็กเหมือนเดิม
+   -bare ไม่มีพื้นของตัวเอง จึงวางบน var(--surface) เหมือนเป็นส่วนหนึ่งของแถบ ไม่ใช่สติกเกอร์ */
+.err-toast { position:fixed; left:50%; transform:translateX(-50%); bottom:76px; z-index:40;
+  display:flex; align-items:center; gap:12px; max-width:min(560px, calc(100vw - 32px));
+  padding:12px 16px; border-radius:var(--r-lg); border:1px solid var(--crit);
+  background:var(--crit-soft); color:var(--text); box-shadow:var(--shadow-2); }
+.err-toast[hidden] { display:none; }
+.brand-dock { position:fixed; left:0; right:0; bottom:0; z-index:30;
+  height:calc(100px + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom);
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface); border-top:1px solid var(--border); box-shadow:var(--shadow-1);
+  text-decoration:none; }
+.brand-dock:focus-visible { outline:none; box-shadow:var(--focus-ring); }
+.brand-dock img { width:280px; height:auto; display:block; }
+.brand-dock .mark-dark { display:none; }
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) .brand-dock .mark-light { display:none; }
+  :root:not([data-theme="light"]) .brand-dock .mark-dark { display:block; }
+}
+:root[data-theme="dark"] .brand-dock .mark-light { display:none; }
+:root[data-theme="dark"] .brand-dock .mark-dark { display:block; }
+
+@media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">A</div>
+  <div class="app-name">ชื่อแอป</div>
+  <div class="spacer"></div>
+  <button class="btn btn-ghost" id="themeBtn" aria-label="สลับธีมสว่าง/มืด">ธีม</button>
+</header>
+
+<main>
+  <div>
+    <div class="eyebrow">หมวดของหน้า</div>
+    <h1>หัวเรื่องหลัก</h1>
+    <p class="lede">คำอธิบายสั้นๆ ของหน้านี้ — แทนที่ด้วยเนื้อหาจริงของแอป</p>
+  </div>
+
+  <div class="grid" id="kpiRow"></div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>รหัส</th><th>รายการ</th><th class="num">ค่า</th><th>สถานะ</th></tr></thead>
+      <tbody id="tblBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Global Error Boundary แสดงผลที่นี่ · role=alert ให้ screen reader ประกาศทันที
+     ซ่อนด้วย [hidden] ไม่ใช่ display:none ในสไตล์ เพื่อให้ JS toggle ได้ที่เดียว -->
+<div class="err-toast" id="errorToast" role="alert" aria-live="assertive" hidden>
+  <span id="errorToastText"></span>
+  <button class="btn btn-ghost" id="reportBtn" type="button">รายงานปัญหา</button>
+</div>
+
+<a class="brand-dock" href="#" aria-label="สร้างโดย A(i)CODER">
+  <img class="mark-light" src="assets/d1-neon-arcade-bare.svg" alt="" width="1200" height="300">
+  <img class="mark-dark" src="assets/d2-crt-night-bare.svg" alt="" width="1200" height="300">
+</a>
+
+<script>
+/* ============================================================
+   โครง 9 โมดูล (IIFE) ตามมาตรฐาน Supasit.A
+   แต่ละก้อนเป็น scope ปิดของตัวเอง เปิดเฉพาะสิ่งที่ต้องให้ก้อนอื่นเรียก
+   ============================================================ */
+
+/* 1 · APP_CONFIG — ค่าคงที่ที่อื่นห้ามแก้ */
+var APP_CONFIG = (function () {
+  return Object.freeze({
+    APP_NAME: "ชื่อแอป",
+    DB_NAME: "supasit_app",
+    DB_VERSION: 2,
+    STORES: ["records", "settings", "debugLog"],
+    THEME_KEY: "app:theme",
+    /* ใส่ .../issues/new ของ repo แอปนี้ — ว่างไว้ = ปุ่มรายงานปัญหาจะเงียบ */
+    ISSUE_URL: ""
+  });
+})();
+
+/* 2 · STATE_STORE — state กลางแบบ pub/sub: เปลี่ยน state แล้วผู้ที่ subscribe ถูกเรียกเอง */
+var STATE_STORE = (function () {
+  var state = { records: [], loading: false, error: null };
+  var subs = [];
+  return {
+    get: function (k) { return k ? state[k] : state; },
+    set: function (patch) { Object.assign(state, patch); subs.forEach(function (f) { f(state); }); },
+    subscribe: function (fn) { subs.push(fn); return function () { subs = subs.filter(function (f) { return f !== fn; }); }; }
+  };
+})();
+
+/* 3 · STORAGE_ENGINE — IndexedDB หุ้มด้วย Promise (โครงว่าง เติมตอนใช้จริง) */
+var STORAGE_ENGINE = (function () {
+  var dbp = null;
+  function open() {
+    if (dbp) return dbp;
+    dbp = new Promise(function (resolve, reject) {
+      var req = indexedDB.open(APP_CONFIG.DB_NAME, APP_CONFIG.DB_VERSION);
+      req.onupgradeneeded = function (e) {
+        var db = e.target.result;
+        APP_CONFIG.STORES.forEach(function (s) {
+          if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, { keyPath: "id" });
+        });
+      };
+      req.onsuccess = function () {
+        var db = req.result;
+        /* ถ้าแท็บอื่น (หรือแอปเวอร์ชันใหม่) ขอ upgrade — ต้องปิด connection นี้ทิ้ง
+           ไม่งั้น upgrade จะถูกบล็อกและแท็บนั้นค้างถาวรโดยไม่มี error ให้เห็น
+           เจอจาก tests/unit/starter-contract.test.mjs (เทสต์ migration) */
+        db.onversionchange = function () {
+          db.close();
+          dbp = null;
+          DEBUG_MODULE.log("ปิด DB เพราะมีเวอร์ชันใหม่ขอ upgrade");
+        };
+        resolve(db);
+      };
+      req.onerror = function () { reject(req.error); };
+      /* onblocked = มี connection เก่าที่ยังไม่ปิด ต้องบอกให้ชัด ไม่ใช่รอเงียบๆ */
+      req.onblocked = function () {
+        reject(new Error("อัปเกรดฐานข้อมูลไม่ได้ — ปิดแท็บอื่นที่เปิดแอปนี้อยู่ก่อนค่ะ"));
+      };
+    });
+    return dbp;
+  }
+
+  /* หุ้ม IDBRequest ให้เป็น Promise ที่เดียว — ที่เหลือจะได้ไม่ต้องเขียน onsuccess/onerror ซ้ำ */
+  function run(store, mode, fn) {
+    return open().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(store, mode);
+        var req = fn(tx.objectStore(store));
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { reject(req.error); };
+        tx.onabort = function () { reject(tx.error); };
+      });
+    });
+  }
+
+  return {
+    open: open,
+    /* record ต้องมี id เพราะทุก store สร้างด้วย keyPath:"id" */
+    put:    function (store, record) { return run(store, "readwrite", function (s) { return s.put(record); }); },
+    get:    function (store, id)     { return run(store, "readonly",  function (s) { return s.get(id); }); },
+    getAll: function (store)         { return run(store, "readonly",  function (s) { return s.getAll(); }); },
+    del:    function (store, id)     { return run(store, "readwrite", function (s) { return s.delete(id); }); }
+  };
+})();
+
+/* 4 · CLOUD_SYNC_MANAGER · 5 · AUTH_PROVIDER · 6 · GEMINI_AI_BRIDGE
+   เฟส 1 ยังไม่ใช้ — เปิดใช้เมื่อขึ้นเฟส Firebase/AI (ดู skill vibe-coding-firebase / ai-integration.md) */
+var CLOUD_SYNC_MANAGER = (function () { return { enabled: false }; })();
+var AUTH_PROVIDER      = (function () { return { enabled: false }; })();
+var GEMINI_AI_BRIDGE   = (function () { return { enabled: false }; })();
+
+/* 7 · UI_RENDERER — ที่เดียวที่แตะ DOM */
+var UI_RENDERER = (function () {
+  /* กัน XSS: ข้อความจากผู้ใช้/ฐานข้อมูลต้องผ่าน textContent เท่านั้น ห้าม innerHTML */
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = String(text);
+    return n;
+  }
+  function kpi(item) {
+    var c = el("div", "card kpi");
+    c.appendChild(el("div", "k-label", item.label));
+    var v = el("div", "k-val");
+    v.appendChild(el("span", null, item.value));
+    v.appendChild(el("span", "k-unit", item.unit));
+    c.appendChild(v);
+    var chip = el("span", "chip " + item.tone, item.note);
+    var foot = el("div", null); foot.style.marginTop = "8px"; foot.appendChild(chip);
+    c.appendChild(foot);
+    return c;
+  }
+  function row(r) {
+    var tr = el("tr");
+    var td0 = el("td"); td0.appendChild(el("span", "chip c-ref", r.tag)); tr.appendChild(td0);
+    tr.appendChild(el("td", null, r.name));
+    tr.appendChild(el("td", "num", r.value));
+    var td3 = el("td"); td3.appendChild(el("span", "chip " + r.tone, r.status)); tr.appendChild(td3);
+    return tr;
+  }
+  return {
+    el: el,
+    render: function (state) {
+      var kpiRow = document.getElementById("kpiRow");
+      var body = document.getElementById("tblBody");
+      kpiRow.textContent = ""; body.textContent = "";
+      state.kpis.forEach(function (k) { kpiRow.appendChild(kpi(k)); });
+      state.records.forEach(function (r) { body.appendChild(row(r)); });
+    }
+  };
+})();
+
+/* 8 · DEBUG_MODULE — เปิดด้วย ?debug=1 เท่านั้น production จึงเงียบสนิท
+   แต่ ring buffer เก็บ log ไว้เสมอ เพื่อให้ปุ่ม "รายงานปัญหา" มีอะไรให้แนบ
+   ตอนนี้ persist ผ่าน STORAGE_ENGINE ที่มีอยู่แล้ว (ไม่เปิด IndexedDB เส้นที่สอง)
+   เพื่อให้ log คงอยู่ข้าม reload — ยังต้องกดปุ่มรายงานปัญหาเองเหมือนเดิม
+   ไม่มีอะไรถูกส่งออกไปนอกเครื่องอัตโนมัติ */
+var DEBUG_MODULE = (function () {
+  var STORE = "debugLog";
+  var RING_ID = "ring";
+  var MAX = 20;            /* เก็บแค่ 20 รายการล่าสุด — พอให้ debug ไม่กินหน่วยความจำ */
+  var on = new URLSearchParams(location.search).get("debug") === "1";
+  var ring = [];
+  function persist() {
+    return STORAGE_ENGINE.put(STORE, { id: RING_ID, entries: ring, updatedAt: Date.now() })
+      .catch(function () {}); /* log ต้องไม่มีวันทำแอปพัง แม้ IndexedDB จะเขียนไม่ได้ */
+  }
+  function log() {
+    var args = Array.prototype.slice.call(arguments);
+    ring.push(new Date().toISOString().slice(11, 19) + " " + args.join(" "));
+    if (ring.length > MAX) ring.shift();
+    if (on) console.log.apply(console, args);
+    return persist(); /* คืน promise ไว้ให้เทสต์ await ได้ — ผู้เรียกจริงไม่ต้อง await */
+  }
+  function hydrate() {
+    return STORAGE_ENGINE.get(STORE, RING_ID).then(function (rec) {
+      var persisted = (rec && rec.entries) || [];
+      /* merge ไม่ใช่ replace — กัน race กับ log() ที่เกิดระหว่าง init() เดียวกัน */
+      ring = persisted.concat(ring).slice(-MAX);
+    }).catch(function () {});
+  }
+  return {
+    log: log,
+    hydrate: hydrate,
+    recent: function () { return ring.slice(); },
+    version: function () {
+      var m = document.querySelector('meta[name="app-version"]');
+      return m ? m.content : "dev";
+    }
+  };
+})();
+
+/* 9 · APP_CORE — ประกอบทุกอย่างเข้าด้วยกัน */
+var APP_CORE = (function () {
+  var root = document.documentElement;
+
+  function currentTheme() {
+    var t = root.getAttribute("data-theme");
+    if (t) return t;
+    return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  function applyTheme(t) {
+    root.setAttribute("data-theme", t);
+    /* localStorage โยน error ได้ในโหมดส่วนตัว — ต้องอยู่ใน try/catch เสมอ */
+    try { localStorage.setItem(APP_CONFIG.THEME_KEY, t); } catch (e) {}
+  }
+  function initTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem(APP_CONFIG.THEME_KEY); } catch (e) {}
+    if (saved) root.setAttribute("data-theme", saved);   /* ไม่ stamp อะไรเลย = ตามระบบ */
+  }
+
+  /* Global Error Boundary — §2 ระบุว่าต้องมี แต่ starter เดิมยังไม่ได้ทำ
+     ไม่มีอันนี้ = ผู้ใช้เจอ error แล้วไม่มีใครรู้ นอกจากเขาจะเดินมาบอกเอง */
+  function installErrorBoundary() {
+    function report(kind, detail) {
+      DEBUG_MODULE.log("[" + kind + "]", detail);
+      var box = document.getElementById("errorToast");
+      var txt = document.getElementById("errorToastText");
+      if (txt) txt.textContent = "เกิดข้อผิดพลาด — กดรายงานปัญหาได้ค่ะ";
+      if (box) box.hidden = false;
+    }
+
+    /* ปุ่มรายงานปัญหา = เปิด GitHub issue ที่กรอกไว้ให้แล้ว
+       ไม่ต้องมี backend · ไม่มีค่าใช้จ่าย · ไม่มีข้อมูลออกจากเครื่องจนกว่าผู้ใช้จะกดเอง
+       ตั้ง APP_CONFIG.ISSUE_URL เป็น .../issues/new ของ repo แอปนั้น */
+    var btn = document.getElementById("reportBtn");
+    if (btn) {
+      btn.addEventListener("click", function () {
+        var body =
+          "**เกิดอะไรขึ้น:** \n\n**กดอะไรก่อนหน้านั้น:** \n\n" +
+          "---\nเวอร์ชัน: " + DEBUG_MODULE.version() +
+          "\nเบราว์เซอร์: " + navigator.userAgent +
+          "\n\nlog ล่าสุด:\n```\n" + DEBUG_MODULE.recent().join("\n") + "\n```";
+        var url = APP_CONFIG.ISSUE_URL;
+        if (!url) { DEBUG_MODULE.log("ยังไม่ได้ตั้ง APP_CONFIG.ISSUE_URL"); return; }
+        window.open(url + "?title=" + encodeURIComponent("[bug] ") +
+          "&body=" + encodeURIComponent(body), "_blank", "noopener");
+      });
+    }
+    window.addEventListener("error", function (e) { report("error", e.message); });
+    window.addEventListener("unhandledrejection", function (e) {
+      report("promise", (e.reason && e.reason.message) || String(e.reason));
+    });
+  }
+
+  function init() {
+    DEBUG_MODULE.hydrate(); /* fire-and-forget — init() ต้องยัง sync เหมือนเดิม */
+    installErrorBoundary();
+    initTheme();
+    document.getElementById("themeBtn").addEventListener("click", function () {
+      applyTheme(currentTheme() === "dark" ? "light" : "dark");
+    });
+
+    /* ข้อมูลตัวอย่าง — ลบทิ้งแล้วต่อกับ STORAGE_ENGINE ของจริง */
+    UI_RENDERER.render({
+      kpis: [
+        { label: "ตัวชี้วัดที่ 1", value: "1,842", unit: "หน่วย", note: "ปกติ", tone: "c-ok" },
+        { label: "ตัวชี้วัดที่ 2", value: "96.4", unit: "หน่วย", note: "เฝ้าระวัง", tone: "c-warn" },
+        { label: "ตัวชี้วัดที่ 3", value: "99.1", unit: "%", note: "ปกติ", tone: "c-ok" },
+        { label: "ตัวชี้วัดที่ 4", value: "3", unit: "รายการ", note: "ต้องแก้", tone: "c-crit" }
+      ],
+      records: [
+        { tag: "FI-2104", name: "รายการตัวอย่างที่หนึ่ง", value: "128.40", status: "ปกติ", tone: "c-ok" },
+        { tag: "TI-3312", name: "รายการตัวอย่างที่สอง", value: "214.80", status: "เฝ้าระวัง", tone: "c-warn" }
+      ]
+    });
+
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      navigator.serviceWorker.register("sw.js").catch(function (e) { DEBUG_MODULE.log("sw", e); });
+    }
+    DEBUG_MODULE.log("พร้อมใช้งาน", APP_CONFIG.APP_NAME);
+  }
+  return { init: init };
+})();
+
+document.addEventListener("DOMContentLoaded", APP_CORE.init);
+</script>
+</body>
+</html>

@@ -80,8 +80,15 @@ gemini-config/
 ├── hooks.json              → Life-cycle hooks (Windows SAPI Voice alerts Start/Stop)
 ├── mcp_config.json         → MCP Servers (Firebase, Notebooks, Visualizations)
 ├── .geminiignore           → Ignore rules สำหรับ Gemini CLI
-├── .gitignore              → ป้องกัน Credentials, /brain, /logs หลุดขึ้น GitHub
+├── .gitignore              → Strict Gitignore (ตัด /brain, /logs, credentials, node_modules)
+├── .prettierrc / .ignore   → มาตรฐานการจัดฟอร์แมตโค้ด
 ├── setup-junctions.ps1     → สคริปต์ติดตั้งและสร้าง Junction อัตโนมัติ (มี Per-plugin Fallback)
+├── USER.md                 → ข้อมูลบริบทส่วนตัว พี่ A, สไตล์ Vibe Coding, กฎเหล็ก
+├── branding/               → Brand Identity ชุด A(i)CODER 2025 & Supasit.A Studio (SVG/Fonts)
+├── assets/                 → Assets องค์กร GC-M PTA (โลโก้บริษัทสำหรับ Web Tools)
+├── design-lab/             → แม่แบบ Starter (Single HTML / Multi-File Vite) & Preview Kit
+├── learning/               → บันทึกการเรียนรู้ Dev Roadmap & Web App Scaling Techniques
+├── agents/                 → คลัง Subagent Prompts (sa-architect, sa-reviewer, sa-debugger ฯลฯ)
 ├── plugins/                → แหล่งรวม Plugins & กฎเหล็ก (user-profile/rules/AGENTS.md)
 ├── skills/                 → แหล่งรวม Skills ทั้งหมด (Vibe Coding + GCP/BigQuery + PTA)
 ├── sidecars/               → Sidecars configuration

@@ -1,0 +1,1683 @@
+<title>A(i)CODER — Identity Directions</title>
+
+<style>
+/* ── Faces ────────────────────────────────────────────────────────────
+   Tektur     — display. Machined, faceted, arcade-adjacent without being
+                a pixel font (the logo already owns pixel).
+   Instrument — body. Warm grotesque, quiet next to Tektur's angles.
+   DM Mono    — data. Hex values, dimensions, specs.
+   Inlined as data URIs: the artifact CSP blocks font CDNs.            */
+
+@font-face {
+  font-family: "SC Display";
+  src: url(data:font/ttf;base64,__TEKTUR__) format("truetype");
+  font-weight: 500; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: "SC Body";
+  src: url(data:font/ttf;base64,__INSTRUMENT_REG__) format("truetype");
+  font-weight: 400; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: "SC Body";
+  src: url(data:font/ttf;base64,__INSTRUMENT_BOLD__) format("truetype");
+  font-weight: 700; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: "SC Mono";
+  src: url(data:font/ttf;base64,__DMMONO__) format("truetype");
+  font-weight: 400; font-style: normal; font-display: block;
+}
+
+/* ── Page tokens ──────────────────────────────────────────────────────
+   The page chrome is a near-monochrome gallery with a violet bias in
+   the neutrals, so the brand's actual colour lives only inside the
+   mockups. Complete light palette on bare :root; dark redefines tokens
+   twice (media query + explicit stamp) so both directions win.        */
+
+:root {
+  --ground:    #F2F0F6;
+  --surface:   #FCFBFE;
+  --surface-2: #E8E5F0;
+  --ink:       #17131F;
+  --ink-2:     #453E53;
+  --muted:     #746D84;
+  --rule:      #DBD5E6;
+  --rule-soft: #E6E2EE;
+  --mark:      #3B2F55;
+  --grid:      rgba(59, 47, 85, .055);
+  --shadow:    0 1px 2px rgba(23,19,31,.05), 0 12px 32px -18px rgba(23,19,31,.28);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:    #121017;
+    --surface:   #1B1724;
+    --surface-2: #241F30;
+    --ink:       #F0ECF7;
+    --ink-2:     #C7C0D6;
+    --muted:     #938BA5;
+    --rule:      #2E2839;
+    --rule-soft: #241F30;
+    --mark:      #BCA9EC;
+    --grid:      rgba(188, 169, 236, .05);
+    --shadow:    0 1px 2px rgba(0,0,0,.3), 0 12px 32px -18px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"] {
+  --ground:    #121017;
+  --surface:   #1B1724;
+  --surface-2: #241F30;
+  --ink:       #F0ECF7;
+  --ink-2:     #C7C0D6;
+  --muted:     #938BA5;
+  --rule:      #2E2839;
+  --rule-soft: #241F30;
+  --mark:      #BCA9EC;
+  --grid:      rgba(188, 169, 236, .05);
+  --shadow:    0 1px 2px rgba(0,0,0,.3), 0 12px 32px -18px rgba(0,0,0,.7);
+}
+
+/* ── Brand tokens ─────────────────────────────────────────────────────
+   Fixed values. These never respond to theme — a logo that changes
+   colour with the viewer's OS setting is not a logo.                  */
+:root {
+  --sc-violet:      #B39DF3;
+  --sc-violet-hi:   #C4AFFF;
+  --sc-violet-deep: #8C74E0;
+  --sc-pink:        #FF5C8A;
+  --sc-pink-hot:    #FF4D7E;
+  --sc-paw-pink:    #FF6FA5;
+  --sc-red:         #F4614B;
+  --sc-navy:        #3D4EA3;
+  --sc-paper:       #F7F5FB;
+  --sc-night:       #0D0B14;
+  --sc-hairline:    #C9D6D2;
+  --sc-ink:         #1B1533;
+  --sc-lilac:       #EFEAFB;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background-color: var(--ground);
+  /* 8px bitmap ground — the page sits on the same grid the logo is drawn on */
+  background-image:
+    repeating-linear-gradient(to right,  var(--grid) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px 8px);
+  color: var(--ink);
+  font-family: "SC Body", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 28px 96px;
+}
+
+/* ── Type scale ───────────────────────────────────────────────────── */
+
+h1, h2, h3 {
+  font-family: "SC Display", system-ui, sans-serif;
+  font-weight: 500;
+  text-wrap: balance;
+  margin: 0;
+  letter-spacing: -.01em;
+}
+h1 { font-size: clamp(2.1rem, 5.5vw, 3.4rem); line-height: 1.04; }
+h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); line-height: 1.1; }
+h3 { font-size: 1.02rem; line-height: 1.35; letter-spacing: 0; }
+p  { margin: 0; }
+
+.lede    { font-size: 1.06rem; color: var(--ink-2); max-width: 62ch; }
+.note    { font-size: .9rem;  color: var(--muted); max-width: 66ch; }
+.eyebrow {
+  font-family: "SC Mono", ui-monospace, monospace;
+  font-size: .72rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--mark);
+}
+.mono { font-family: "SC Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+/* ── Masthead ─────────────────────────────────────────────────────── */
+
+.masthead {
+  padding: 72px 0 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.masthead-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  align-items: baseline;
+  font-family: "SC Mono", ui-monospace, monospace;
+  font-size: .74rem;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+.masthead-meta b { color: var(--ink-2); font-weight: 400; }
+
+/* Controls: the ground picker and the motion switch. Deliberately plain —
+   they are page furniture, not part of the identity being judged. */
+
+#motion-toggle, .ground-pick button {
+  font-family: "SC Mono", ui-monospace, monospace;
+  font-size: .7rem;
+  letter-spacing: .06em;
+  color: var(--ink-2);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 4px 11px;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+#motion-toggle:hover, .ground-pick button:hover { border-color: var(--mark); color: var(--ink); }
+#motion-toggle[aria-pressed="true"] { background: var(--mark); border-color: var(--mark); color: var(--surface); }
+
+.ground-pick { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.ground-pick button.on { background: var(--mark); border-color: var(--mark); color: var(--surface); }
+.ground-label {
+  font-family: "SC Mono", ui-monospace, monospace;
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 3px;
+}
+
+/* Stopping the flicker drops the animations entirely rather than pausing
+   them, so the signs settle lit instead of freezing mid-dropout. */
+body.no-motion .tube,
+body.no-motion .tube-s,
+body.no-motion .tube-b { animation: none; opacity: 1; }
+
+/* A rule made of pixels rather than a hairline. */
+.pixrule {
+  height: 4px;
+  background-image: repeating-linear-gradient(to right, var(--rule) 0 4px, transparent 4px 8px);
+  border: 0;
+  margin: 0;
+}
+
+/* ── Brief ────────────────────────────────────────────────────────── */
+
+.brief {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 28px 40px;
+  padding: 36px 0 8px;
+}
+.brief-item { display: flex; flex-direction: column; gap: 7px; }
+.brief-item h3 { color: var(--ink); }
+.brief-item p  { font-size: .92rem; color: var(--muted); }
+
+/* ── Direction sections ───────────────────────────────────────────── */
+
+.dir { padding: 68px 0 0; display: flex; flex-direction: column; gap: 26px; }
+
+.dir-head { display: flex; flex-direction: column; gap: 12px; }
+.dir-id {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.dir-badge {
+  font-family: "SC Mono", ui-monospace, monospace;
+  font-size: .78rem;
+  letter-spacing: .1em;
+  padding: 4px 10px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--mark);
+}
+.dir-for {
+  font-family: "SC Mono", ui-monospace, monospace;
+  font-size: .74rem;
+  color: var(--muted);
+  letter-spacing: .03em;
+}
+
+/* Every mockup surface. The scroller keeps wide artwork from pushing
+   the page sideways. */
+/* The stage is the surface a mark is being previewed on, so it is set to
+   the mode's own world rather than the page's. Without that, "bare" has
+   nothing to be bare against and "glow" reads as a stain. Both are held a
+   step away from the mark's own ground so a plate still reads as a slab. */
+.stage {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.stage[data-surface="light"] { background: #E4E1EC; }
+.stage[data-surface="night"] { background: #08060D; border-color: #241C33; }
+.stage > svg { display: block; width: 100%; min-width: 640px; height: auto; }
+
+.apps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+  gap: 18px;
+}
+.app { display: flex; flex-direction: column; gap: 9px; }
+.app-frame {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+/* No min-width here: these tiles are compositions to compare, so they
+   scale down to the column rather than clipping into a scroller. */
+.app-frame > svg { display: block; width: 100%; height: auto; }
+.app-cap {
+  font-family: "SC Mono", ui-monospace, monospace;
+  font-size: .7rem;
+  letter-spacing: .05em;
+  color: var(--muted);
+}
+
+/* ── Spec block ───────────────────────────────────────────────────── */
+
+.spec {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 30px 44px;
+  padding: 8px 0 4px;
+}
+@media (max-width: 720px) { .spec { grid-template-columns: 1fr; } }
+
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+.sw { display: flex; flex-direction: column; gap: 6px; width: 92px; }
+.sw-chip { height: 46px; border: 1px solid var(--rule); }
+.sw-hex  { font-family: "SC Mono", ui-monospace, monospace; font-size: .68rem; color: var(--ink-2); letter-spacing: .02em; }
+.sw-role { font-size: .68rem; color: var(--muted); line-height: 1.3; }
+
+.speclist { display: flex; flex-direction: column; gap: 0; }
+.speclist div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  font-size: .84rem;
+}
+.speclist div:last-child { border-bottom: 0; }
+.speclist dt, .speclist span:first-child { color: var(--muted); }
+.speclist span:last-child {
+  font-family: "SC Mono", ui-monospace, monospace;
+  color: var(--ink-2);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Comparison ───────────────────────────────────────────────────── */
+
+.compare { padding: 76px 0 0; display: flex; flex-direction: column; gap: 22px; }
+.table-scroll { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: .87rem; }
+th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+thead th {
+  font-family: "SC Mono", ui-monospace, monospace;
+  font-size: .7rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--mark);
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+tbody th { font-weight: 400; color: var(--ink); white-space: nowrap; }
+td { color: var(--ink-2); }
+tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+
+.closing { padding: 56px 0 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Motion ───────────────────────────────────────────────────────── */
+
+.rise { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+.rise.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .rise { opacity: 1; transform: none; transition: none; }
+}
+:focus-visible { outline: 2px solid var(--mark); outline-offset: 3px; }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <span class="eyebrow">Identity study · round 01</span>
+    <h1>A(i)CODER</h1>
+    <p class="lede">
+      Three ways to take the original banner further. Same wordmark, same paw, same
+      tricolour bar — treated three different ways so the choice is about
+      <em>where the mark has to survive</em>, not about taste alone.
+    </p>
+    <hr class="pixrule">
+    <div class="masthead-meta">
+      <span>SOURCE <b>banner artwork, supplied</b></span>
+      <span>OWNER <b>supasiao7896TH</b></span>
+      <span>RENAMED <b>from SOICODER</b></span>
+      <span>USE <b>dev persona · web app</b></span>
+      <span>YEAR MARK <b>2025, retained</b></span>
+      <button type="button" id="motion-toggle" aria-pressed="false">Stop the flicker</button>
+    </div>
+  </header>
+
+  <section class="brief rise">
+    <div class="brief-item">
+      <h3>Two readings, one word</h3>
+      <p><b>A</b> is the owner. <b>(i)</b> makes it <em>AI</em>. The name says who
+         writes the code and what writes it with him, and the brackets are the
+         join — an aside inside a name, the way a thought interrupts a sentence.</p>
+    </div>
+    <div class="brief-item">
+      <h3>Drawn, not typed</h3>
+      <p>The wordmark is a 5 × 7 bitmap rendered as vector rectangles. No font
+         dependency, no licence to track, and it stays exactly as crisp at 2400 px
+         as it is at 24.</p>
+    </div>
+    <div class="brief-item">
+      <h3>What the round decides</h3>
+      <p>Pick one direction. The next round turns it into the full kit — icon set,
+         clear-space rules, motion, and the app shell it has to live in.</p>
+    </div>
+  </section>
+
+  <!-- Naming ─────────────────────────────────────────────────────── -->
+  <section class="dir rise" id="naming">
+    <div class="dir-head">
+      <span class="eyebrow">Open question</span>
+      <h2>The brackets are the one thing worth arguing about</h2>
+      <p class="note">
+        The rename is right. <b>A(i)CODER</b> is true to the person and true to how the
+        work actually gets made, and it beats SOICODER on both counts. The double
+        reading is the good kind of clever — it survives being explained.
+        The brackets are a separate question, and they are the part that will cost
+        something later. Three versions, drawn at the same size:
+      </p>
+    </div>
+    <div class="apps" id="name-options"></div>
+    <div class="spec">
+      <div class="speclist" id="name-costs"></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <p class="note">
+          What the brackets cost: they cannot be typed into a GitHub handle, an npm
+          package, a domain, or a filename. In a URL they become
+          <span class="mono">%28</span> and <span class="mono">%29</span>. So the
+          written name and the typed name split apart on day one — the logo says
+          A(i)CODER while everything addressable says <span class="mono">aicoder</span>,
+          and that gap never closes.
+        </p>
+        <p class="note">
+          The middle option gets the same two readings out of colour instead of
+          punctuation. One accent glyph, no punctuation to strip, and it stays
+          typeable everywhere. It also costs nothing to change your mind later:
+          the accent is a fill, not a character.
+        </p>
+        <p class="note">
+          <b>Honest read:</b> take the middle one. But this is a name, not a
+          measurement — if the brackets are what you picture when you picture the
+          brand, keep them. Everything on this page is already built for
+          A(i)CODER, so that choice is made and working.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- D1 ─────────────────────────────────────────────────────────── -->
+  <section class="dir rise" id="d1">
+    <div class="dir-head">
+      <div class="dir-id">
+        <span class="dir-badge">D1</span>
+        <h2>Neon Arcade</h2>
+        <span class="dir-for">→ light README · web app header · social card</span>
+      </div>
+      <p class="note">
+        The supplied artwork, resolved. Spacing put on the same 8 px grid the letters
+        are drawn on, the bloom rebuilt as a two-pass Gaussian so it survives export,
+        and the paws re-cut so the pads read as pads at any size. Every glyph and paw
+        is a separate tube on its own phase, so the sign strikes unevenly and never
+        blinks in unison.
+      </p>
+    </div>
+    <div class="ground-pick" data-for="d1">
+      <span class="ground-label">Ground</span>
+      <button type="button" data-g="bare">Bare</button>
+      <button type="button" data-g="glow" class="on">Glow</button>
+      <button type="button" data-g="plate">Plate</button>
+    </div>
+    <div class="stage" data-surface="light" id="d1-hero"></div>
+    <div class="apps" id="d1-apps"></div>
+    <div class="spec">
+      <div>
+        <div class="swatches" id="d1-sw"></div>
+      </div>
+      <div class="speclist" id="d1-spec"></div>
+    </div>
+  </section>
+
+  <!-- D2 ─────────────────────────────────────────────────────────── -->
+  <section class="dir rise" id="d2">
+    <div class="dir-head">
+      <div class="dir-id">
+        <span class="dir-badge">D2</span>
+        <h2>CRT Night</h2>
+        <span class="dir-for">→ terminal · dark README · PWA splash</span>
+      </div>
+      <p class="note">
+        Same lockup, moved to a phosphor screen. Bloom runs hotter, a pink ghost sits
+        one pixel off-register the way a cheap CRT actually misconverges, and a 3 px
+        scanline field holds the whole plate together. The ghost lives inside the same
+        tube as its letter, so a dropout takes both — a ghost left glowing over a dead
+        letter is the tell that gives away a fake.
+      </p>
+    </div>
+    <div class="ground-pick" data-for="d2">
+      <span class="ground-label">Ground</span>
+      <button type="button" data-g="bare">Bare</button>
+      <button type="button" data-g="glow" class="on">Glow</button>
+      <button type="button" data-g="plate">Plate</button>
+    </div>
+    <div class="stage" data-surface="night" id="d2-hero"></div>
+    <div class="apps" id="d2-apps"></div>
+    <div class="spec">
+      <div>
+        <div class="swatches" id="d2-sw"></div>
+      </div>
+      <div class="speclist" id="d2-spec"></div>
+    </div>
+  </section>
+
+  <!-- D3 ─────────────────────────────────────────────────────────── -->
+  <section class="dir rise" id="d3">
+    <div class="dir-head">
+      <div class="dir-id">
+        <span class="dir-badge">D3</span>
+        <h2>Street Sticker</h2>
+        <span class="dir-for">→ avatar · favicon · PWA icon · merch</span>
+      </div>
+      <p class="note">
+        Glow is a luxury of large sizes. Below about 64 px it turns a mark into a
+        smudge — so this direction trades it for flat colour, a die-cut keyline and a
+        hard offset shadow, and stacks the wordmark to fit a square. The paw is
+        promoted to lead. It is the only one of the three that is still legible as a
+        16 px favicon.
+      </p>
+    </div>
+    <div class="stage" id="d3-hero"></div>
+    <div class="apps" id="d3-apps"></div>
+    <div class="spec">
+      <div>
+        <div class="swatches" id="d3-sw"></div>
+      </div>
+      <div class="speclist" id="d3-spec"></div>
+    </div>
+  </section>
+
+  <!-- The dark-surface problem ───────────────────────────────────── -->
+  <section class="dir rise" id="dark-test">
+    <div class="dir-head">
+      <span class="eyebrow">The question</span>
+      <h2>What happens on a dark app surface</h2>
+      <p class="note">
+        A plate is a rectangle of light. Drop one into a dark interface and the eye
+        finds the box before it finds the logo — four hard edges and two hairlines all
+        announcing themselves. The fix is not a better rectangle. It is to stop
+        shipping the ground attached to the mark.
+      </p>
+    </div>
+    <div class="apps" id="dark-apps"></div>
+    <p class="note">
+      Left is the problem. Middle is the same mark with no ground at all, which is what
+      belongs in a header, a README or a splash screen. Right is the glow ground: light
+      that falls off into the surface with no straight edge anywhere, which is what
+      neon does to the air around it.
+    </p>
+    <div class="spec">
+      <div class="speclist" id="ground-rules"></div>
+      <p class="note" style="align-self:start">
+        One more rule worth stating plainly: <b>D1 and D2 are not two logos.</b> They are
+        one logo with a light mode and a dark mode. “D1 on a dark background” is not a
+        thing to be fixed — the answer is D2 bare. Pastel violet
+        <span class="mono">#B39DF3</span> does not carry enough contrast on
+        <span class="mono">#0D0B14</span>, which is the whole reason D2 lifts the
+        wordmark to <span class="mono">#C4AFFF</span>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Comparison ─────────────────────────────────────────────────── -->
+  <section class="compare rise">
+    <div class="dir-head">
+      <span class="eyebrow">How to choose</span>
+      <h2>Where each one holds up</h2>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Test</th>
+            <th scope="col">D1 Neon Arcade</th>
+            <th scope="col">D2 CRT Night</th>
+            <th scope="col">D3 Street Sticker</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Legible at 16 px</th>
+            <td>No — bloom fills the counters</td>
+            <td>No — bloom fills the counters</td>
+            <td>Yes, paw only</td>
+          </tr>
+          <tr>
+            <th scope="row">Works on a white page</th>
+            <td>Yes, native</td>
+            <td>Needs its own dark plate</td>
+            <td>Yes, native</td>
+          </tr>
+          <tr>
+            <th scope="row">Works on a dark page</th>
+            <td>Weak — pastel on black loses the glow</td>
+            <td>Yes, native</td>
+            <td>Yes, keyline carries it</td>
+          </tr>
+          <tr>
+            <th scope="row">Printable / embroiderable</th>
+            <td>No — gradients and blur</td>
+            <td>No — gradients and blur</td>
+            <td>Yes — five flat spot colours</td>
+          </tr>
+          <tr>
+            <th scope="row">Closest to the supplied art</th>
+            <td>Direct descendant</td>
+            <td>Same lockup, new ground</td>
+            <td>Re-composed</td>
+          </tr>
+          <tr>
+            <th scope="row">Cost to extend into a full kit</th>
+            <td>Low</td>
+            <td>Low</td>
+            <td>Medium — needs a mono lockup drawn</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      These are not mutually exclusive. The usual resolution is one primary plus one
+      utility: <b>D1 or D2 as the primary voice, D3 as the icon system underneath it</b>,
+      since something has to be the 16 px favicon regardless.
+    </p>
+  </section>
+
+  <section class="closing rise">
+    <hr class="pixrule">
+    <span class="eyebrow">Next</span>
+    <p class="note">
+      Name a direction and the second round produces: the full icon set at 512 / 192 /
+      64 / 32 / 16, clear-space and minimum-size rules, a monochrome lockup for stamps
+      and single-colour print, the app shell header in situ, and the exported asset
+      pack. Everything on this page is drawn from four primitives — a 5 × 7 glyph
+      table, a paw, a tricolour bar, and a bloom filter — so extending it is
+      composition, not redrawing.
+    </p>
+  </section>
+
+</div>
+
+<script>
+/* ══ Primitives ══════════════════════════════════════════════════════
+   Everything on this page is composed from four things: a 5 × 7 glyph
+   table, a paw, a tricolour bar, and a bloom filter.                  */
+
+const GW = 5, GH = 7;
+
+/* Element ids must be unique across the document but stable across builds —
+   a random id would make every rebuild a fresh git diff and would break the
+   byte-comparison in tools/verify.mjs. */
+let UID_N = 0;
+const uid = (prefix) => prefix + (++UID_N).toString(36);
+
+const GLYPHS = {
+  A: ["01110","10001","10001","11111","10001","10001","10001"],
+  S: ["01110","10001","10000","01110","00001","10001","01110"],
+  O: ["01110","10001","10001","10001","10001","10001","01110"],
+  I: ["11111","00100","00100","00100","00100","00100","11111"],
+  C: ["01110","10001","10000","10000","10000","10001","01110"],
+  D: ["11110","10001","10001","10001","10001","10001","11110"],
+  E: ["11111","10000","10000","11110","10000","10000","11111"],
+  R: ["11110","10001","10001","11110","10100","10010","10001"],
+  0: ["01110","10001","10001","10001","10001","10001","01110"],
+  1: ["00100","01100","00100","00100","00100","00100","01110"],
+  2: ["01110","10001","00001","00110","01000","10000","11111"],
+  3: ["11111","00010","00100","00010","00001","10001","01110"],
+  4: ["00010","00110","01010","10010","11111","00010","00010"],
+  5: ["11111","10000","11110","00001","00001","10001","01110"],
+  6: ["00110","01000","10000","11110","10001","10001","01110"],
+  7: ["11111","00001","00010","00100","01000","01000","01000"],
+  8: ["01110","10001","10001","01110","10001","10001","01110"],
+  9: ["01110","10001","10001","01111","00001","00010","01100"],
+
+  /* Narrow glyphs. A bracket is 2 units and a lowercase i is 1, because
+     padding them out to a 5-unit body would make the aside they enclose
+     shout as loudly as the word it interrupts. The i keeps its tittle —
+     it is the only lowercase form in the set and has to look deliberate. */
+  "(": ["01","10","10","10","10","10","01"],
+  ")": ["10","01","01","01","01","01","10"],
+  i:   ["1","0","1","1","1","1","1"]
+};
+
+/* Glyphs are variable width — a bracket or a lowercase i set on the same
+   5-unit body as a C would read as a mistake. Width comes from the rows
+   themselves, so adding a narrow glyph needs nothing else changed. */
+function glyphOf(ch) {
+  return GLYPHS[ch] || GLYPHS[ch.toUpperCase()] || null;
+}
+function glyphWidth(ch) {
+  const g = glyphOf(ch);
+  return g ? g[0].length : GW;
+}
+function textWidth(text, tracking) {
+  let w = 0;
+  for (const ch of String(text)) w += glyphWidth(ch) + tracking;
+  return w - tracking;
+}
+
+/* Collect the lit cells of a string, then merge each row's runs into one
+   rect. Fewer nodes, and no hairline seam between neighbouring pixels. */
+function glyphRuns(text, tracking) {
+  const rows = new Map();
+  let cursor = 0;
+  for (const ch of String(text)) {
+    const g = glyphOf(ch);
+    if (g) {
+      g.forEach((row, y) => {
+        for (let x = 0; x < row.length; x++) {
+          if (row[x] === "1") {
+            if (!rows.has(y)) rows.set(y, []);
+            rows.get(y).push(cursor + x);
+          }
+        }
+      });
+    }
+    cursor += glyphWidth(ch) + tracking;
+  }
+  const runs = [];
+  for (const [y, xs] of rows) {
+    xs.sort((a, b) => a - b);
+    let start = xs[0], prev = xs[0];
+    for (let i = 1; i < xs.length; i++) {
+      if (xs[i] === prev + 1) { prev = xs[i]; continue; }
+      runs.push([start, y, prev - start + 1]);
+      start = prev = xs[i];
+    }
+    runs.push([start, y, prev - start + 1]);
+  }
+  return { runs, cols: cursor - tracking, rows: GH };
+}
+
+function wordmarkWidth(text, px, tracking = 2) {
+  return textWidth(text, tracking) * px;
+}
+
+/* px = size of one logical pixel in user units. */
+function wordmark(text, opts = {}) {
+  const { px = 12, tracking = 2, fill = "#000", x = 0, y = 0, radius = 0, attrs = "" } = opts;
+  const { runs } = glyphRuns(text, tracking);
+  const body = runs.map(([cx, cy, len]) =>
+    `<rect x="${x + cx * px}" y="${y + cy * px}" width="${len * px}" height="${px}"` +
+    (radius ? ` rx="${radius}"` : "") + `/>`
+  ).join("");
+  return `<g fill="${fill}" shape-rendering="crispEdges" ${attrs}>${body}</g>`;
+}
+
+/* Paw drawn in a 0–100 box: four toes on an arc, one pad. Toes are sized
+   and placed to clear the pad, so a die-cut keyline never crosses itself. */
+const PAW_PAD = "M50 51C58 51 66 53 73 58C81 63 86 70 85 77C84 87 69 95 50 95C31 95 16 87 15 77C14 70 19 63 27 58C34 53 42 51 50 51Z";
+const PAW_TOES = [
+  [20, 41, 11,   13.5, -26],
+  [41, 25, 11.5, 15,    -9],
+  [62, 25, 11.5, 15,     9],
+  [83, 41, 11,   13.5,  26]
+];
+function pawShapes() {
+  return PAW_TOES.map(([cx, cy, rx, ry, rot]) =>
+    `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" transform="rotate(${rot} ${cx} ${cy})"/>`
+  ).join("") + `<path d="${PAW_PAD}"/>`;
+}
+function paw(opts = {}) {
+  const { x = 0, y = 0, size = 100, fill = "#000", attrs = "" } = opts;
+  const s = size / 100;
+  return `<g transform="translate(${x} ${y}) scale(${s})" fill="${fill}" ${attrs}>${pawShapes()}</g>`;
+}
+
+/* Tricolour bar. Segment ratios read off the supplied artwork. */
+const BAR = [[0, 0.365, "var(--sc-red)"], [0.365, 0.25, "#F4F2F6"], [0.615, 0.385, "var(--sc-navy)"]];
+function bar(opts = {}) {
+  const { x = 0, y = 0, w = 160, h = 20, white = "#FFFFFF", attrs = "" } = opts;
+  const id = uid("clip");
+  const segs = BAR.map(([o, len, c]) =>
+    `<rect x="${x + o * w}" y="${y}" width="${len * w + 0.5}" height="${h}" fill="${c === "#F4F2F6" ? white : c}"/>`
+  ).join("");
+  return `<g ${attrs}><defs><clipPath id="${id}">` +
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${h / 2}"/></clipPath></defs>` +
+    `<g clip-path="url(#${id})">${segs}</g></g>`;
+}
+
+/* Two-pass bloom: a wide low halo plus a tight core. Built as an SVG
+   filter rather than CSS blur so it screenshots at 2× without breaking. */
+function bloomDef(id, far, near, doubled = true) {
+  return `<filter id="${id}" x="-60%" y="-120%" width="220%" height="340%" color-interpolation-filters="sRGB">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="${far}" result="far"/>
+    <feGaussianBlur in="SourceGraphic" stdDeviation="${near}" result="near"/>
+    <feMerge>
+      <feMergeNode in="far"/>${doubled ? '<feMergeNode in="far"/>' : ""}
+      <feMergeNode in="near"/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>`;
+}
+
+function svg(w, h, inner, extra = "") {
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg" ${extra}>${inner}</svg>`;
+}
+
+/* ══ Neon flicker ════════════════════════════════════════════════════
+   A Yaowarat sign at 2am does three things at once, so a tube stacks
+   three animations on three nested groups — nesting rather than one
+   list, because CSS lets only the last animation win a property, while
+   nested opacities multiply.
+
+     .tube    warm-up   fires once on load: hard, irregular strikes
+     .tube-s  stutter   a long quiet loop broken by a ~60ms dropout
+     .tube-b  breathe   a slow swell, the ballast hum
+
+   Two rules keep the PNG export honest. Playwright's animations:"disabled"
+   fast-forwards finite animations and cancels infinite ones to their base
+   style, so warm-up may start dark (it ends lit) but breathe and stutter
+   must sit at full opacity at 0%.
+
+   The filter goes on the innermost group, which never changes geometry.
+   Opacity composites after filtering, so the blur is computed once and
+   cached; animating opacity on an ancestor of a filtered group instead
+   would re-run the Gaussian every frame.                              */
+
+const NEON_CSS = `
+.tube   { animation: sc-warm 2.6s steps(1, end) var(--wd, 0s) 1 both; }
+.tube-s { animation: sc-stut var(--sp, 13s) steps(1, end) var(--sd, 0s) infinite; }
+.tube-b { animation: sc-breathe var(--bp, 6s) ease-in-out var(--bd, 0s) infinite; }
+
+@keyframes sc-warm {
+  0%   { opacity: 0; }
+  3%   { opacity: 1; }
+  6%   { opacity: .06; }
+  10%  { opacity: .85; }
+  13%  { opacity: 0; }
+  21%  { opacity: 1; }
+  25%  { opacity: .1; }
+  28%  { opacity: 1; }
+  32%  { opacity: .35; }
+  36%  { opacity: 1; }
+  41%  { opacity: .15; }
+  46%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+/* Lit at 0% so a cancelled animation leaves the sign on. */
+@keyframes sc-stut {
+  0%, 95.6%   { opacity: 1; }
+  96%         { opacity: .07; }
+  96.4%       { opacity: 1; }
+  97.2%       { opacity: .14; }
+  97.6%, 100% { opacity: 1; }
+}
+
+@keyframes sc-breathe {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .87; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tube, .tube-s, .tube-b { animation: none; opacity: 1; }
+}
+`;
+
+/* Deterministic phase per tube. Real neon never blinks in unison, and a
+   seeded hash keeps every tube out of step while the build stays
+   byte-reproducible. */
+function tubeVars(i) {
+  const h = (salt) => {
+    const x = Math.sin((i + 1) * 12.9898 + salt * 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  };
+  const r = (v) => Math.round(v * 100) / 100;
+  const bp = 5 + h(1) * 2.6;
+  const sp = 9 + h(2) * 8;
+  return `--wd:${r(h(3) * 0.5)}s;` +
+         `--bp:${r(bp)}s;--bd:${r(-h(4) * bp)}s;` +
+         `--sp:${r(sp)}s;--sd:${r(-h(5) * sp)}s`;
+}
+
+/* Wrap artwork in the three flicker layers. `i` picks the phase. */
+function tube(i, inner, filterId) {
+  const f = filterId ? ` filter="url(#${filterId})"` : "";
+  return `<g class="tube" style="${tubeVars(i)}"><g class="tube-s">` +
+         `<g class="tube-b"${f}>${inner}</g></g></g>`;
+}
+
+/* ══ Horizontal lockup geometry ══════════════════════════════════════
+   One place decides where everything sits, for any plate size. The
+   wordmark, year and right padding are measured back from the right
+   edge, so no plate can push its own content off the end.             */
+
+/* The name, in one place. Every lockup, mockup and export reads these,
+   so changing the brand is changing these two lines. HEAD/TAIL are the
+   stacked split D3 needs; they must concatenate back to WORDMARK. */
+const WORDMARK = "A(i)CODER";
+const HEAD = "A(i)", TAIL = "CODER";
+const INITIAL = "A";
+const YEARMARK = "2025";
+
+const UNIT_WORD = wordmarkWidth(WORDMARK, 1);
+const UNIT_YEAR = wordmarkWidth(YEARMARK, 1);
+
+/* Indices of the "(i)" span inside WORDMARK, so the AI pun reads in
+   colour as well as punctuation. Derived from the brackets rather than
+   hardcoded, so it keeps working if WORDMARK is ever edited. Empty when
+   there is no bracket pair — accenting then silently no-ops. */
+const ACCENT_IDX = (() => {
+  const open = WORDMARK.indexOf("("), close = WORDMARK.indexOf(")");
+  if (open < 0 || close < open) return [];
+  return Array.from({ length: close - open + 1 }, (_, k) => open + k);
+})();
+
+/* Two paws walking up-right, trailing off after the wordmark. Sized off
+   the plate height, independent of the glyph pixel unit. metrics() is
+   split out so lockupGeometry can reserve their width the same way it
+   already reserves the year mark's, before any drawing happens. */
+function pawClusterMetrics(H) {
+  const sTrail = H * 0.28, sLead = H * 0.34;
+  const leadX = Math.round(sTrail * 0.74);
+  return { sTrail, sLead, leadX, width: leadX + sLead };
+}
+function pawCluster(pawX, H, trail, lead) {
+  const { sTrail, sLead, leadX } = pawClusterMetrics(H);
+  const y1 = Math.round(H * 0.50);
+  return [
+    paw({ x: pawX, y: y1, size: sTrail, fill: trail }),
+    paw({ x: pawX + leadX, y: Math.round(H * 0.245), size: sLead, fill: lead })
+  ];
+}
+
+function lockupGeometry(W, H) {
+  const px   = Math.max(2, Math.floor((W * 0.58) / UNIT_WORD));
+  const yrPx = Math.max(1, Math.round(px / 2));
+  const gap  = Math.round(W * 0.035);
+  const pad  = Math.round(W * 0.045);
+  const wmW  = UNIT_WORD * px;
+  const yrW  = UNIT_YEAR * yrPx;
+  const pawW = pawClusterMetrics(H).width;
+  const wmX  = W - pad - yrW - gap - pawW - gap - wmW;
+  const wmY  = Math.round((H - GH * px) / 2);
+  const pawX = wmX + wmW + gap;
+  const yrX  = pawX + pawW + gap;
+  const yrY  = wmY + GH * px - GH * yrPx;
+  return {
+    px, yrPx, wmW, yrW, pawW, wmX, wmY, pawX, yrX, yrY,
+    barY: yrY + GH * yrPx + Math.round(H * 0.07),
+    barH: Math.max(4, Math.round(H * 0.055))
+  };
+}
+
+/* The wordmark as one tube per glyph, so letters strike independently.
+   Tracking is 2 empty columns, so a merged run never spans two glyphs —
+   rendering them one at a time is identical to rendering the string. */
+function wordmarkTubes(text, opts = {}) {
+  const {
+    px = 12, tracking = 2, x = 0, y = 0, filterId = null, seed = 0,
+    layers = [{ fill: "#000" }], accent = [], accentFill = null, firstFill = null
+  } = opts;
+  /* Case matters — the lowercase i is its own 1-unit glyph — and the
+     advance is per glyph, so this walks a cursor rather than multiplying
+     a fixed step. Uppercasing here is what silently made the mark wider
+     than the geometry that positioned it. */
+  let cursor = 0;
+  return [...String(text)].map((ch, i) => {
+    const xo = x + cursor * px;
+    cursor += glyphWidth(ch) + tracking;
+    if (!glyphOf(ch)) return "";
+    /* Every layer of a glyph — core plus any ghost — goes inside the same
+       tube, so a dropout takes the whole letter with it. Accenting only
+       ever swaps the core (last) layer — a ghost, where one exists, stays
+       on its own hue so the misconvergence read doesn't change. */
+    const coreFill = (accentFill && accent.includes(i)) ? accentFill
+                   : (firstFill && i === 0) ? firstFill
+                   : null;
+    const useLayers = coreFill
+      ? layers.map((l, li) => li === layers.length - 1 ? { ...l, fill: coreFill } : l)
+      : layers;
+    const art = useLayers.map(l => wordmark(ch, {
+      px, tracking, fill: l.fill, x: xo + (l.dx || 0), y, attrs: l.attrs || ""
+    })).join("");
+    return tube(seed + i, art, filterId);
+  }).join("");
+}
+
+/* ══ Ground treatments ═══════════════════════════════════════════════
+   The lockup is identical in all three; only what sits behind it moves.
+
+     bare   nothing at all — transparent, for a surface that already has
+            a ground of its own. This is the one that stops the mark
+            reading as a bright slab on a dark app.
+     glow   a radial haze with no straight edge anywhere, which is what
+            neon actually does to the air around it.
+     plate  the opaque banner, for cards that want a frame.            */
+
+function scanPattern(id, opacity) {
+  return `<pattern id="${id}" width="3" height="3" patternUnits="userSpaceOnUse">` +
+         `<rect width="3" height="1" fill="#FFFFFF" opacity="${opacity}"/></pattern>`;
+}
+
+function groundLayer(kind, W, H, mode) {
+  const night = mode === "night";
+  const fill = night ? "var(--sc-night)" : "var(--sc-paper)";
+  if (kind === "bare") return { defs: "", back: "", front: "" };
+
+  if (kind === "glow") {
+    const gid = uid("gg"), mid = uid("gm"), sid = uid("gs");
+    return {
+      defs:
+        /* Four stops, not two: a straight white-to-black ramp leaves a
+           visible ring where the falloff turns over, which is the one
+           thing a glow ground exists to avoid. */
+        `<radialGradient id="${gid}" cx="50%" cy="52%" r="72%">` +
+        `<stop offset="0%" stop-color="#FFFFFF"/>` +
+        `<stop offset="38%" stop-color="#FFFFFF" stop-opacity=".94"/>` +
+        `<stop offset="68%" stop-color="#FFFFFF" stop-opacity=".45"/>` +
+        `<stop offset="88%" stop-color="#FFFFFF" stop-opacity=".12"/>` +
+        `<stop offset="100%" stop-color="#000000"/></radialGradient>` +
+        `<mask id="${mid}"><rect width="${W}" height="${H}" fill="url(#${gid})"/></mask>` +
+        (night ? scanPattern(sid, ".055") : ""),
+      back:
+        `<g mask="url(#${mid})"><rect width="${W}" height="${H}" fill="${fill}"/>` +
+        (night ? `<rect width="${W}" height="${H}" fill="url(#${sid})"/>` : "") + `</g>`,
+      front: ""
+    };
+  }
+
+  if (night) {
+    const vid = uid("pv"), sid = uid("ps");
+    return {
+      defs:
+        `<radialGradient id="${vid}" cx="45%" cy="50%" r="72%">` +
+        `<stop offset="0%" stop-color="#241C3C" stop-opacity=".85"/>` +
+        `<stop offset="60%" stop-color="#130F20" stop-opacity=".4"/>` +
+        `<stop offset="100%" stop-color="#000000" stop-opacity=".55"/></radialGradient>` +
+        scanPattern(sid, ".055"),
+      back: `<rect width="${W}" height="${H}" fill="${fill}"/><rect width="${W}" height="${H}" fill="url(#${vid})"/>`,
+      front:
+        `<rect width="${W}" height="${H}" fill="url(#${sid})"/>` +
+        `<line x1="0" y1="0.5" x2="${W}" y2="0.5" stroke="#3A2F55"/>` +
+        `<line x1="0" y1="${H - 0.5}" x2="${W}" y2="${H - 0.5}" stroke="#3A2F55"/>`
+    };
+  }
+  return {
+    defs: "",
+    back: `<rect width="${W}" height="${H}" fill="${fill}"/>`,
+    front:
+      `<line x1="0" y1="0.5" x2="${W}" y2="0.5" stroke="var(--sc-hairline)"/>` +
+      `<line x1="0" y1="${H - 0.5}" x2="${W}" y2="${H - 0.5}" stroke="var(--sc-hairline)"/>`
+  };
+}
+
+/* ══ D1 — Neon Arcade ════════════════════════════════════════════════ */
+
+/* ══ The lockup ══════════════════════════════════════════════════════
+   D1 and D2 are one lockup in two modes, so they get one renderer. Two
+   functions is how they drifted apart the first time.                 */
+
+const MODES = {
+  light: {
+    bloom: [15, 2, true], pawBloom: [18, 4, true],
+    paws: ["var(--sc-violet-deep)", "var(--sc-paw-pink)"],
+    pawOpacity: ".92",
+    core: "var(--sc-violet)", ghost: null,
+    year: "var(--sc-pink)", barWhite: "#FFFFFF"
+  },
+  night: {
+    bloom: [17, 2, false], pawBloom: [20, 4, false],
+    paws: ["var(--sc-violet)", "var(--sc-paw-pink)"],
+    pawOpacity: "1",
+    core: "var(--sc-violet-hi)", ghost: "var(--sc-pink)",
+    year: "var(--sc-pink-hot)", barWhite: "#E4DFF0"
+  }
+};
+
+/* `extra` is only passed by the SVG export (see __exportSVGs): the
+   exported D1 files carry a recoloured first letter and a tagline that
+   the on-page mockups do not. */
+function lockupInner(mode, groundKind, W, H, standalone = false, extra = {}) {
+  const m = MODES[mode];
+  const g = lockupGeometry(W, H);
+  const gr = groundLayer(groundKind, W, H, mode);
+  const bloom = uid("b"), pawB = uid("b");
+  const [trail, lead] = pawCluster(g.pawX, H, m.paws[0], m.paws[1]);
+  const k = H / 300;                       // bloom scales with the plate
+  const bl = (v) => [v[0] * k, v[1] * k, v[2]];
+
+  /* Ghost offset is a fraction of the pixel unit, so misconvergence stays
+     proportional instead of turning into a smear on a small plate. */
+  const layers = m.ghost
+    ? [{ fill: m.ghost, dx: -Math.max(1, Math.round(g.px * 0.42)), attrs: 'opacity=".5"' }, { fill: m.core }]
+    : [{ fill: m.core }];
+
+  return `
+    ${standalone ? `<style>${NEON_CSS}</style>` : ""}
+    <defs>${gr.defs}${bloomDef(bloom, ...bl(m.bloom))}${bloomDef(pawB, ...bl(m.pawBloom))}</defs>
+    ${gr.back}
+    ${wordmarkTubes(WORDMARK, { px: g.px, x: g.wmX, y: g.wmY, filterId: bloom, seed: 0, layers, accent: ACCENT_IDX, accentFill: m.year, firstFill: extra.firstFill })}
+    <g opacity="${m.pawOpacity}">${tube(20, trail, pawB)}${tube(21, lead, pawB)}</g>
+    ${wordmarkTubes(YEARMARK, { px: g.yrPx, x: g.yrX, y: g.yrY, filterId: bloom, seed: 30, layers: [{ fill: m.year }] })}
+    <g class="tube-b" style="${tubeVars(40)}">${bar({ x: g.yrX, y: g.barY, w: g.yrW, h: g.barH, white: m.barWhite })}</g>${extra.tagline ? `
+    ${extra.tagline}` : ""}
+    ${gr.front}
+  `;
+}
+
+function heroD1(groundKind = "glow", standalone = false) {
+  return svg(1200, 300, lockupInner("light", groundKind, 1200, 300, standalone));
+}
+
+function appsD1() {
+  return [
+    { cap: "GitHub README banner", svg: ghCard(false) },
+    { cap: "Web app header — light", svg: appBar() },
+    { cap: "Social card 1200 × 630", svg: socialCard() }
+  ];
+}
+
+/* Repo card containing the banner, light or dark. */
+function ghCard(dark) {
+  const W = 560, H = 300;
+  const ground = dark ? "#0D1117" : "#FFFFFF";
+  const chrome = dark ? "#161B22" : "#F6F8FA";
+  const rule   = dark ? "#30363D" : "#D8DEE4";
+  const text   = dark ? "#C9D1D9" : "#24292F";
+  const dim    = dark ? "#8B949E" : "#6E7781";
+  const plate  = dark ? heroD2Plate(520, 130) : heroD1Plate(520, 130);
+  return svg(W, H, `
+    <rect width="${W}" height="${H}" fill="${ground}"/>
+    <rect width="${W}" height="34" fill="${chrome}"/>
+    <line x1="0" y1="34.5" x2="${W}" y2="34.5" stroke="${rule}"/>
+    <circle cx="18" cy="17" r="4.5" fill="#FF5F57"/><circle cx="33" cy="17" r="4.5" fill="#FEBC2E"/><circle cx="48" cy="17" r="4.5" fill="#28C840"/>
+    <text x="68" y="21" font-family="SC Mono, monospace" font-size="10.5" fill="${dim}">supasiao7896TH / aicoder</text>
+    <g transform="translate(20 56)">${plate}</g>
+    <g fill="${text}" opacity=".9">
+      <rect x="20" y="206" width="150" height="9" rx="4.5"/>
+      <rect x="20" y="230" width="380" height="7" rx="3.5" opacity=".42"/>
+      <rect x="20" y="248" width="320" height="7" rx="3.5" opacity=".42"/>
+      <rect x="20" y="266" width="355" height="7" rx="3.5" opacity=".42"/>
+    </g>
+  `);
+}
+
+/* The lockup at banner proportions, for embedding in an app frame.
+   Same renderer as the heroes — these used to be hand-copied, which is
+   exactly how the two drifted out of sync. */
+const heroD1Plate = (W, H) => lockupInner("light", "plate", W, H);
+const heroD2Plate = (W, H) => lockupInner("night", "plate", W, H);
+
+/* Compact horizontal mark: paw + wordmark on one line. */
+function compactMark(x, y, h, wordFill, pawFill) {
+  const px = Math.max(2, Math.round(h / 7));
+  return `${paw({ x, y: y - h * 0.06, size: h * 1.12, fill: pawFill })}` +
+         wordmark(WORDMARK, { px, x: x + h * 1.5, y, fill: wordFill });
+}
+
+function appBar() {
+  const W = 560, H = 300;
+  return svg(W, H, `
+    <rect width="${W}" height="${H}" fill="#F4F2F8"/>
+    <rect width="${W}" height="56" fill="#FFFFFF"/>
+    <line x1="0" y1="56.5" x2="${W}" y2="56.5" stroke="#E3DEEC"/>
+    ${compactMark(22, 21, 15, "var(--sc-violet-deep)", "var(--sc-paw-pink)")}
+    <g font-family="SC Body, sans-serif" font-size="11" fill="#6B6478">
+      <text x="286" y="32">Dashboard</text><text x="356" y="32">Logs</text><text x="398" y="32">Settings</text>
+    </g>
+    <circle cx="468" cy="28" r="4" fill="#22C55E"/>
+    <text x="478" y="31.5" font-family="SC Mono, monospace" font-size="9" fill="#6B6478">Online</text>
+    <circle cx="536" cy="28" r="11" fill="var(--sc-lilac)" stroke="#E3DEEC"/>
+    ${paw({ x: 529, y: 21, size: 14, fill: "var(--sc-violet-deep)" })}
+    <g fill="#FFFFFF" stroke="#E9E4F2">
+      <rect x="22" y="78" width="240" height="90" rx="10"/>
+      <rect x="278" y="78" width="260" height="90" rx="10"/>
+      <rect x="22" y="182" width="516" height="94" rx="10"/>
+    </g>
+    <g font-family="SC Mono, monospace" font-size="8.5" fill="#8B8399">
+      <text x="38" y="100">BATCH THROUGHPUT</text><text x="294" y="100">SYNC STATUS</text><text x="38" y="204">RECENT RUNS</text>
+    </g>
+    <text x="38" y="132" font-family="SC Display, sans-serif" font-size="26" fill="#241D33">1,284</text>
+    <text x="294" y="132" font-family="SC Display, sans-serif" font-size="26" fill="#241D33">Synced</text>
+    ${bar({ x: 38, y: 146, w: 120, h: 8 })}
+    ${bar({ x: 294, y: 146, w: 120, h: 8 })}
+    <g fill="#E9E4F2">
+      <rect x="38" y="220" width="484" height="6" rx="3"/>
+      <rect x="38" y="238" width="430" height="6" rx="3"/>
+      <rect x="38" y="256" width="462" height="6" rx="3"/>
+    </g>
+  `);
+}
+
+function socialCard() {
+  const W = 560, H = 300;
+  const px = 9;
+  const wmW = wordmarkWidth(WORDMARK, px);
+  return svg(W, H, `
+    <defs>${bloomDef("soc-b", 11, 3)}</defs>
+    <rect width="${W}" height="${H}" fill="var(--sc-paper)"/>
+    <rect width="${W}" height="${H}" fill="none" stroke="var(--sc-hairline)"/>
+    <g filter="url(#soc-b)" opacity=".9">
+      ${paw({ x: (W - 92) / 2, y: 52, size: 50, fill: "var(--sc-violet-deep)" })}
+      ${paw({ x: (W - 92) / 2 + 40, y: 40, size: 58, fill: "var(--sc-paw-pink)" })}
+    </g>
+    ${wordmark(WORDMARK, { px, x: (W - wmW) / 2, y: 140, fill: "var(--sc-violet)", attrs: 'filter="url(#soc-b)"' })}
+    <text x="${W / 2}" y="228" text-anchor="middle" font-family="SC Mono, monospace" font-size="10.5" letter-spacing="2.4" fill="#7C7490">CODE · SHARE · INSPIRE</text>
+    ${bar({ x: (W - 110) / 2, y: 246, w: 110, h: 9 })}
+  `);
+}
+
+/* ══ D2 — CRT Night ══════════════════════════════════════════════════ */
+
+function heroD2(groundKind = "glow", standalone = false) {
+  return svg(1200, 300, lockupInner("night", groundKind, 1200, 300, standalone));
+}
+
+function appsD2() {
+  return [
+    { cap: "Terminal — shell greeting", svg: terminal() },
+    { cap: "PWA splash — 390 × 844", svg: splash() },
+    { cap: "GitHub README banner — dark", svg: ghCard(true) }
+  ];
+}
+
+function terminal() {
+  const W = 560, H = 300;
+  const px = 5;
+  const wmW = wordmarkWidth(WORDMARK, px);
+  return svg(W, H, `
+    <defs>${bloomDef("term-b", 5, 1.6)}
+      <pattern id="term-s" width="3" height="3" patternUnits="userSpaceOnUse">
+        <rect width="3" height="1" fill="#FFFFFF" opacity=".045"/>
+      </pattern>
+    </defs>
+    <rect width="${W}" height="${H}" fill="#0B0912"/>
+    <rect width="${W}" height="30" fill="#171223"/>
+    <circle cx="17" cy="15" r="4.5" fill="#FF5F57"/><circle cx="32" cy="15" r="4.5" fill="#FEBC2E"/><circle cx="47" cy="15" r="4.5" fill="#28C840"/>
+    <text x="${W / 2}" y="19" text-anchor="middle" font-family="SC Mono, monospace" font-size="9.5" fill="#6B6089">zsh — aicoder</text>
+
+    <g filter="url(#term-b)">
+      ${paw({ x: 26, y: 50, size: 34, fill: "var(--sc-paw-pink)" })}
+      ${wordmark(WORDMARK, { px, x: 74, y: 54, fill: "var(--sc-violet-hi)" })}
+      ${wordmark(YEARMARK, { px: 3, x: 74 + wmW + 14, y: 54 + GH * px - GH * 3, fill: "var(--sc-pink-hot)" })}
+    </g>
+
+    <g font-family="SC Mono, monospace" font-size="10.5">
+      <text x="26" y="126" fill="#5E5580">~/dev/aicoder</text>
+      <text x="26" y="150" fill="var(--sc-violet-hi)">❯<tspan fill="#D9D2EC" dx="8">git status</tspan></text>
+      <text x="26" y="170" fill="#6F6693">On branch </text>
+      <text x="94" y="170" fill="var(--sc-pink-hot)">main</text>
+      <text x="26" y="190" fill="#6F6693">nothing to commit, working tree clean</text>
+      <text x="26" y="216" fill="var(--sc-violet-hi)">❯<tspan fill="#D9D2EC" dx="8">aicoder build --watch</tspan></text>
+      <text x="26" y="236" fill="#6F6693">watching 14 files…</text>
+      <text x="26" y="262" fill="var(--sc-violet-hi)">❯</text>
+    </g>
+    <rect x="42" y="252" width="9" height="14" fill="var(--sc-pink-hot)"/>
+    ${bar({ x: 26, y: 278, w: 96, h: 6, white: "#E4DFF0" })}
+    <rect width="${W}" height="${H}" fill="url(#term-s)"/>
+  `);
+}
+
+function splash() {
+  const W = 560, H = 300;
+  const pw = 176, ph = 268, pxx = (W - pw) / 2, pyy = (H - ph) / 2;
+  const px = 3;
+  const wmW = wordmarkWidth(WORDMARK, px);
+  return svg(W, H, `
+    <defs>${bloomDef("sp-b", 6, 2)}</defs>
+    <rect width="${W}" height="${H}" fill="#1A1626"/>
+    <g font-family="SC Mono, monospace" font-size="9" fill="#6B6089">
+      <text x="40" y="${H / 2 - 6}">install</text>
+      <text x="40" y="${H / 2 + 10}">prompt</text>
+      <text x="${W - 40}" y="${H / 2 - 6}" text-anchor="end">cold</text>
+      <text x="${W - 40}" y="${H / 2 + 10}" text-anchor="end">start</text>
+    </g>
+    <rect x="${pxx}" y="${pyy}" width="${pw}" height="${ph}" rx="20" fill="var(--sc-night)" stroke="#3A2F55"/>
+    <rect x="${pxx + pw / 2 - 22}" y="${pyy + 8}" width="44" height="7" rx="3.5" fill="#2A2340"/>
+    <g filter="url(#sp-b)">
+      ${paw({ x: pxx + pw / 2 - 34, y: pyy + 84, size: 34, fill: "var(--sc-violet)" })}
+      ${paw({ x: pxx + pw / 2 - 2, y: pyy + 70, size: 40, fill: "var(--sc-paw-pink)" })}
+      ${wordmark(WORDMARK, { px, x: pxx + (pw - wmW) / 2, y: pyy + 142, fill: "var(--sc-violet-hi)" })}
+    </g>
+    <text x="${pxx + pw / 2}" y="${pyy + 178}" text-anchor="middle" font-family="SC Mono, monospace" font-size="6.5" letter-spacing="1.6" fill="#6B6089">CODE · SHARE · INSPIRE</text>
+    ${bar({ x: pxx + (pw - 84) / 2, y: pyy + 206, w: 84, h: 7, white: "#E4DFF0" })}
+    <text x="${pxx + pw / 2}" y="${pyy + 236}" text-anchor="middle" font-family="SC Mono, monospace" font-size="6.5" fill="#4E4670">v1.0.0 · 2025</text>
+  `);
+}
+
+/* ══ D3 — Street Sticker ═════════════════════════════════════════════ */
+
+const INK = "var(--sc-ink)";
+
+function heroD3() {
+  const W = 1200, H = 300;
+  /* The shadow is offset by exactly one logical pixel. On a bitmap wordmark
+     an arbitrary offset reads as a mistake; one unit reads as the grid. */
+  const px = 13, off = px;
+  const soiW = wordmarkWidth(HEAD, px);
+  const codW = wordmarkWidth(TAIL, px);
+  const stackH = GH * px * 2 + 24;
+  const wmX = 430, l1Y = Math.round((H - stackH) / 2), l2Y = l1Y + GH * px + 24;
+
+  const pawInner = `<g transform="translate(130 48) scale(1.85)">${pawShapes()}</g>`;
+  const soiRuns = wordmark(HEAD, { px, x: wmX, y: l1Y, fill: "currentColor" });
+  const codRuns = wordmark(TAIL, { px, x: wmX, y: l2Y, fill: "currentColor" });
+
+  /* Badge rides line 1, bar rides line 2 — the stagger fills the corner the
+     short top line leaves open. */
+  const yrPx = 7, badgeH = GH * yrPx + 26;
+  const badgeW = wordmarkWidth(YEARMARK, yrPx) + 44;
+  const badgeX = wmX + soiW + 34;
+  const badgeY = Math.round(l1Y + (GH * px - badgeH) / 2);
+  const barH = 20, barW = badgeW;
+  const barX = wmX + codW + 34;
+  const barY = Math.round(l2Y + (GH * px - barH) / 2);
+
+  return svg(W, H, `
+    <defs>
+      <pattern id="d3-dots" width="16" height="16" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1.4" fill="var(--sc-violet-deep)" opacity=".16"/>
+      </pattern>
+    </defs>
+    <rect width="${W}" height="${H}" fill="var(--sc-lilac)"/>
+    <rect width="${W}" height="${H}" fill="url(#d3-dots)"/>
+
+    <g transform="translate(${off} ${off})" fill="${INK}">${pawInner}</g>
+    <g fill="var(--sc-paw-pink)" stroke="${INK}" stroke-width="2.4" stroke-linejoin="round">${pawInner}</g>
+
+    <!-- No shadow on the letters: the strokes are one unit wide, so any
+         offset copy lands inside the counters and closes them up. The
+         solid shapes carry the sticker depth instead. -->
+    <g color="var(--sc-violet-deep)">${soiRuns}</g>
+    <g color="${INK}">${codRuns}</g>
+
+    <g transform="translate(${off} ${off})">
+      <rect x="${badgeX}" y="${badgeY}" width="${badgeW}" height="${badgeH}" rx="${badgeH / 2}" fill="${INK}"/>
+    </g>
+    <rect x="${badgeX}" y="${badgeY}" width="${badgeW}" height="${badgeH}" rx="${badgeH / 2}" fill="var(--sc-pink)" stroke="${INK}" stroke-width="3"/>
+    ${wordmark(YEARMARK, { px: yrPx, x: badgeX + 22, y: badgeY + 13, fill: "#FFFFFF" })}
+
+    <g transform="translate(${off} ${off})"><rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="${barH / 2}" fill="${INK}"/></g>
+    ${bar({ x: barX, y: barY, w: barW, h: barH })}
+    <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="${barH / 2}" fill="none" stroke="${INK}" stroke-width="3"/>
+  `);
+}
+
+function appsD3() {
+  return [
+    { cap: "Avatar — 512 px", svg: avatar() },
+    { cap: "Favicon — 64 / 32 / 16 px", svg: favicons() },
+    { cap: "Die-cut sticker sheet", svg: stickerSheet() }
+  ];
+}
+
+function avatar() {
+  const W = 560, H = 300, r = 108, cx = W / 2, cy = H / 2;
+  return svg(W, H, `
+    <rect width="${W}" height="${H}" fill="#DED6F2"/>
+    <circle cx="${cx + 6}" cy="${cy + 6}" r="${r}" fill="${INK}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--sc-lilac)" stroke="${INK}" stroke-width="4"/>
+    <g transform="translate(${cx - 62} ${cy - 86}) scale(1.24)" fill="var(--sc-paw-pink)" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round">${pawShapes()}</g>
+    ${wordmark(INITIAL, { px: 5, x: cx - wordmarkWidth(INITIAL, 5) / 2, y: cy + 44, fill: INK })}
+  `);
+}
+
+function favicons() {
+  const W = 560, H = 300;
+  const sizes = [124, 70, 38];
+  const labels = ["64", "32", "16"];
+  let x = 96;
+  let out = `<rect width="${W}" height="${H}" fill="#DED6F2"/>`;
+  sizes.forEach((s, i) => {
+    const y = (H - s) / 2 - 10;
+    out += `<rect x="${x + 4}" y="${y + 4}" width="${s}" height="${s}" rx="${s * 0.22}" fill="${INK}"/>`;
+    out += `<rect x="${x}" y="${y}" width="${s}" height="${s}" rx="${s * 0.22}" fill="var(--sc-lilac)" stroke="${INK}" stroke-width="${Math.max(1.5, s * 0.03)}"/>`;
+    out += `<g transform="translate(${x + s * 0.14} ${y + s * 0.16}) scale(${s * 0.0072})" fill="var(--sc-paw-pink)" stroke="${INK}" stroke-width="${3.2}">${pawShapes()}</g>`;
+    out += `<text x="${x + s / 2}" y="${y + s + 26}" text-anchor="middle" font-family="SC Mono, monospace" font-size="10" fill="#5B5279">${labels[i]} px</text>`;
+    x += s + 46;
+  });
+  return svg(W, H, out);
+}
+
+function stickerSheet() {
+  const W = 560, H = 300;
+  const pxs = 6;
+  const soiW = wordmarkWidth(HEAD, pxs);
+  return svg(W, H, `
+    <rect width="${W}" height="${H}" fill="#F6F3FC"/>
+    <g stroke="#CFC6E6" stroke-dasharray="4 5" fill="none">
+      <rect x="20" y="20" width="${W - 40}" height="${H - 40}" rx="8"/>
+    </g>
+
+    <g transform="translate(58 62)">
+      <circle cx="46" cy="46" r="46" transform="translate(5 5)" fill="${INK}"/>
+      <circle cx="46" cy="46" r="46" fill="var(--sc-violet)" stroke="${INK}" stroke-width="3.5"/>
+      <g transform="translate(18 14) scale(0.56)" fill="#FFFFFF" stroke="${INK}" stroke-width="4">${pawShapes()}</g>
+    </g>
+
+    <g transform="translate(186 74)">
+      <rect x="5" y="5" width="150" height="62" rx="31" fill="${INK}"/>
+      <rect width="150" height="62" rx="31" fill="var(--sc-paper)" stroke="${INK}" stroke-width="3.5"/>
+      ${wordmark(HEAD, { px: pxs, x: (150 - soiW) / 2, y: (62 - GH * pxs) / 2, fill: "var(--sc-violet-deep)" })}
+    </g>
+
+    <g transform="translate(366 74)">
+      <rect x="5" y="5" width="160" height="62" rx="10" fill="${INK}"/>
+      <rect width="160" height="62" rx="10" fill="var(--sc-pink)" stroke="${INK}" stroke-width="3.5"/>
+      ${wordmark(YEARMARK, { px: 5, x: (160 - wordmarkWidth(YEARMARK, 5)) / 2, y: (62 - GH * 5) / 2, fill: "#FFFFFF" })}
+    </g>
+
+    <g transform="translate(58 186)">
+      <rect x="5" y="5" width="330" height="60" rx="10" fill="${INK}"/>
+      <rect width="330" height="60" rx="10" fill="var(--sc-lilac)" stroke="${INK}" stroke-width="3.5"/>
+      ${wordmark(TAIL, { px: pxs, x: 26, y: (60 - GH * pxs) / 2, fill: INK })}
+      ${bar({ x: 250, y: 24, w: 60, h: 12 })}
+    </g>
+
+    <g transform="translate(414 186)">
+      <rect x="5" y="5" width="86" height="60" rx="10" fill="${INK}"/>
+      <rect width="86" height="60" rx="10" fill="#FFFFFF" stroke="${INK}" stroke-width="3.5"/>
+      <g transform="translate(20.5 3) scale(0.45)" fill="var(--sc-violet-deep)">${pawShapes()}</g>
+    </g>
+  `);
+}
+
+/* ══ Naming options ══════════════════════════════════════════════════
+   The wordmark alone, large, on a night plate — no paw, no year, no
+   bar. A name has to survive being looked at on its own before it earns
+   a lockup around it. `accent` takes glyph indices that carry the
+   second colour. */
+
+function nameOption(text, accent = []) {
+  const W = 560, H = 150;
+  const px = Math.max(2, Math.floor((W * 0.82) / wordmarkWidth(text, 1)));
+  const x0 = Math.round((W - wordmarkWidth(text, px)) / 2);
+  const y0 = Math.round((H - GH * px) / 2);
+  const bloom = uid("n");
+
+  let cursor = 0;
+  const glyphs = [...text].map((ch, i) => {
+    const xo = x0 + cursor * px;
+    cursor += glyphWidth(ch) + 2;
+    const fill = accent.includes(i) ? "var(--sc-pink-hot)" : "var(--sc-violet-hi)";
+    return wordmark(ch, { px, x: xo, y: y0, fill });
+  }).join("");
+
+  return svg(W, H, `
+    <defs>${bloomDef(bloom, 9, 1.4, false)}</defs>
+    <rect width="${W}" height="${H}" fill="var(--sc-night)"/>
+    <g filter="url(#${bloom})">${glyphs}</g>
+  `);
+}
+
+/* ══ The dark-surface test ═══════════════════════════════════════════
+   The mark dropped into a dark app header, so the three grounds can be
+   judged where the problem actually shows up rather than in isolation. */
+
+function darkSurface(mode, groundKind) {
+  const W = 560, H = 300, PW = 520, PH = 96;
+  return svg(W, H, `
+    <rect width="${W}" height="${H}" fill="#0E0C15"/>
+    <rect width="${W}" height="${H}" fill="none" stroke="#221C33"/>
+    <g transform="translate(20 24)">${lockupInner(mode, groundKind, PW, PH)}</g>
+    <g fill="#171223" stroke="#241D38">
+      <rect x="20" y="146" width="248" height="62" rx="8"/>
+      <rect x="284" y="146" width="256" height="62" rx="8"/>
+      <rect x="20" y="222" width="520" height="56" rx="8"/>
+    </g>
+    <g font-family="SC Mono, monospace" font-size="8" fill="#5B5280">
+      <text x="34" y="168">UPTIME</text><text x="298" y="168">QUEUE</text><text x="34" y="244">EVENTS</text>
+    </g>
+    <g font-family="SC Display, sans-serif" font-size="17" fill="#B9B1CE">
+      <text x="34" y="194">99.98%</text><text x="298" y="194">14</text>
+    </g>
+    <g fill="#241D38">
+      <rect x="34" y="256" width="380" height="5" rx="2.5"/>
+      <rect x="34" y="268" width="300" height="5" rx="2.5"/>
+    </g>
+  `);
+}
+
+const GROUND_RULES = [
+  ["Bare", "header · README · splash"],
+  ["Glow", "hero · dark app · social"],
+  ["Plate", "OG image · card · print"],
+  ["Light mode — D1", "grounds lighter than #E8E4F2"],
+  ["Dark mode — D2", "grounds darker than #1A1626"],
+  ["Never", "D1 on a dark ground"]
+];
+
+/* ══ Palettes and specs ══════════════════════════════════════════════ */
+
+const PALETTES = {
+  d1: [
+    ["#F7F5FB", "Paper ground"],
+    ["#B39DF3", "Wordmark"],
+    ["#FF5C8A", "Year mark"],
+    ["#FF6FA5", "Paw · lead"],
+    ["#8C74E0", "Paw · trail"],
+    ["#F4614B", "Bar 1"],
+    ["#3D4EA3", "Bar 3"],
+    ["#C9D6D2", "Hairline"]
+  ],
+  d2: [
+    ["#0D0B14", "Night ground"],
+    ["#C4AFFF", "Wordmark"],
+    ["#FF4D7E", "Year · ghost"],
+    ["#FF6FA5", "Paw · lead"],
+    ["#B39DF3", "Paw · trail"],
+    ["#F4614B", "Bar 1"],
+    ["#3D4EA3", "Bar 3"],
+    ["#3A2F55", "Screen edge"]
+  ],
+  d3: [
+    ["#EFEAFB", "Lilac ground"],
+    ["#1B1533", "Keyline · shadow"],
+    ["#8C74E0", "Head"],
+    ["#FF6FA5", "Paw"],
+    ["#FF5C8A", "Year badge"],
+    ["#F4614B", "Bar 1"],
+    ["#3D4EA3", "Bar 3"],
+    ["#FFFFFF", "Die-cut edge"]
+  ]
+};
+
+const SPECS = {
+  d1: [
+    ["Lockup", "horizontal, 1200 × 300"],
+    ["Glyph grid", "5 × 7, tracking 2"],
+    ["Pixel unit", "12 u · wordmark 648 u"],
+    ["Bloom", "σ 15 far ×2 + σ 2 near"],
+    ["Tubes", "14 — 8 + 4 glyphs, 2 paws"],
+    ["Flicker", "warm-up 2.6 s · breathe 5–7.6 s"],
+    ["Grounds", "bare · glow · plate"],
+    ["Minimum width", "240 px"],
+    ["Clear space", "2 pixel units all sides"]
+  ],
+  d2: [
+    ["Lockup", "horizontal, 1200 × 300"],
+    ["Ghost offset", "0.42 × pixel unit, 50% pink"],
+    ["Scanline", "1 px on 3 px, 5.5% white"],
+    ["Bloom", "σ 17 far + σ 2 near"],
+    ["Tubes", "14 — ghost rides its letter"],
+    ["Flicker", "stutter 9–17 s, ~60 ms dropout"],
+    ["Grounds", "bare · glow · plate"],
+    ["Minimum width", "280 px"],
+    ["Requires", "a dark surface, never white"]
+  ],
+  d3: [
+    ["Lockup", "stacked, 1200 × 300"],
+    ["Keyline", "3 – 4 px, #1B1533"],
+    ["Shadow", "1 unit, solid shapes only"],
+    ["Colours", "5 flat, no gradients"],
+    ["Minimum size", "16 px, paw only"],
+    ["Clear space", "1 keyline width all sides"]
+  ]
+};
+
+/* ══ Assembly ════════════════════════════════════════════════════════ */
+
+function mountApps(id, list) {
+  document.getElementById(id).innerHTML = list.map(a =>
+    `<figure class="app"><div class="app-frame">${a.svg}</div>` +
+    `<figcaption class="app-cap">${a.cap}</figcaption></figure>`
+  ).join("");
+}
+
+function mountSwatches(id, palette) {
+  document.getElementById(id).innerHTML = palette.map(([hex, role]) =>
+    `<div class="sw"><div class="sw-chip" style="background:${hex}"></div>` +
+    `<span class="sw-hex">${hex}</span><span class="sw-role">${role}</span></div>`
+  ).join("");
+}
+
+function mountSpec(id, rows) {
+  document.getElementById(id).innerHTML = rows.map(([k, v]) =>
+    `<div><span>${k}</span><span>${v}</span></div>`
+  ).join("");
+}
+
+/* The flicker rules live in one string so the page and every standalone
+   SVG stay in step. The page gets them once, here. */
+const styleTag = document.createElement("style");
+styleTag.textContent = NEON_CSS;
+document.head.appendChild(styleTag);
+
+/* ── Ground picker ─────────────────────────────────────────────────
+   Re-rendering the hero on each pick is cheap and keeps one source of
+   truth; there is no second code path for "the D1 that is showing". */
+
+const HERO = { d1: heroD1, d2: heroD2 };
+
+function paintHero(dir, groundKind) {
+  document.getElementById(dir + "-hero").innerHTML = HERO[dir](groundKind);
+}
+
+document.querySelectorAll(".ground-pick").forEach(pick => {
+  const dir = pick.dataset.for;
+  pick.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-g]");
+    if (!btn) return;
+    pick.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === btn));
+    paintHero(dir, btn.dataset.g);
+  });
+  paintHero(dir, pick.querySelector("button.on").dataset.g);
+});
+
+document.getElementById("d3-hero").innerHTML = heroD3();
+
+mountApps("d1-apps", appsD1());
+mountApps("d2-apps", appsD2());
+mountApps("d3-apps", appsD3());
+
+mountApps("name-options", [
+  { cap: "A(i)CODER — as asked", svg: nameOption("A(i)CODER") },
+  { cap: "AICODER — accent on the i", svg: nameOption("AICODER", [1]) },
+  { cap: "AICODER — flat, no second reading", svg: nameOption("AICODER") }
+]);
+mountSpec("name-costs", [
+  ["Two readings", "brackets · colour · none"],
+  ["Typeable as a handle", "no · yes · yes"],
+  ["Survives a URL", "no — %28 %29 · yes · yes"],
+  ["Works at 16 px", "no — brackets close up · yes · yes"],
+  ["Reads without explaining", "yes · mostly · no"],
+  ["Glyphs to draw", "3 new · 0 new · 0 new"]
+]);
+
+mountApps("dark-apps", [
+  { cap: "D1 plate — the problem", svg: darkSurface("light", "plate") },
+  { cap: "D2 bare — no ground at all", svg: darkSurface("night", "bare") },
+  { cap: "D2 glow — light, no box", svg: darkSurface("night", "glow") }
+]);
+mountSpec("ground-rules", GROUND_RULES);
+
+["d1", "d2", "d3"].forEach(d => {
+  mountSwatches(d + "-sw", PALETTES[d]);
+  mountSpec(d + "-spec", SPECS[d]);
+});
+
+/* ── Motion switch ─────────────────────────────────────────────────── */
+const motionBtn = document.getElementById("motion-toggle");
+motionBtn.addEventListener("click", () => {
+  const off = document.body.classList.toggle("no-motion");
+  motionBtn.setAttribute("aria-pressed", String(off));
+  motionBtn.textContent = off ? "Start the flicker" : "Stop the flicker";
+});
+
+/* ── Export hook ───────────────────────────────────────────────────
+   tools/build.mjs reads these through the page, so the exported SVGs
+   come off the same renderer as everything on screen. Brand colours are
+   CSS variables here but a standalone file has no :root to read, so they
+   are resolved to literals on the way out. */
+
+const BRAND = {
+  "--sc-violet": "#B39DF3", "--sc-violet-hi": "#C4AFFF", "--sc-violet-deep": "#8C74E0",
+  "--sc-pink": "#FF5C8A", "--sc-pink-hot": "#FF4D7E", "--sc-paw-pink": "#FF6FA5",
+  "--sc-red": "#F4614B", "--sc-navy": "#3D4EA3", "--sc-paper": "#F7F5FB",
+  "--sc-night": "#0D0B14", "--sc-hairline": "#C9D6D2", "--sc-ink": "#1B1533",
+  "--sc-lilac": "#EFEAFB"
+};
+
+function resolveTokens(s) {
+  return s.replace(/var\((--sc-[a-z-]+)\)/g, (whole, key) => BRAND[key] ?? whole);
+}
+
+/* D1 export only: first letter in Ink Blue, plus the tagline. The tagline
+   tube has fixed phase values rather than tubeVars() so it keeps the
+   timing it was tuned with. */
+const D1_EXPORT_EXTRA = {
+  firstFill: "#1D4ED8",
+  tagline: `<g class="tube" style="--wd:0.3s;--bp:6.6s;--bd:-2.2s;--sp:11.4s;--sd:-4.1s"><g class="tube-s"><g class="tube-b"><text x="53" y="245" font-family="'Courier New',ui-monospace,monospace" font-size="44" font-weight="700" letter-spacing="4" fill="#131829">CODE &#183; SHARE &#183; INSPIRE</text></g></g></g>`
+};
+
+/* A bare lockup has no ground to clip to, so its bloom would be cut off
+   at the 1200×300 edge — pad the viewBox by 60 on every side. */
+function svgPadded(w, h, pad, inner) {
+  return `<svg viewBox="${-pad} ${-pad} ${w + pad * 2} ${h + pad * 2}" width="${w + pad * 2}" height="${h + pad * 2}" xmlns="http://www.w3.org/2000/svg" >${inner}</svg>`;
+}
+
+window.__exportSVGs = () => {
+  const out = {};
+  for (const [dir, mode] of [["d1", "light"], ["d2", "night"]]) {
+    for (const groundKind of ["bare", "glow", "plate"]) {
+      const name = (dir === "d1" ? "d1-neon-arcade" : "d2-crt-night") + "-" + groundKind;
+      const extra = dir === "d1" ? D1_EXPORT_EXTRA : {};
+      const inner = lockupInner(mode, groundKind, 1200, 300, true, extra);
+      out[name] = resolveTokens(dir === "d1" && groundKind === "bare"
+        ? svgPadded(1200, 300, 60, inner)
+        : svg(1200, 300, inner));
+    }
+  }
+  return out;
+};
+
+/* Scroll reveal, honouring reduced-motion via the CSS above. */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+}, { rootMargin: "0px 0px -8% 0px" });
+document.querySelectorAll(".rise").forEach(el => io.observe(el));
+</script>

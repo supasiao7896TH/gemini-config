@@ -1,0 +1,36 @@
+{
+  "name": "supasit-starter",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "โครงเริ่มต้นแอป Supasit.A — Single HTML File + ชุดทดสอบที่ทำงานกับไฟล์จริงที่ deploy",
+  "scripts": {
+    "serve": "node tools/serve.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "lint": "prettier --check .",
+    "fix": "prettier --write .",
+    "secrets": "secretlint \"**/*\"",
+    "check": "npm run lint && npm run secrets && npm test && npm run e2e",
+    "check:local": "npm run lint && npm run secrets && npm test",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.62.1",
+    "@secretlint/secretlint-rule-pattern": "13.0.5",
+    "@secretlint/secretlint-rule-preset-recommend": "13.0.5",
+    "fake-indexeddb": "6.2.5",
+    "husky": "9.1.7",
+    "jsdom": "30.0.1",
+    "lint-staged": "17.4.1",
+    "prettier": "3.9.6",
+    "secretlint": "13.0.5",
+    "vitest": "4.1.11"
+  },
+  "lint-staged": {
+    "*.{json,mjs,js,yml,yaml}": "prettier --write",
+    "*": "secretlint"
+  }
+}

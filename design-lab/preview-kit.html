@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="th" data-dir="d4" data-density="comfortable" data-font="noto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Preview Kit — Supasit.A (รอบที่ 4)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap">
+<style>
+/* ============================================================
+   DESIGN PREVIEW KIT — 3 ทิศทาง เทียบกันบน markup ชุดเดียวกัน
+   D1 Expressive  : Material 3 Expressive-leaning (Google/Play Store)
+   D2 Clarity     : Apple HIG / Liquid Glass-leaning (iOS)
+   D3 Studio      : Modern Web SaaS (Linear / Notion / Vercel)
+   ------------------------------------------------------------
+   ทุก token เป็น CSS variable ชื่อเดียวกันทั้ง 3 ทิศทาง
+   สลับ direction = สลับค่า variable เท่านั้น ไม่แตะ markup
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+
+/* ---------- ตัวแปรที่ไม่ขึ้นกับ direction ---------- */
+:root {
+  --font-anuphan: "Anuphan", system-ui, sans-serif;
+  --font-noto: "Noto Sans Thai", system-ui, sans-serif;
+  --font-sarabun: "Sarabun", system-ui, sans-serif;
+  --font-baijam: "Bai Jamjuree", system-ui, sans-serif;
+  --font-plex: "IBM Plex Sans Thai", system-ui, sans-serif;
+  --lab-bg: #f4f4f5;
+  --lab-fg: #18181b;
+  --lab-line: #d4d4d8;
+  --lab-card: #ffffff;
+  --lab-accent: #18181b;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --lab-bg:#0a0a0b; --lab-fg:#fafafa; --lab-line:#2e2e33; --lab-card:#141417; --lab-accent:#fafafa; }
+}
+html[data-font="anuphan"] { --font-ui: var(--font-anuphan); }
+html[data-font="noto"]    { --font-ui: var(--font-noto); }
+html[data-font="sarabun"] { --font-ui: var(--font-sarabun); }
+html[data-font="baijam"]  { --font-ui: var(--font-baijam); }
+html[data-font="plex"]    { --font-ui: var(--font-plex); }
+
+html[data-density="compact"]     { --d: 0.82; }
+html[data-density="comfortable"] { --d: 1; }
+
+/* ============================================================
+   D1 · EXPRESSIVE — Material 3 Expressive-leaning
+   สีสด tonal · มุมมนมาก 16-28px · เงานุ่ม 3 ระดับ · motion สปริง
+   ============================================================ */
+html[data-dir="d1"] {
+  --bg:#F6FAF8; --surface:#FFFFFF; --surface-2:#EAF3F0; --surface-3:#DCEBE6;
+  --border:#CFE0DA; --border-strong:#A9C7BE;
+  --text:#0E1F1B; --text-2:#41544F; --text-3:#6C807A;
+  --accent:#00897B; --accent-hover:#00695F; --on-accent:#FFFFFF;
+  --accent-soft:#A6F0E2; --accent-soft-text:#00302A;
+  --accent-2:#F2B705; --accent-2-soft:#FFEFC2; --accent-2-text:#5A4200;
+  --ok:#1E7F4B; --ok-soft:#CFF0DC; --warn:#9A6200; --warn-soft:#FFEBC4; --crit:#B3261E; --crit-soft:#FADAD7; --on-crit:#FFFFFF;
+  --r-sm:12px; --r-md:18px; --r-lg:26px; --r-xl:30px; --r-pill:999px; --r-btn:999px;
+  --shadow-1:0 1px 2px rgba(0,45,38,.06), 0 2px 8px rgba(0,45,38,.06);
+  --shadow-2:0 4px 10px rgba(0,45,38,.09), 0 12px 28px rgba(0,45,38,.10);
+  --topbar-bg:#EAF3F0; --topbar-blur:none; --topbar-border:transparent;
+  --ease:cubic-bezier(.2,.9,.25,1.25); --dur:.34s;
+  --card-pad:calc(22px * var(--d)); --gap:calc(16px * var(--d));
+  --h1:clamp(28px,4.2vw,40px); --h1-weight:700; --title-ls:-.01em;
+  --body:calc(16px * var(--d)); --lh:1.7;
+  --btn-pad:calc(13px * var(--d)) calc(26px * var(--d)); --btn-weight:600;
+  --field-bg:var(--surface-2); --field-border:transparent; --field-radius:16px;
+  --input-focus-ring:0 0 0 3px var(--accent-soft);
+  --card-border:1px solid transparent; --card-shadow:var(--shadow-1);
+  --nav-active-bg:var(--accent-soft); --nav-active-fg:var(--accent-soft-text);
+}
+@media (prefers-color-scheme: dark) {
+  html[data-dir="d1"]:not([data-theme="light"]) {
+    --bg:#0B120F; --surface:#141D1A; --surface-2:#1D2A26; --surface-3:#26362F;
+    --border:#2C3B36; --border-strong:#436056;
+    --text:#E6F1EC; --text-2:#B4C6C0; --text-3:#8A9C96;
+    --accent:#5FE0CB; --accent-hover:#8DF0E0; --on-accent:#00332C;
+    --accent-soft:#0C4A41; --accent-soft-text:#A6F0E2;
+    --accent-2:#FFCF4D; --accent-2-soft:#4A3800; --accent-2-text:#FFE9A8;
+    --ok:#6BD99A; --ok-soft:#12351F; --warn:#F0BC58; --warn-soft:#3A2A05; --crit:#F2A79E; --crit-soft:#4A1712; --on-crit:#3A0F0A;
+    --shadow-1:0 1px 2px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.35);
+    --shadow-2:0 6px 14px rgba(0,0,0,.55), 0 14px 32px rgba(0,0,0,.45);
+    --topbar-bg:#1D2A26;
+  }
+}
+html[data-dir="d1"][data-theme="dark"] {
+  --bg:#0B120F; --surface:#141D1A; --surface-2:#1D2A26; --surface-3:#26362F;
+  --border:#2C3B36; --border-strong:#436056;
+  --text:#E6F1EC; --text-2:#B4C6C0; --text-3:#8A9C96;
+  --accent:#5FE0CB; --accent-hover:#8DF0E0; --on-accent:#00332C;
+  --accent-soft:#0C4A41; --accent-soft-text:#A6F0E2;
+  --accent-2:#FFCF4D; --accent-2-soft:#4A3800; --accent-2-text:#FFE9A8;
+  --ok:#6BD99A; --ok-soft:#12351F; --warn:#F0BC58; --warn-soft:#3A2A05; --crit:#F2A79E; --crit-soft:#4A1712; --on-crit:#3A0F0A;
+  --shadow-1:0 1px 2px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.35);
+  --shadow-2:0 6px 14px rgba(0,0,0,.55), 0 14px 32px rgba(0,0,0,.45);
+  --topbar-bg:#1D2A26;
+}
+
+/* ============================================================
+   D2 · CLARITY — Apple HIG / Liquid Glass-leaning
+   พื้นเทาอ่อน grouped · การ์ดขาว · แถบโปร่งแสง blur · accent สีเดียวสด
+   ============================================================ */
+html[data-dir="d2"] {
+  --bg:#F2F2F7; --surface:#FFFFFF; --surface-2:#F7F7FA; --surface-3:#E9E9EE;
+  --border:#E3E3E8; --border-strong:#C7C7CC;
+  --text:#1C1C1E; --text-2:#5C5C61; --text-3:#8E8E93;
+  --accent:#007AFF; --accent-hover:#0062CC; --on-accent:#FFFFFF;
+  --accent-soft:#E1EEFF; --accent-soft-text:#0055B3;
+  --accent-2:#5856D6; --accent-2-soft:#E8E8FB; --accent-2-text:#3A38A8;
+  --ok:#248A3D; --ok-soft:#DDF3E2; --warn:#B25000; --warn-soft:#FFEBD9; --crit:#D70015; --crit-soft:#FFE0E0; --on-crit:#FFFFFF;
+  --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:22px; --r-pill:999px; --r-btn:999px;
+  --shadow-1:0 1px 3px rgba(0,0,0,.05);
+  --shadow-2:0 8px 30px rgba(0,0,0,.12);
+  --topbar-bg:color-mix(in srgb, #F2F2F7 72%, transparent);
+  --topbar-blur:saturate(180%) blur(20px); --topbar-border:var(--border);
+  --ease:cubic-bezier(.32,.72,0,1); --dur:.28s;
+  --card-pad:calc(20px * var(--d)); --gap:calc(14px * var(--d));
+  --h1:clamp(30px,4.6vw,36px); --h1-weight:700; --title-ls:-.022em;
+  --body:calc(16px * var(--d)); --lh:1.62;
+  --btn-pad:calc(12px * var(--d)) calc(22px * var(--d)); --btn-weight:600;
+  --field-bg:var(--surface-2); --field-border:var(--border); --field-radius:12px;
+  --input-focus-ring:0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
+  --card-border:1px solid var(--border); --card-shadow:var(--shadow-1);
+  --nav-active-bg:var(--accent-soft); --nav-active-fg:var(--accent);
+}
+@media (prefers-color-scheme: dark) {
+  html[data-dir="d2"]:not([data-theme="light"]) {
+    --bg:#000000; --surface:#1C1C1E; --surface-2:#2C2C2E; --surface-3:#3A3A3C;
+    --border:#38383A; --border-strong:#545458;
+    --text:#FFFFFF; --text-2:#C7C7CC; --text-3:#98989E;
+    --accent:#0A84FF; --accent-hover:#409CFF; --on-accent:#FFFFFF;
+    --accent-soft:#0B2A4A; --accent-soft-text:#9CCAFF;
+    --accent-2:#7D7AFF; --accent-2-soft:#232160; --accent-2-text:#C7C5FF;
+    --ok:#30D158; --ok-soft:#0E2E17; --warn:#FF9F0A; --warn-soft:#3A2500; --crit:#FF453A; --crit-soft:#3D0F0C; --on-crit:#FFFFFF;
+    --shadow-1:0 1px 3px rgba(0,0,0,.6);
+    --shadow-2:0 8px 30px rgba(0,0,0,.7);
+    --topbar-bg:color-mix(in srgb, #000000 66%, transparent);
+  }
+}
+html[data-dir="d2"][data-theme="dark"] {
+  --bg:#000000; --surface:#1C1C1E; --surface-2:#2C2C2E; --surface-3:#3A3A3C;
+  --border:#38383A; --border-strong:#545458;
+  --text:#FFFFFF; --text-2:#C7C7CC; --text-3:#98989E;
+  --accent:#0A84FF; --accent-hover:#409CFF; --on-accent:#FFFFFF;
+  --accent-soft:#0B2A4A; --accent-soft-text:#9CCAFF;
+  --accent-2:#7D7AFF; --accent-2-soft:#232160; --accent-2-text:#C7C5FF;
+  --ok:#30D158; --ok-soft:#0E2E17; --warn:#FF9F0A; --warn-soft:#3A2500; --crit:#FF453A; --crit-soft:#3D0F0C; --on-crit:#FFFFFF;
+  --shadow-1:0 1px 3px rgba(0,0,0,.6);
+  --shadow-2:0 8px 30px rgba(0,0,0,.7);
+  --topbar-bg:color-mix(in srgb, #000000 66%, transparent);
+}
+
+/* ============================================================
+   D3 · STUDIO — Modern Web SaaS (Linear / Notion / Vercel)
+   neutral อุ่น · มุม 8-14px · เงาบางชั้นเดียว + hairline · motion เร็ว
+   ============================================================ */
+html[data-dir="d3"] {
+  --bg:#FAFAF9; --surface:#FFFFFF; --surface-2:#F5F5F3; --surface-3:#EDEDEA;
+  --border:#E7E5E1; --border-strong:#D3D0CA;
+  --text:#1A1A18; --text-2:#57564F; --text-3:#8A887F;
+  --accent:#0B8A5F; --accent-hover:#097550; --on-accent:#FFFFFF;
+  --accent-soft:#DFF3EA; --accent-soft-text:#065F41;
+  --accent-2:#C2410C; --accent-2-soft:#FDEAE0; --accent-2-text:#9A3412;
+  --ok:#15803D; --ok-soft:#E3F3E8; --warn:#A16207; --warn-soft:#FBF0D9; --crit:#B91C1C; --crit-soft:#FBE6E6; --on-crit:#FFFFFF;
+  --r-sm:6px; --r-md:9px; --r-lg:13px; --r-xl:16px; --r-pill:999px; --r-btn:9px;
+  --shadow-1:0 1px 2px rgba(24,24,20,.05);
+  --shadow-2:0 4px 16px rgba(24,24,20,.09);
+  --topbar-bg:color-mix(in srgb, #FAFAF9 85%, transparent);
+  --topbar-blur:blur(8px); --topbar-border:var(--border);
+  --ease:cubic-bezier(.4,0,.2,1); --dur:.16s;
+  --card-pad:calc(18px * var(--d)); --gap:calc(12px * var(--d));
+  --h1:clamp(24px,3.4vw,32px); --h1-weight:600; --title-ls:-.018em;
+  --body:calc(15px * var(--d)); --lh:1.6;
+  --btn-pad:calc(9px * var(--d)) calc(16px * var(--d)); --btn-weight:500;
+  --field-bg:var(--surface); --field-border:var(--border-strong); --field-radius:9px;
+  --input-focus-ring:0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+  --card-border:1px solid var(--border); --card-shadow:var(--shadow-1);
+  --nav-active-bg:var(--surface-3); --nav-active-fg:var(--text);
+}
+@media (prefers-color-scheme: dark) {
+  html[data-dir="d3"]:not([data-theme="light"]) {
+    --bg:#0F0F0E; --surface:#17171A; --surface-2:#1E1E21; --surface-3:#26262B;
+    --border:#2A2A2F; --border-strong:#3D3D44;
+    --text:#EDEDEB; --text-2:#A8A8A2; --text-3:#7A7A75;
+    --accent:#34D399; --accent-hover:#5BE3B0; --on-accent:#04291C;
+    --accent-soft:#0D3527; --accent-soft-text:#8FEBC6;
+    --accent-2:#FB923C; --accent-2-soft:#3A2210; --accent-2-text:#FDBA8C;
+    --ok:#4ADE80; --ok-soft:#0E2E1A; --warn:#FBBF24; --warn-soft:#33280A; --crit:#F87171; --crit-soft:#3A1414; --on-crit:#3A0F0A;
+    --shadow-1:0 1px 2px rgba(0,0,0,.55);
+    --shadow-2:0 4px 18px rgba(0,0,0,.6);
+    --topbar-bg:color-mix(in srgb, #0F0F0E 82%, transparent);
+  }
+}
+html[data-dir="d3"][data-theme="dark"] {
+  --bg:#0F0F0E; --surface:#17171A; --surface-2:#1E1E21; --surface-3:#26262B;
+  --border:#2A2A2F; --border-strong:#3D3D44;
+  --text:#EDEDEB; --text-2:#A8A8A2; --text-3:#7A7A75;
+  --accent:#34D399; --accent-hover:#5BE3B0; --on-accent:#04291C;
+  --accent-soft:#0D3527; --accent-soft-text:#8FEBC6;
+  --accent-2:#FB923C; --accent-2-soft:#3A2210; --accent-2-text:#FDBA8C;
+  --ok:#4ADE80; --ok-soft:#0E2E1A; --warn:#FBBF24; --warn-soft:#33280A; --crit:#F87171; --crit-soft:#3A1414; --on-crit:#3A0F0A;
+  --shadow-1:0 1px 2px rgba(0,0,0,.55);
+  --shadow-2:0 4px 18px rgba(0,0,0,.6);
+  --topbar-bg:color-mix(in srgb, #0F0F0E 82%, transparent);
+}
+
+/* ============================================================
+   D4 · SUPASIT.A STUDIO — ตัวจริงรอบที่ 4 (พี่ A เลือก 2569-08-28)
+   สูตรผสม: โครง/จังหวะจาก D3 · สีจาก D1 · ปุ่มแคปซูลจาก D2
+   ฟอนต์ Noto Sans Thai · ความแน่นสบายตา · สว่างเป็นหลัก
+   ============================================================ */
+html[data-dir="d4"] {
+  /* พื้นผิว — สีจาก D1 (neutral เอียงเขียว ไม่ใช่เทาเปล่า) */
+  --bg:#F7F9FC; --surface:#FFFFFF; --surface-2:#EDF1F9; --surface-3:#DFE6F3;
+  /* เส้น hairline — วิธีสร้างความลึกแบบ D3 */
+  --border:#D6DEEE; --border-strong:#B2BFD8;
+  --text:#131829; --text-2:#414A60; --text-3:#5F6980;
+  /* accent — เขียวมิ้นท์ของ D1 */
+  --accent:#1D4ED8; --accent-hover:#173DA8; --on-accent:#FFFFFF;
+  --accent-soft:#DFE6FA; --accent-soft-text:#15389C;
+  /* accent รอง — อำพัน ใช้กับข้อมูลอ้างอิง/metadata ไม่ใช่ปุ่มหลัก */
+  --accent-2:#8A6410; --accent-2-soft:#FBEFCF; --accent-2-text:#6B4E08;
+  --ok:#1A7444; --ok-soft:#D6F0E1; --warn:#8A5A08; --warn-soft:#FBEBCF; --crit:#B3261E; --crit-soft:#FBDEDB; --on-crit:#FFFFFF;
+  /* มุม — สเกลของ D3 แต่ปุ่มเป็นแคปซูลตาม D2 */
+  --r-sm:6px; --r-md:9px; --r-lg:13px; --r-xl:16px; --r-pill:999px; --r-btn:999px;
+  /* เงาบางชั้นเดียวแบบ D3 — ชั้นหนาใช้เฉพาะ hover/modal */
+  --shadow-1:0 1px 2px rgba(15,25,50,.06);
+  --shadow-2:0 4px 16px rgba(15,25,50,.11);
+  --topbar-bg:color-mix(in srgb, #F7F9FC 85%, transparent);
+  --topbar-blur:blur(8px); --topbar-border:var(--border);
+  --ease:cubic-bezier(.4,0,.2,1); --dur:.16s;
+  --card-pad:calc(18px * var(--d)); --gap:calc(12px * var(--d));
+  --h1:clamp(24px,3.4vw,32px); --h1-weight:600; --title-ls:-.018em;
+  --body:calc(15px * var(--d)); --lh:1.6;
+  --btn-pad:calc(10px * var(--d)) calc(20px * var(--d)); --btn-weight:600;
+  --field-bg:var(--surface); --field-border:var(--border-strong); --field-radius:9px;
+  --input-focus-ring:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+  --card-border:1px solid var(--border); --card-shadow:var(--shadow-1);
+  --nav-active-bg:var(--accent-soft); --nav-active-fg:var(--accent-soft-text);
+}
+@media (prefers-color-scheme: dark) {
+  html[data-dir="d4"]:not([data-theme="light"]) {
+    --bg:#0E1219; --surface:#161C27; --surface-2:#1D2431; --surface-3:#262F40;
+    --border:#242C3A; --border-strong:#38455A;
+    --text:#E6EAF3; --text-2:#B0B9CB; --text-3:#868FA3;
+    --accent:#7FA8FF; --accent-hover:#A6C3FF; --on-accent:#141B29;
+    --accent-soft:#1C2538; --accent-soft-text:#DFE9FF;
+    --accent-2:#E0B85C; --accent-2-soft:#332708; --accent-2-text:#F0D69A;
+    --ok:#5FD08D; --ok-soft:#0F2E1D; --warn:#E0AE52; --warn-soft:#32250A; --crit:#F0938A; --crit-soft:#3A1512; --on-crit:#3A0F0A;
+    --shadow-1:0 1px 2px rgba(0,0,0,.5);
+    --shadow-2:0 4px 18px rgba(0,0,0,.55);
+    --topbar-bg:color-mix(in srgb, #0E1219 85%, transparent);
+  }
+}
+html[data-dir="d4"][data-theme="dark"] {
+  --bg:#0E1219; --surface:#161C27; --surface-2:#1D2431; --surface-3:#262F40;
+  --border:#242C3A; --border-strong:#38455A;
+  --text:#E6EAF3; --text-2:#B0B9CB; --text-3:#868FA3;
+  --accent:#7FA8FF; --accent-hover:#A6C3FF; --on-accent:#141B29;
+  --accent-soft:#1C2538; --accent-soft-text:#DFE9FF;
+  --accent-2:#E0B85C; --accent-2-soft:#332708; --accent-2-text:#F0D69A;
+  --ok:#5FD08D; --ok-soft:#0F2E1D; --warn:#E0AE52; --warn-soft:#32250A; --crit:#F0938A; --crit-soft:#3A1512; --on-crit:#3A0F0A;
+  --shadow-1:0 1px 2px rgba(0,0,0,.5);
+  --shadow-2:0 4px 18px rgba(0,0,0,.55);
+  --topbar-bg:color-mix(in srgb, #0E1219 85%, transparent);
+}
+
+/* ============================================================
+   ตัวสลับโทนสีของ D4 — เปลี่ยนเฉพาะ "สี" ไม่แตะโครง/สัดส่วน/จังหวะ
+   ผูกกับ D4 เท่านั้น เพื่อให้ D1-D3 ยังเป็นตัวอ้างอิงเดิมได้
+   ทุกค่าคำนวณ contrast มาแล้วทั้งสว่างและมืด
+   ที่มา: สีแบรนด์ 3 ระบบที่ผ่านมาเป็น teal hue 173-175 ทั้งหมด (ห่างกัน 2 องศา)
+          และเขียวแบรนด์อยู่ห่างจากเขียว "ปกติ" แค่ 25 องศา — เหลือ 5 องศาในสายตาคนตาบอดสีเขียว-แดง
+   ============================================================ */
+
+/* --- มิ้นท์ (ของเดิม เก็บไว้เทียบ) --- */
+html[data-dir="d4"][data-tone="mint"] {
+  --bg:#F6FAF8; --surface:#FFFFFF; --surface-2:#EAF3F0; --surface-3:#DCEBE6;
+  --border:#CFE0DA; --border-strong:#A9C7BE;
+  --text:#0E1F1B; --text-2:#41544F; --text-3:#5E7973;
+  --accent:#007F70; --accent-hover:#00695F; --on-accent:#FFFFFF;
+  --accent-soft:#CDF3EA; --accent-soft-text:#00544A;
+  --topbar-bg:color-mix(in srgb, #F6FAF8 85%, transparent);
+  --shadow-1:0 1px 2px rgba(10,40,34,.05); --shadow-2:0 4px 16px rgba(10,40,34,.10);
+}
+@media (prefers-color-scheme: dark) { html[data-dir="d4"][data-tone="mint"]:not([data-theme="light"]) {
+  --bg:#0F1412; --surface:#161F1C; --surface-2:#1D2825; --surface-3:#26332F;
+  --border:#25332E; --border-strong:#3A4C46;
+  --text:#E7F0EC; --text-2:#B0C0BB; --text-3:#87968F;
+  --accent:#5FE0CB; --accent-hover:#8DF0E0; --on-accent:#04302A;
+  --accent-soft:#0D3B35; --accent-soft-text:#9DEDDF;
+  --topbar-bg:color-mix(in srgb, #0F1412 85%, transparent);
+} }
+html[data-dir="d4"][data-tone="mint"][data-theme="dark"] {
+  --bg:#0F1412; --surface:#161F1C; --surface-2:#1D2825; --surface-3:#26332F;
+  --border:#25332E; --border-strong:#3A4C46;
+  --text:#E7F0EC; --text-2:#B0C0BB; --text-3:#87968F;
+  --accent:#5FE0CB; --accent-hover:#8DF0E0; --on-accent:#04302A;
+  --accent-soft:#0D3B35; --accent-soft-text:#9DEDDF;
+  --topbar-bg:color-mix(in srgb, #0F1412 85%, transparent);
+}
+
+/* --- กรมท่าอมเทา --- */
+html[data-dir="d4"][data-tone="navy"] {
+  --bg:#F8F9FB; --surface:#FFFFFF; --surface-2:#EDF0F3; --surface-3:#E0E5EB;
+  --border:#D8DEE5; --border-strong:#B4BEC9;
+  --text:#161D24; --text-2:#434C57; --text-3:#616B77;
+  --accent:#334E68; --accent-hover:#283D51; --on-accent:#FFFFFF;
+  --accent-soft:#E2E6EA; --accent-soft-text:#25384B;
+  --topbar-bg:color-mix(in srgb, #F8F9FB 85%, transparent);
+  --shadow-1:0 1px 2px rgba(0,0,0,.5); --shadow-2:0 4px 18px rgba(0,0,0,.55);
+}
+@media (prefers-color-scheme: dark) { html[data-dir="d4"][data-tone="navy"]:not([data-theme="light"]) {
+  --bg:#0F1216; --surface:#171B20; --surface-2:#1E232A; --surface-3:#272D35;
+  --border:#252B33; --border-strong:#3A434E;
+  --text:#E7EAEE; --text-2:#B2B9C2; --text-3:#88909A;
+  --accent:#9FC0DE; --accent-hover:#C0D8EE; --on-accent:#191F24;
+  --accent-soft:#232A31; --accent-soft-text:#E7EFF7;
+  --topbar-bg:color-mix(in srgb, #0F1216 85%, transparent);
+} }
+html[data-dir="d4"][data-tone="navy"][data-theme="dark"] {
+  --bg:#0F1216; --surface:#171B20; --surface-2:#1E232A; --surface-3:#272D35;
+  --border:#252B33; --border-strong:#3A434E;
+  --text:#E7EAEE; --text-2:#B2B9C2; --text-3:#88909A;
+  --accent:#9FC0DE; --accent-hover:#C0D8EE; --on-accent:#191F24;
+  --accent-soft:#232A31; --accent-soft-text:#E7EFF7;
+  --topbar-bg:color-mix(in srgb, #0F1216 85%, transparent);
+}
+
+/* --- ฟ้าเข้ม --- */
+html[data-dir="d4"][data-tone="sky"] {
+  --bg:#F5FAFC; --surface:#FFFFFF; --surface-2:#E9F2F7; --surface-3:#DAE8F0;
+  --border:#D2E1EA; --border-strong:#ADC3D2;
+  --text:#10202A; --text-2:#3E4E58; --text-3:#5C6C77;
+  --accent:#0369A1; --accent-hover:#02527E; --on-accent:#FFFFFF;
+  --accent-soft:#DCEAF2; --accent-soft-text:#024C74;
+  --topbar-bg:color-mix(in srgb, #F5FAFC 85%, transparent);
+  --shadow-1:0 1px 2px rgba(10,35,50,.06); --shadow-2:0 4px 16px rgba(10,35,50,.11);
+}
+@media (prefers-color-scheme: dark) { html[data-dir="d4"][data-tone="sky"]:not([data-theme="light"]) {
+  --bg:#0C1418; --surface:#141D22; --surface-2:#1A252C; --surface-3:#233038;
+  --border:#223038; --border-strong:#354851;
+  --text:#E4EDF2; --text-2:#AEBDC5; --text-3:#85949C;
+  --accent:#6FC5F0; --accent-hover:#9BDBF8; --on-accent:#122026;
+  --accent-soft:#182B35; --accent-soft-text:#DBF0FB;
+  --topbar-bg:color-mix(in srgb, #0C1418 85%, transparent);
+} }
+html[data-dir="d4"][data-tone="sky"][data-theme="dark"] {
+  --bg:#0C1418; --surface:#141D22; --surface-2:#1A252C; --surface-3:#233038;
+  --border:#223038; --border-strong:#354851;
+  --text:#E4EDF2; --text-2:#AEBDC5; --text-3:#85949C;
+  --accent:#6FC5F0; --accent-hover:#9BDBF8; --on-accent:#122026;
+  --accent-soft:#182B35; --accent-soft-text:#DBF0FB;
+  --topbar-bg:color-mix(in srgb, #0C1418 85%, transparent);
+}
+
+/* --- ม่วงพลัม --- */
+html[data-dir="d4"][data-tone="plum"] {
+  --bg:#FBF7FC; --surface:#FFFFFF; --surface-2:#F3ECF5; --surface-3:#E9DFEC;
+  --border:#E2D6E5; --border-strong:#C4B0C9;
+  --text:#1E1522; --text-2:#4C4152; --text-3:#6B5F71;
+  --accent:#7B2D8E; --accent-hover:#60236F; --on-accent:#FFFFFF;
+  --accent-soft:#EDE2EF; --accent-soft-text:#592066;
+  --topbar-bg:color-mix(in srgb, #FBF7FC 85%, transparent);
+  --shadow-1:0 1px 2px rgba(40,20,45,.06); --shadow-2:0 4px 16px rgba(40,20,45,.11);
+}
+@media (prefers-color-scheme: dark) { html[data-dir="d4"][data-tone="plum"]:not([data-theme="light"]) {
+  --bg:#141016; --surface:#1C1620; --surface-2:#241C29; --surface-3:#2E2434;
+  --border:#2B2231; --border-strong:#443749;
+  --text:#EFE8F2; --text-2:#BCB0C2; --text-3:#928798;
+  --accent:#E29BF0; --accent-hover:#EFC0F8; --on-accent:#241926;
+  --accent-soft:#322235; --accent-soft-text:#F8E6FB;
+  --topbar-bg:color-mix(in srgb, #141016 85%, transparent);
+} }
+html[data-dir="d4"][data-tone="plum"][data-theme="dark"] {
+  --bg:#141016; --surface:#1C1620; --surface-2:#241C29; --surface-3:#2E2434;
+  --border:#2B2231; --border-strong:#443749;
+  --text:#EFE8F2; --text-2:#BCB0C2; --text-3:#928798;
+  --accent:#E29BF0; --accent-hover:#EFC0F8; --on-accent:#241926;
+  --accent-soft:#322235; --accent-soft-text:#F8E6FB;
+  --topbar-bg:color-mix(in srgb, #141016 85%, transparent);
+}
+</style>
+<style>
+/* ============================================================
+   LAB SHELL — แถบควบคุมของห้องแล็บ (ไม่ใช่ส่วนของ design system)
+   ตั้งใจให้หน้าตาเป็นกลาง จะได้ไม่ไปแย่งสายตาจากตัวอย่างที่กำลังเทียบ
+   ============================================================ */
+body { background: var(--lab-bg); color: var(--lab-fg); font-family: var(--font-ui, var(--font-anuphan)); }
+
+.lab-bar {
+  position: sticky; top: 0; z-index: 50;
+  background: color-mix(in srgb, var(--lab-bg) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--lab-line);
+  padding: 10px 16px;
+  display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center;
+}
+.lab-brand { font-weight: 700; font-size: 14px; letter-spacing: -.01em; margin-right: auto; }
+.lab-brand small { display: block; font-weight: 400; font-size: 11px; opacity: .6; }
+.lab-group { display: flex; align-items: center; gap: 6px; }
+.lab-group > span { font-size: 11px; opacity: .6; margin-right: 2px; }
+.seg { display: flex; background: var(--lab-card); border: 1px solid var(--lab-line); border-radius: 8px; padding: 2px; gap: 2px; }
+.seg button {
+  font: inherit; font-size: 12px; line-height: 1; padding: 7px 11px; border: 0; border-radius: 6px;
+  background: transparent; color: inherit; cursor: pointer; opacity: .65; white-space: nowrap;
+}
+.seg button[aria-pressed="true"] { background: var(--lab-accent); color: var(--lab-bg); opacity: 1; font-weight: 600; }
+.lab-main { padding: 20px 16px 80px; display: grid; gap: 24px; grid-template-columns: minmax(0,1fr); align-items: start; }
+@media (min-width: 1180px) { .lab-main { grid-template-columns: minmax(0,1fr) 430px; } }
+.lab-note { font-size: 12px; opacity: .65; margin: 0 0 10px; }
+
+/* กรอบมือถือ 390px — ใช้ container query จึงได้ layout มือถือจริงโดยไม่ต้องย่อหน้าต่าง */
+.phone-col { position: sticky; top: 74px; }
+.phone {
+  width: 390px; max-width: 100%; height: min(78vh, 780px);
+  border: 10px solid #1b1b1f; border-radius: 42px; overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0,0,0,.25); background: var(--bg);
+}
+.phone .screen-host { height: 100%; overflow-y: auto; overflow-x: hidden; }
+.phone-label { font-size: 11px; opacity: .6; margin-bottom: 8px; }
+
+/* ============================================================
+   ตัวอย่างหน้าจอ — ใช้ token ของ direction ที่เลือกเท่านั้น
+   responsive ทั้งหมดผูกกับ @container ไม่ใช่ viewport
+   จอคอมกับกรอบมือถือจึงใช้ markup ชุดเดียวกันได้จริง
+   ============================================================ */
+.screen-host {
+  container-type: inline-size; container-name: app;
+  background: var(--bg); color: var(--text);
+  border-radius: var(--r-xl); overflow: hidden;
+  font-size: var(--body); line-height: var(--lh);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.lab-main > .screen-host { border: 1px solid var(--lab-line); }
+.screen-host :is(h1,h2,h3,h4,p,ul,ol) { margin: 0; }
+.screen-host ul { list-style: none; padding: 0; }
+
+.app-top {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--topbar-bg); backdrop-filter: var(--topbar-blur);
+  border-bottom: 1px solid var(--topbar-border);
+  padding: 12px 20px; display: flex; align-items: center; gap: 12px;
+}
+.app-logo { width: 30px; height: 30px; border-radius: var(--r-sm); background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; font-weight: 700; font-size: 13px; flex: none; }
+.app-name { font-weight: 600; letter-spacing: var(--title-ls); font-size: calc(var(--body) * 1.02); }
+.app-top .spacer { margin-left: auto; }
+.avatar { width: 32px; height: 32px; border-radius: 999px; background: var(--accent-2-soft); color: var(--accent-2-text);
+  display: grid; place-items: center; font-size: 12px; font-weight: 600; flex: none; }
+
+/* กัน grid/flex item ขยายตามเนื้อหาจนดันหน้าให้เลื่อนแนวนอน
+   (min-width ค่าเริ่มต้นของ grid item คือ auto ไม่ใช่ 0 — ตารางที่กว้างเกินจะดันกรอบทั้งหน้า) */
+.app-body, .content, .content > section, .grid > *, .grid-2 > *, .card, .tbl-wrap, .list li > * { min-width: 0; }
+.list .l-title, .list .l-sub { overflow-wrap: anywhere; }
+
+.app-body { display: grid; grid-template-columns: 216px minmax(0,1fr); }
+@container app (max-width: 720px) { .app-body { grid-template-columns: minmax(0,1fr); } }
+
+.side { padding: 16px 12px; border-right: 1px solid var(--border); display: grid; gap: 4px; align-content: start; }
+@container app (max-width: 720px) { .side { display: none; } }
+.side a {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-md);
+  color: var(--text-2); text-decoration: none; font-size: calc(var(--body) * .95);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.side a:hover { background: var(--surface-2); color: var(--text); }
+.side a.on { background: var(--nav-active-bg); color: var(--nav-active-fg); font-weight: 600; }
+.side a:focus-visible { outline: none; box-shadow: var(--input-focus-ring); }
+
+.content { padding: calc(24px * var(--d)) calc(24px * var(--d)) calc(40px * var(--d)); display: grid; gap: calc(28px * var(--d)); }
+@container app (max-width: 720px) { .content { padding: 16px 16px 96px; gap: 22px; } }
+
+.page-head { display: grid; gap: 6px; }
+/* eyebrow · chip อ้างอิง — ที่ยืนของสีรอง (อำพัน): บอก "ที่มา/หมวดของหน้า" ไม่ใช่สถานะ ไม่ใช่สิ่งที่กดได้ */
+.eyebrow { font-size: calc(var(--body) * .78); font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--accent-2); }
+.c-ref { background: var(--accent-2-soft); color: var(--accent-2-text); }
+.page-head h1 { font-size: var(--h1); font-weight: var(--h1-weight); letter-spacing: var(--title-ls); line-height: 1.18; }
+.page-head p { color: var(--text-2); font-size: calc(var(--body) * .95); max-width: 62ch; }
+.sec-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: calc(12px * var(--d)); }
+.sec-head h2 { font-size: calc(var(--body) * 1.18); font-weight: 600; letter-spacing: var(--title-ls); }
+.sec-head span { font-size: calc(var(--body) * .84); color: var(--text-3); margin-left: auto; }
+
+.card {
+  background: var(--surface); border: var(--card-border); border-radius: var(--r-lg);
+  box-shadow: var(--card-shadow); padding: var(--card-pad);
+  transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.card.hoverable:hover { box-shadow: var(--shadow-2); transform: translateY(-2px); }
+
+.grid { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); }
+/* จอกว้างพอ = บังคับ 4 คอลัมน์เท่ากัน ไม่ปล่อยให้ auto-fit ทำให้ใบที่ 4 ตกบรรทัด */
+@container app (min-width: 760px) { .grid { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+@container app (max-width: 720px) { .grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; } }
+.grid-2 { display: grid; gap: var(--gap); grid-template-columns: 1.6fr 1fr; align-items: start; }
+@container app (max-width: 860px) { .grid-2 { grid-template-columns: minmax(0,1fr); } }
+
+.kpi .k-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.kpi .k-ico { width: 30px; height: 30px; border-radius: var(--r-sm); display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent-soft-text); flex: none; }
+.kpi .k-label { font-size: calc(var(--body) * .82); color: var(--text-2); }
+.kpi .k-val { font-size: calc(var(--body) * 2); font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
+.kpi .k-unit { font-size: calc(var(--body) * .8); color: var(--text-3); font-weight: 400; margin-left: 4px; white-space: nowrap; }
+.kpi .k-val { display: flex; align-items: baseline; flex-wrap: wrap; }
+.kpi .k-foot { margin-top: 8px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; font-size: calc(var(--body) * .8); }
+.kpi .k-foot > span:not(.chip) { white-space: nowrap; }
+
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--r-pill);
+  font-size: calc(var(--body) * .78); font-weight: 600; white-space: nowrap; }
+.c-ok { background: var(--ok-soft); color: var(--ok); }
+.c-warn { background: var(--warn-soft); color: var(--warn); }
+.c-crit { background: var(--crit-soft); color: var(--crit); }
+.c-neutral { background: var(--surface-3); color: var(--text-2); }
+.c-accent { background: var(--accent-soft); color: var(--accent-soft-text); }
+
+.btn {
+  font: inherit; font-size: calc(var(--body) * .93); font-weight: var(--btn-weight);
+  padding: var(--btn-pad); border-radius: var(--r-btn); border: 1px solid transparent;
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  min-height: 44px;
+}
+.btn:focus-visible { outline: none; box-shadow: var(--input-focus-ring); }
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-soft { background: var(--accent-soft); color: var(--accent-soft-text); }
+.btn-soft:hover { background: color-mix(in srgb, var(--accent-soft) 80%, var(--accent)); }
+.btn-outline { background: transparent; color: var(--text); border-color: var(--border-strong); }
+.btn-outline:hover { background: var(--surface-2); }
+.btn-ghost { background: transparent; color: var(--text-2); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+.btn-danger { background: var(--crit-soft); color: var(--crit); }
+.btn-danger:hover { background: color-mix(in srgb, var(--crit-soft) 70%, var(--crit)); }
+.btn-sm { min-height: 36px; padding: 7px 14px; font-size: calc(var(--body) * .85); }
+/* นิ้วโป้ง (ยิ่งใส่ถุงมือ) ต้องการเป้าอย่างน้อย 44px — ขยายเฉพาะจอแคบ เดสก์ท็อปยังกระชับเหมือนเดิม */
+@container app (max-width: 720px) { .btn-sm { min-height: 44px; padding: 11px 16px; } }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.field { display: grid; gap: 6px; }
+.field label { font-size: calc(var(--body) * .85); font-weight: 500; color: var(--text-2); }
+.field :is(input, select, textarea) {
+  font: inherit; font-size: calc(var(--body) * .95); color: var(--text); width: 100%;
+  background: var(--field-bg); border: 1px solid var(--field-border); border-radius: var(--field-radius);
+  padding: 12px 14px; min-height: 46px;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.field textarea { min-height: 96px; resize: vertical; }
+.field :is(input, select, textarea):focus { outline: none; border-color: var(--accent); box-shadow: var(--input-focus-ring); }
+.field .hint { font-size: calc(var(--body) * .8); color: var(--text-3); }
+.field.err :is(input, select, textarea) { border-color: var(--crit); }
+.field.err .hint { color: var(--crit); }
+.form-grid { display: grid; gap: calc(16px * var(--d)); grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+@container app (max-width: 720px) { .form-grid { grid-template-columns: minmax(0,1fr); } }
+
+.switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: calc(var(--body) * .92); }
+.switch input { position: absolute; opacity: 0; pointer-events: none; }
+.track { width: 50px; height: 30px; border-radius: 999px; background: var(--surface-3); position: relative; flex: none;
+  transition: background var(--dur) var(--ease); }
+.track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 999px;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform var(--dur) var(--ease); }
+.switch input:checked + .track { background: var(--accent); }
+.switch input:checked + .track::after { transform: translateX(20px); }
+.switch input:focus-visible + .track { box-shadow: var(--input-focus-ring); }
+
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 520px; }
+thead th { text-align: left; font-size: calc(var(--body) * .8); font-weight: 600; color: var(--text-2);
+  background: var(--surface-2); padding: 12px 16px; white-space: nowrap; border-bottom: 1px solid var(--border); }
+tbody td { padding: 13px 16px; font-size: calc(var(--body) * .92); border-bottom: 1px solid var(--border); }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: var(--surface-2); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.list { display: grid; gap: 8px; }
+.list li { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--surface);
+  border: var(--card-border); border-radius: var(--r-md); box-shadow: var(--card-shadow);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.list li:hover { transform: translateX(2px); box-shadow: var(--shadow-2); }
+.list .l-title { font-weight: 600; font-size: calc(var(--body) * .95); }
+.list .l-sub { font-size: calc(var(--body) * .82); color: var(--text-3); }
+.list .l-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+.empty { display: grid; gap: 10px; justify-items: center; text-align: center; padding: 40px 20px;
+  border: 1px dashed var(--border-strong); border-radius: var(--r-lg); color: var(--text-2); }
+.empty .e-ico { width: 52px; height: 52px; border-radius: var(--r-md); background: var(--surface-2);
+  display: grid; place-items: center; color: var(--text-3); }
+
+.skel { background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 37%, var(--surface-2) 63%);
+  background-size: 400% 100%; animation: shimmer 1.4s ease infinite; border-radius: var(--r-sm); height: 14px; }
+@keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+.sheet-backdrop { position: relative; border-radius: var(--r-lg); background: color-mix(in srgb, var(--text) 12%, transparent);
+  padding: calc(26px * var(--d)); display: grid; place-items: center; }
+.sheet { background: var(--surface); border-radius: var(--r-xl); box-shadow: var(--shadow-2); padding: var(--card-pad);
+  width: min(420px, 100%); display: grid; gap: 14px; border: var(--card-border); }
+.sheet h3 { font-size: calc(var(--body) * 1.1); font-weight: 600; }
+.sheet p { color: var(--text-2); font-size: calc(var(--body) * .92); }
+
+.toast { display: flex; align-items: center; gap: 10px; background: var(--surface); border: var(--card-border);
+  border-left: 3px solid var(--ok); border-radius: var(--r-md); box-shadow: var(--shadow-2); padding: 13px 16px;
+  font-size: calc(var(--body) * .9); }
+.toast.warn { border-left-color: var(--warn); }
+.toast.crit { border-left-color: var(--crit); }
+
+.chart { width: 100%; height: 180px; display: block; }
+.chart .grid-line { stroke: var(--border); stroke-width: 1; }
+.chart .bar { fill: var(--accent); }
+.chart .bar.alt { fill: var(--accent-2); }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.chart .area { fill: var(--accent); opacity: .12; }
+.chart .axis { font-size: 10px; fill: var(--text-3); }
+
+/* ===== คลังส่วนประกอบเพิ่มเติม — ของที่แอปจริงต้องใช้แต่ 3 หน้าแรกยังไม่มี ===== */
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tabs button { font: inherit; font-size: calc(var(--body) * .93); font-weight: 500; color: var(--text-2);
+  background: none; border: 0; border-bottom: 2px solid transparent; padding: 11px 16px; min-height: 44px;
+  cursor: pointer; white-space: nowrap; transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.tabs button:hover { color: var(--text); }
+.tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs button:focus-visible { outline: none; box-shadow: var(--input-focus-ring); border-radius: var(--r-sm); }
+
+.seg-ctl { display: inline-flex; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--r-pill); padding: 3px; gap: 2px; }
+.seg-ctl button { font: inherit; font-size: calc(var(--body) * .87); font-weight: 500; color: var(--text-2);
+  background: none; border: 0; border-radius: var(--r-pill); padding: 8px 16px; min-height: 38px; cursor: pointer; }
+@container app (max-width: 720px) { .seg-ctl button { min-height: 44px; } }
+.seg-ctl button[aria-pressed="true"] { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--shadow-1); }
+.seg-ctl button:focus-visible { outline: none; box-shadow: var(--input-focus-ring); }
+
+.menu { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-2); padding: 6px; width: min(240px, 100%); }
+.menu a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; min-height: 44px; border-radius: var(--r-md);
+  color: var(--text); text-decoration: none; font-size: calc(var(--body) * .93); }
+.menu a:hover { background: var(--surface-2); }
+.menu a:focus-visible { outline: none; box-shadow: var(--input-focus-ring); }
+.menu a.danger { color: var(--crit); }
+.menu .sep { height: 1px; background: var(--border); margin: 6px 4px; }
+
+.pager { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pager button { font: inherit; font-size: calc(var(--body) * .88); min-width: 40px; min-height: 40px; padding: 0 12px;
+  background: var(--surface); color: var(--text-2); border: 1px solid var(--border); border-radius: var(--r-md); cursor: pointer; }
+.pager button:hover { border-color: var(--border-strong); color: var(--text); }
+.pager button[aria-current="page"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 600; }
+.pager button:focus-visible { outline: none; box-shadow: var(--input-focus-ring); }
+.pager .info { font-size: calc(var(--body) * .85); color: var(--text-3); margin-left: auto; }
+
+.tip-wrap { position: relative; display: inline-flex; }
+.tip { background: var(--text); color: var(--surface); font-size: calc(var(--body) * .82); line-height: 1.45;
+  padding: 8px 11px; border-radius: var(--r-md); box-shadow: var(--shadow-2); max-width: 240px; }
+
+.ico-badge { position: relative; display: inline-flex; }
+.ico-badge .count { position: absolute; top: -5px; right: -7px; min-width: 19px; height: 19px; padding: 0 5px;
+  border-radius: 999px; background: var(--crit); color: var(--on-crit); font-size: 11px; font-weight: 700;
+  display: grid; place-items: center; border: 2px solid var(--surface); }
+
+.acc { border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); overflow: hidden; }
+.acc details + details { border-top: 1px solid var(--border); }
+.acc summary { padding: 14px 16px; min-height: 48px; display: flex; align-items: center; gap: 10px;
+  cursor: pointer; font-weight: 500; font-size: calc(var(--body) * .95); list-style: none; }
+.acc summary::-webkit-details-marker { display: none; }
+.acc summary::after { content: "+"; margin-left: auto; color: var(--text-3); font-size: 18px; }
+.acc details[open] summary::after { content: "−"; }
+.acc summary:hover { background: var(--surface-2); }
+.acc summary:focus-visible { outline: none; box-shadow: var(--input-focus-ring); }
+.acc .acc-body { padding: 0 16px 16px; color: var(--text-2); font-size: calc(var(--body) * .92); }
+
+a.card-link { display: block; text-decoration: none; color: inherit; }
+a.card-link:hover .card { box-shadow: var(--shadow-2); transform: translateY(-2px); border-color: var(--border-strong); }
+a.card-link:focus-visible { outline: none; border-radius: var(--r-lg); box-shadow: var(--input-focus-ring); }
+
+.meter { display: grid; gap: 6px; }
+.meter .bar { height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+.meter .fill { height: 100%; border-radius: 999px; background: var(--accent); transition: width var(--dur) var(--ease); }
+.meter .fill.warn { background: var(--warn); }
+.meter .row { display: flex; font-size: calc(var(--body) * .85); color: var(--text-2); }
+.meter .row span:last-child { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+.crumbs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: calc(var(--body) * .87); }
+.crumbs a { color: var(--text-2); text-decoration: none;
+  display: inline-flex; align-items: center; min-height: 32px; padding: 0 2px; border-radius: var(--r-sm); }
+.crumbs a:focus-visible { outline: none; box-shadow: var(--input-focus-ring); }
+@container app (max-width: 720px) { .crumbs a { min-height: 44px; } }
+.crumbs a:hover { color: var(--accent); text-decoration: underline; }
+.crumbs .sep { color: var(--text-3); }
+.crumbs .now { color: var(--text); font-weight: 600; }
+
+.choice { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: calc(var(--body) * .93); cursor: pointer; }
+.choice input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; cursor: pointer; }
+
+.search-field { position: relative; }
+.search-field svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+.search-field input { padding-left: 40px; }
+
+.avatars { display: flex; }
+.avatars .avatar { border: 2px solid var(--surface); margin-left: -8px; }
+.avatars .avatar:first-child { margin-left: 0; }
+.avatars .more { background: var(--surface-3); color: var(--text-2); }
+
+.bottom-nav { display: none; }
+@container app (max-width: 720px) {
+  .bottom-nav {
+    display: flex; position: sticky; bottom: 0; z-index: 20;
+    background: var(--topbar-bg); backdrop-filter: var(--topbar-blur);
+    border-top: 1px solid var(--border); padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  }
+  .bottom-nav a { flex: 1; display: grid; justify-items: center; gap: 3px; padding: 8px 4px; min-height: 48px;
+    border-radius: var(--r-md); color: var(--text-3); text-decoration: none; font-size: 11px; }
+  .bottom-nav a.on { background: var(--nav-active-bg); color: var(--nav-active-fg); font-weight: 600; }
+  .bottom-nav a:focus-visible { outline: none; box-shadow: var(--input-focus-ring); }
+}
+
+.ico { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.ico-lg { width: 24px; height: 24px; }
+
+/* ============================================================
+   BADGE LAB — 3 ตำแหน่งของเครื่องหมายกะพริบตลอดเวลา (A(i)CODER neon)
+   เพิ่ม 2569-08-29 — เทียบก่อนเลือก 1 ใน 3 ไปทำจริงใน starter/index.html
+   ตั้งใจ "ไม่ผูก" กับ data-dir/data-tone ที่แถบบนสลับอยู่: ป้ายนี้คือของแอปจริง
+   (D4/Supasit.A Studio เท่านั้น) จึงประกาศ --bg/--surface/... ทับใหม่ในกรอบนี้เอง
+   ค่าเดียวกับ starter/index.html:24-66 เป๊ะๆ — สลับสว่าง/มืดยังใช้ data-theme
+   ตัวเดียวกับปุ่ม "ธีม" ด้านบน ไม่ใช่ปุ่ม "ทิศทาง"
+   ============================================================ */
+.badge-lab {
+  --bg:#F7F9FC; --surface:#FFFFFF; --border:#D6DEEE; --text:#131829; --text-2:#414A60;
+  --accent:#1D4ED8; --shadow-1:0 1px 2px rgba(15,25,50,.06);
+  --focus-ring:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+  margin: 8px auto 40px; padding: 22px clamp(16px,3vw,28px) 28px; max-width: 1180px;
+  border-radius: 20px; background: var(--lab-card); border: 1px solid var(--lab-line);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .badge-lab {
+    --bg:#0E1219; --surface:#161C27; --border:#242C3A; --text:#E6EAF3; --text-2:#B0B9CB;
+    --accent:#7FA8FF; --shadow-1:0 1px 2px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"] .badge-lab {
+  --bg:#0E1219; --surface:#161C27; --border:#242C3A; --text:#E6EAF3; --text-2:#B0B9CB;
+  --accent:#7FA8FF; --shadow-1:0 1px 2px rgba(0,0,0,.5);
+}
+
+.badge-lab .nz-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .badge-lab .nz-light { display: none; }
+  :root:not([data-theme="light"]) .badge-lab .nz-dark { display: block; }
+}
+:root[data-theme="dark"] .badge-lab .nz-light { display: none; }
+:root[data-theme="dark"] .badge-lab .nz-dark { display: block; }
+
+.badge-lab-head { display: grid; gap: 4px; margin-bottom: 18px; }
+.badge-lab-head h2 { font-size: 16px; font-weight: 700; letter-spacing: -.01em; margin: 0; color: var(--lab-fg); }
+.badge-lab-head p { font-size: 12.5px; opacity: .68; margin: 0; max-width: 76ch; color: var(--lab-fg); }
+
+.badge-cand { display: grid; gap: 10px; padding: 22px 0; border-top: 1px dashed var(--lab-line); }
+.badge-cand:first-child { padding-top: 0; border-top: 0; }
+.badge-cand-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 10px; color: var(--lab-fg); }
+.badge-cand-label strong { font-size: 13px; }
+.badge-cand-label span { font-size: 12px; opacity: .62; }
+
+.cand-link { display: inline-flex; border-radius: 999px; }
+.cand-link:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* ----- A · แถบล่างเต็มความกว้าง ----- */
+.cand-a-frame { position: relative; height: 320px; max-height: 55vh; overflow: hidden;
+  border-radius: 14px; background: var(--bg); border: 1px solid var(--border); }
+.cand-a-dock { position: absolute; left: 0; right: 0; bottom: 0; height: 100px;
+  background: var(--surface); border-top: 1px solid var(--border); box-shadow: var(--shadow-1);
+  display: flex; align-items: center; justify-content: center; }
+.cand-a-dock img { width: 280px; height: auto; display: block; }
+.cand-a-mobile { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 14px; }
+.cand-a-phone { position: relative; width: 195px; height: 422px; border: 6px solid #1b1b1f;
+  border-radius: 22px; overflow: hidden; background: var(--bg); flex: none; }
+.cand-a-phone .cand-a-dock { height: 50px; }
+.cand-a-phone .cand-a-dock img { width: 140px; }
+.cand-a-cost { font-size: 12.5px; color: var(--text-2); max-width: 48ch; }
+.cand-a-cost b { color: var(--text); }
+
+/* ----- B · ฝังในแถบบนสุด (topbar) ----- */
+.cand-b-frame { border-radius: 14px; overflow: hidden; border: 1px solid var(--border); }
+.cand-b-bar { background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 15px 22px; display: flex; align-items: center; }
+.cand-b-bar img { width: 280px; height: auto; display: block; }
+.cand-b-right { margin-left: auto; font-size: 12px; color: var(--text-2); }
+.cand-b-body { background: var(--bg); height: 140px; display: flex; align-items: center;
+  justify-content: center; color: var(--text-2); font-size: 12.5px; }
+
+/* ----- C · ย่อลงในขนาด badge เดิม ----- */
+.cand-c-row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; }
+.cand-c-frame { position: relative; width: 320px; height: 200px; border-radius: 14px;
+  background: var(--bg); border: 1px solid var(--border); overflow: hidden; flex: none; }
+.cand-c-badge { position: absolute; right: 14px; bottom: 14px; display: inline-flex;
+  padding: 6px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 999px; box-shadow: var(--shadow-1); }
+.cand-c-badge img { width: 130px; height: auto; display: block; }
+.cand-c-ref { display: grid; gap: 6px; }
+.cand-c-ref img { width: 280px; height: auto; display: block; border-radius: 8px; }
+.cand-c-ref span { font-size: 11.5px; opacity: .6; color: var(--lab-fg); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ไอคอน: inline SVG sprite (ไม่พึ่ง CDN — เปิดไฟล์ offline ก็ยังครบ) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 22 20H2z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 12h5l2 3h4l2-3h5"/><path d="M4.5 5h15l1.5 7v7H3v-7z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.2 6 10.2A6 6 0 0 1 6 13.2C6 9.2 12 3 12 3z"/></symbol>
+</svg>
+
+<header class="lab-bar">
+  <div class="lab-brand">Design Preview Kit — รอบที่ 4
+    <small>เทียบ 3 ทิศทางบน markup ชุดเดียวกัน · Supasit.A</small>
+  </div>
+
+  <div class="lab-group"><span>ทิศทาง</span>
+    <div class="seg" id="seg-dir">
+      <button data-v="d4" aria-pressed="true">D4 Supasit.A Studio ★</button>
+      <button data-v="d1" aria-pressed="false">D1 Expressive</button>
+      <button data-v="d2" aria-pressed="false">D2 Clarity</button>
+      <button data-v="d3" aria-pressed="false">D3 Studio</button>
+    </div>
+  </div>
+
+  <div class="lab-group"><span>โทนสี</span>
+    <div class="seg" id="seg-tone">
+      <button data-v="base" aria-pressed="true">น้ำเงินหมึก ★</button>
+      <button data-v="navy" aria-pressed="false">กรมท่า</button>
+      <button data-v="sky" aria-pressed="false">ฟ้าเข้ม</button>
+      <button data-v="plum" aria-pressed="false">ม่วงพลัม</button>
+      <button data-v="mint" aria-pressed="false">มิ้นท์ (เดิม)</button>
+    </div>
+  </div>
+
+  <div class="lab-group"><span>ธีม</span>
+    <div class="seg" id="seg-theme">
+      <button data-v="light" aria-pressed="false">สว่าง</button>
+      <button data-v="dark" aria-pressed="false">มืด</button>
+      <button data-v="system" aria-pressed="true">ตามระบบ</button>
+    </div>
+  </div>
+
+  <div class="lab-group"><span>ฟอนต์</span>
+    <div class="seg" id="seg-font">
+      <button data-v="anuphan" aria-pressed="false">Anuphan</button>
+      <button data-v="noto" aria-pressed="true">Noto</button>
+      <button data-v="sarabun" aria-pressed="false">Sarabun</button>
+      <button data-v="baijam" aria-pressed="false">Bai Jamjuree</button>
+      <button data-v="plex" aria-pressed="false">Plex (ของเดิม)</button>
+    </div>
+  </div>
+
+  <div class="lab-group"><span>ความแน่น</span>
+    <div class="seg" id="seg-density">
+      <button data-v="compact" aria-pressed="false">แน่น</button>
+      <button data-v="comfortable" aria-pressed="true">สบายตา</button>
+    </div>
+  </div>
+</header>
+
+<main class="lab-main">
+  <div>
+    <p class="lab-note" id="dir-note"></p>
+    <p class="lab-note" id="tone-note" style="margin-top:-6px"></p>
+    <div class="screen-host" id="host-desktop"></div>
+  </div>
+  <div class="phone-col">
+    <p class="phone-label">มือถือ 390px — เลย์เอาต์เดียวกัน ต่างที่ container query (เลื่อนดูได้)</p>
+    <div class="phone"><div class="screen-host" id="host-phone"></div></div>
+  </div>
+</main>
+
+<section class="badge-lab" id="badge-lab" aria-labelledby="badge-lab-h">
+  <div class="badge-lab-head">
+    <h2 id="badge-lab-h">เครื่องหมายกะพริบตลอดเวลา — 3 ตำแหน่งให้เทียบ (เพิ่ม 2569-08-29)</h2>
+    <p>แทนที่ Studio badge นิ่งๆ มุมขวาล่างของเดิม ด้วยเครื่องหมาย A(i)CODER แบบนีออนที่กะพริบตลอดไป (ไม่ใช่แค่ตอนบูตเหมือนตอนนี้) —
+      ใช้ไฟล์ SVG ชุดเดียวกับ boot splash ปัจจุบัน สลับสว่าง/มืดตามปุ่ม "ธีม" ด้านบน ไม่ผูกกับปุ่ม "ทิศทาง"/"โทนสี"
+      เพราะป้ายนี้เป็นของแอปจริง (D4 เดียว) ไม่ใช่ตัวอย่างที่เปลี่ยนตามทิศทาง — ดูแล้วเลือก 1 ใน 3 ก่อนค่อยแก้ starter/index.html จริง</p>
+  </div>
+
+  <div class="badge-cand">
+    <div class="badge-cand-label">
+      <strong>ตัวเลือก A · แถบล่างเต็มความกว้าง (bottom dock)</strong>
+      <span>เครื่องหมายกว้าง 280px (พอสำหรับ D1 ≥240px และ D2 ≥280px พร้อมกัน) · แถบสูง 100px</span>
+    </div>
+    <div class="cand-a-frame">
+      <div class="cand-a-dock">
+        <a class="cand-link" href="#" aria-label="สร้างโดย A(i)CODER">
+          <img class="nz-light" src="starter/assets/d1-neon-arcade-bare.svg" alt="" width="1200" height="300">
+          <img class="nz-dark"  src="starter/assets/d2-crt-night-bare.svg"  alt="" width="1200" height="300">
+        </a>
+      </div>
+    </div>
+    <div class="cand-a-mobile" aria-hidden="true">
+      <div class="cand-a-phone">
+        <div class="cand-a-dock">
+          <img class="nz-light" src="starter/assets/d1-neon-arcade-bare.svg" alt="">
+          <img class="nz-dark"  src="starter/assets/d2-crt-night-bare.svg"  alt="">
+        </div>
+      </div>
+      <p class="cand-a-cost">จำลองย่อครึ่งสัดส่วนจากแบบด้านบน — บนจอมือถือสูง 844px (มาตรฐาน iPhone 12/13/14)
+        แถบนี้กิน <b>100px ≈ 11.8%</b> ของความสูงจอ ถาวรทุกหน้า ทุกเวลา</p>
+    </div>
+  </div>
+
+  <div class="badge-cand">
+    <div class="badge-cand-label">
+      <strong>ตัวเลือก B · ฝังในแถบบนสุด (topbar)</strong>
+      <span>ใช้ความกว้างเต็มหน้าของ topbar อยู่แล้ว จึงไม่ติดขั้นต่ำ 240/280px — ต้นทุนจริงคือความสูง topbar ต้องเพิ่มจาก ~54px เป็น ~100px ถาวร</span>
+    </div>
+    <div class="cand-b-frame">
+      <div class="cand-b-bar">
+        <a class="cand-link" href="#" aria-label="สร้างโดย A(i)CODER">
+          <img class="nz-light" src="starter/assets/d1-neon-arcade-bare.svg" alt="" width="1200" height="300">
+          <img class="nz-dark"  src="starter/assets/d2-crt-night-bare.svg"  alt="" width="1200" height="300">
+        </a>
+        <div class="cand-b-right" aria-hidden="true">ธีม</div>
+      </div>
+      <div class="cand-b-body" aria-hidden="true">เนื้อหาแอป…</div>
+    </div>
+  </div>
+
+  <div class="badge-cand">
+    <div class="badge-cand-label">
+      <strong>ตัวเลือก C · ย่อลงในขนาด badge เดิม (~110-150px)</strong>
+      <span>ทดสอบจริงว่า "อ่านไม่ออกต่ำกว่า 240px" จริงไหม — ดูข้างขนาดเต็มเทียบกัน</span>
+    </div>
+    <div class="cand-c-row">
+      <div class="cand-c-frame">
+        <div class="cand-c-badge">
+          <a class="cand-link" href="#" aria-label="สร้างโดย A(i)CODER">
+            <img class="nz-light" src="starter/assets/d1-neon-arcade-bare.svg" alt="" width="1200" height="300">
+            <img class="nz-dark"  src="starter/assets/d2-crt-night-bare.svg"  alt="" width="1200" height="300">
+          </a>
+        </div>
+      </div>
+      <div class="cand-c-ref" aria-hidden="true">
+        <span>ขนาดเต็ม 280px (ไว้เทียบเท่านั้น ไม่ใช่ตัวเลือกจริง)</span>
+        <img class="nz-light" src="starter/assets/d1-neon-arcade-bare.svg" alt="">
+        <img class="nz-dark"  src="starter/assets/d2-crt-night-bare.svg"  alt="">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ตัวอย่างหน้าจอทั้งหมดอยู่ใน <template> ชุดเดียว
+     แล้ว clone ไปทั้งจอคอมและกรอบมือถือ → เทียบกันแฟร์ 100%
+     ============================================================ -->
+<template id="app-screens">
+  <div class="app-top">
+    <div class="app-logo">A</div>
+    <div>
+      <div class="app-name">PTA Line Monitor</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost btn-sm" aria-label="ค้นหา"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></button>
+    <div class="avatar">SA</div>
+  </div>
+
+  <div class="app-body">
+    <nav class="side">
+      <a href="#" class="on"><svg class="ico"><use href="#i-home"/></svg> ภาพรวม</a>
+      <a href="#"><svg class="ico"><use href="#i-chart"/></svg> แนวโน้ม</a>
+      <a href="#"><svg class="ico"><use href="#i-list"/></svg> บันทึกงาน</a>
+      <a href="#"><svg class="ico"><use href="#i-inbox"/></svg> รายการแจ้ง</a>
+      <a href="#"><svg class="ico"><use href="#i-gear"/></svg> ตั้งค่า</a>
+    </nav>
+
+    <div class="content">
+
+      <!-- ===== หน้าจอ 1 · Dashboard ===== -->
+      <section>
+        <div class="page-head" style="margin-bottom:calc(20px * var(--d))">
+          <div class="eyebrow">Unit 100 · กะเช้า</div>
+          <h1>ภาพรวมกะเช้า</h1>
+          <p>สรุปค่าเดินเครื่องหน่วยผลิตวันนี้ อัปเดตล่าสุด 08:42 น. — ข้อมูลตัวอย่างสำหรับดูหน้าตา ไม่ใช่ค่าจริงจากหน้างาน</p>
+        </div>
+
+        <div class="grid">
+          <div class="card kpi hoverable">
+            <div class="k-top"><div class="k-ico"><svg class="ico"><use href="#i-chart"/></svg></div><div class="k-label">กำลังผลิต</div></div>
+            <div class="k-val">1,842<span class="k-unit">ตัน/วัน</span></div>
+            <div class="k-foot"><span class="chip c-ok"><svg class="ico" style="width:13px;height:13px"><use href="#i-up"/></svg> 3.2%</span><span style="color:var(--text-3)">เทียบเมื่อวาน</span></div>
+          </div>
+          <div class="card kpi hoverable">
+            <div class="k-top"><div class="k-ico"><svg class="ico"><use href="#i-drop"/></svg></div><div class="k-label">การใช้ไอน้ำ</div></div>
+            <div class="k-val">96.4<span class="k-unit">t/h</span></div>
+            <div class="k-foot"><span class="chip c-warn">เฝ้าระวัง</span><span style="color:var(--text-3)">สูงกว่าเป้า 2%</span></div>
+          </div>
+          <div class="card kpi hoverable">
+            <div class="k-top"><div class="k-ico"><svg class="ico"><use href="#i-clock"/></svg></div><div class="k-label">เวลาเดินเครื่อง</div></div>
+            <div class="k-val">99.1<span class="k-unit">%</span></div>
+            <div class="k-foot"><span class="chip c-ok"><svg class="ico" style="width:13px;height:13px"><use href="#i-check"/></svg> ปกติ</span></div>
+          </div>
+          <div class="card kpi hoverable">
+            <div class="k-top"><div class="k-ico"><svg class="ico"><use href="#i-alert"/></svg></div><div class="k-label">แจ้งเตือนค้าง</div></div>
+            <div class="k-val">3<span class="k-unit">รายการ</span></div>
+            <div class="k-foot"><span class="chip c-crit">ต้องแก้ 1</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid-2">
+        <div class="card">
+          <div class="sec-head"><h2>แนวโน้ม 7 วัน</h2><span>ตัน/วัน</span></div>
+          <svg class="chart" viewBox="0 0 620 180" preserveAspectRatio="none" role="img" aria-label="กราฟแนวโน้มการผลิต 7 วัน">
+            <line class="grid-line" x1="0" y1="30" x2="620" y2="30"/>
+            <line class="grid-line" x1="0" y1="75" x2="620" y2="75"/>
+            <line class="grid-line" x1="0" y1="120" x2="620" y2="120"/>
+            <path class="area" d="M10 120 L110 96 L210 104 L310 62 L410 74 L510 44 L610 52 L610 165 L10 165 Z"/>
+            <path class="line" d="M10 120 L110 96 L210 104 L310 62 L410 74 L510 44 L610 52"/>
+          </svg>
+        </div>
+        <div class="card">
+          <div class="sec-head"><h2>สัดส่วนสาเหตุหยุดเครื่อง</h2></div>
+          <svg class="chart" viewBox="0 0 300 180" role="img" aria-label="กราฟแท่งสาเหตุการหยุดเครื่อง">
+            <rect class="bar" x="20" y="40" width="42" height="110" rx="6"/>
+            <rect class="bar" x="80" y="72" width="42" height="78" rx="6"/>
+            <rect class="bar alt" x="140" y="96" width="42" height="54" rx="6"/>
+            <rect class="bar" x="200" y="118" width="42" height="32" rx="6"/>
+            <text class="axis" x="41" y="167" text-anchor="middle">ไฟฟ้า</text>
+            <text class="axis" x="101" y="167" text-anchor="middle">ปั๊ม</text>
+            <text class="axis" x="161" y="167" text-anchor="middle">วาล์ว</text>
+            <text class="axis" x="221" y="167" text-anchor="middle">อื่นๆ</text>
+          </svg>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h2>ค่าเดินเครื่องรายจุด</h2><span>อัปเดต 08:42</span></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>จุดตรวจวัด</th><th>รายการ</th><th class="num">ค่าที่อ่านได้</th><th class="num">เป้าหมาย</th><th>สถานะ</th></tr></thead>
+            <tbody>
+              <tr><td><span class="chip c-ref">FI-2104</span></td><td>อัตราการไหลป้อน</td><td class="num">128.40</td><td class="num">130.00</td><td><span class="chip c-ok">ปกติ</span></td></tr>
+              <tr><td><span class="chip c-ref">TI-3312</span></td><td>อุณหภูมิหอกลั่น</td><td class="num">214.80</td><td class="num">210.00</td><td><span class="chip c-warn">เฝ้าระวัง</span></td></tr>
+              <tr><td><span class="chip c-ref">PI-1180</span></td><td>ความดันระบบ</td><td class="num">6.12</td><td class="num">6.00</td><td><span class="chip c-ok">ปกติ</span></td></tr>
+              <tr><td><span class="chip c-ref">LI-4402</span></td><td>ระดับถังพัก</td><td class="num">42.10</td><td class="num">60.00</td><td><span class="chip c-crit">ต้องแก้</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== หน้าจอ 2 · Form ===== -->
+      <section>
+        <div class="page-head" style="margin-bottom:calc(18px * var(--d))">
+          <h1>บันทึกงานประจำกะ</h1>
+          <p>ตัวอย่างฟอร์มพร้อมสถานะ error, ปุ่มทุกแบบ และ toast แจ้งผล</p>
+        </div>
+        <div class="card" style="display:grid;gap:calc(18px * var(--d))">
+          <div class="form-grid">
+            <div class="field">
+              <label for="f1">หัวข้องาน</label>
+              <input id="f1" type="text" value="ตรวจสอบปั๊ม P-2201A">
+            </div>
+            <div class="field">
+              <label for="f2">หน่วยผลิต</label>
+              <select id="f2"><option>Unit 100 — Oxidation</option><option>Unit 200 — Purification</option><option>Unit 300 — Utility</option></select>
+            </div>
+            <div class="field err">
+              <label for="f3">ค่าที่วัดได้ (bar)</label>
+              <input id="f3" type="text" value="12,5">
+              <span class="hint">กรอกเป็นตัวเลข ใช้จุดทศนิยม เช่น 12.5</span>
+            </div>
+            <div class="field">
+              <label for="f4">วันที่ตรวจ</label>
+              <input id="f4" type="date" value="2026-08-28">
+            </div>
+          </div>
+          <div class="field">
+            <label for="f5">รายละเอียด</label>
+            <textarea id="f5">พบเสียงผิดปกติจากแบริ่งฝั่งขับ ตรวจวัดการสั่นสะเทือนแล้วยังอยู่ในเกณฑ์ ติดตามต่อในกะถัดไป</textarea>
+          </div>
+          <label class="switch"><input type="checkbox" checked><span class="track"></span> แจ้งเตือนหัวหน้ากะเมื่อบันทึกเสร็จ</label>
+          <div class="btn-row">
+            <button class="btn btn-primary"><svg class="ico"><use href="#i-check"/></svg> บันทึก</button>
+            <button class="btn btn-soft">บันทึกร่าง</button>
+            <button class="btn btn-outline">ยกเลิก</button>
+            <button class="btn btn-ghost">ล้างฟอร์ม</button>
+            <button class="btn btn-danger">ลบรายการ</button>
+          </div>
+          <div style="display:grid;gap:10px">
+            <div class="toast"><svg class="ico" style="color:var(--ok)"><use href="#i-check"/></svg> บันทึกงานเรียบร้อยแล้ว</div>
+            <div class="toast warn"><svg class="ico" style="color:var(--warn)"><use href="#i-alert"/></svg> ยังไม่ได้ซิงก์ขึ้นคลาวด์ — จะลองใหม่อัตโนมัติ</div>
+            <div class="toast crit"><svg class="ico" style="color:var(--crit)"><use href="#i-alert"/></svg> บันทึกไม่สำเร็จ ตรวจสอบค่าที่กรอกอีกครั้ง</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== หน้าจอ 3 · List + Detail ===== -->
+      <section>
+        <div class="page-head" style="margin-bottom:calc(18px * var(--d))">
+          <h1>รายการแจ้งเตือน</h1>
+          <p>ตัวอย่างรายการ · กล่องยืนยัน · สถานะว่าง · สถานะกำลังโหลด</p>
+        </div>
+        <ul class="list" style="margin-bottom:var(--gap)">
+          <li>
+            <div class="k-ico" style="background:var(--crit-soft);color:var(--crit)"><svg class="ico"><use href="#i-alert"/></svg></div>
+            <div><div class="l-title">ระดับถังพัก LI-4402 ต่ำกว่าเกณฑ์</div><div class="l-sub">Unit 200 · 07:12 น.</div></div>
+            <div class="l-right"><span class="chip c-crit">ต้องแก้</span><button class="btn btn-outline btn-sm">เปิดดู</button></div>
+          </li>
+          <li>
+            <div class="k-ico" style="background:var(--warn-soft);color:var(--warn)"><svg class="ico"><use href="#i-alert"/></svg></div>
+            <div><div class="l-title">อุณหภูมิหอกลั่นสูงกว่าเป้า 4.8°C</div><div class="l-sub">Unit 100 · 06:40 น.</div></div>
+            <div class="l-right"><span class="chip c-warn">เฝ้าระวัง</span><button class="btn btn-outline btn-sm">เปิดดู</button></div>
+          </li>
+          <li>
+            <div class="k-ico"><svg class="ico"><use href="#i-check"/></svg></div>
+            <div><div class="l-title">ตรวจสอบวาล์วนิรภัยครบตามแผน</div><div class="l-sub">Unit 300 · เมื่อวาน 22:05 น.</div></div>
+            <div class="l-right"><span class="chip c-ok">ปิดงานแล้ว</span><button class="btn btn-outline btn-sm">เปิดดู</button></div>
+          </li>
+        </ul>
+
+        <div class="grid-2">
+          <div class="sheet-backdrop">
+            <div class="sheet">
+              <h3>ยืนยันการปิดงานแจ้งเตือน</h3>
+              <p>ระบบจะบันทึกผู้ปิดงานและเวลาไว้ในประวัติ ย้อนกลับไม่ได้</p>
+              <div class="btn-row" style="justify-content:flex-end">
+                <button class="btn btn-ghost">ยกเลิก</button>
+                <button class="btn btn-primary">ยืนยันปิดงาน</button>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;gap:var(--gap)">
+            <div class="empty">
+              <div class="e-ico"><svg class="ico ico-lg"><use href="#i-inbox"/></svg></div>
+              <div style="font-weight:600;color:var(--text)">ยังไม่มีรายการในกะนี้</div>
+              <div style="font-size:calc(var(--body) * .85)">เมื่อมีการแจ้งเตือนใหม่ จะแสดงที่นี่</div>
+              <button class="btn btn-soft btn-sm"><svg class="ico"><use href="#i-plus"/></svg> เพิ่มรายการเอง</button>
+            </div>
+            <div class="card" style="display:grid;gap:10px">
+              <div class="skel" style="width:45%;height:16px"></div>
+              <div class="skel" style="width:100%"></div>
+              <div class="skel" style="width:82%"></div>
+              <div class="skel" style="width:60%"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===== หน้าจอ 4 · คลังส่วนประกอบ ===== -->
+      <section>
+        <div class="page-head" style="margin-bottom:calc(18px * var(--d))">
+          <div class="eyebrow">คลังส่วนประกอบ</div>
+          <h1>ส่วนประกอบที่แอปจริงต้องใช้</h1>
+          <p>ทุกชิ้นใช้ token ชุดเดียวกับหน้าอื่น — เปลี่ยนทิศทางหรือธีมแล้วเปลี่ยนตามทั้งหมด</p>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:var(--gap)">
+          <div class="card" style="display:grid;gap:calc(18px * var(--d))">
+            <div>
+              <div class="sec-head"><h2>แท็บ</h2></div>
+              <div class="tabs" role="tablist">
+                <button role="tab" aria-selected="true">ภาพรวม</button>
+                <button role="tab" aria-selected="false">ค่าเดินเครื่อง</button>
+                <button role="tab" aria-selected="false">ประวัติ</button>
+                <button role="tab" aria-selected="false">ตั้งค่า</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="sec-head"><h2>ตัวเลือกแบบแบ่งช่อง</h2></div>
+              <div class="seg-ctl">
+                <button aria-pressed="true">วันนี้</button>
+                <button aria-pressed="false">7 วัน</button>
+                <button aria-pressed="false">30 วัน</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="sec-head"><h2>เส้นทางหน้า</h2></div>
+              <nav class="crumbs" aria-label="เส้นทางหน้า">
+                <a href="#">หน้าแรก</a><span class="sep">/</span>
+                <a href="#">Unit 100</a><span class="sep">/</span>
+                <span class="now">ปั๊ม P-2201A</span>
+              </nav>
+            </div>
+
+            <div>
+              <div class="sec-head"><h2>ช่องค้นหา</h2></div>
+              <div class="field search-field">
+                <svg class="ico" aria-hidden="true"><use href="#i-search"/></svg>
+                <input type="search" placeholder="ค้นหารหัสอุปกรณ์ หรือชื่องาน" aria-label="ค้นหา">
+              </div>
+            </div>
+
+            <div>
+              <div class="sec-head"><h2>ตัวเลือก</h2></div>
+              <label class="choice"><input type="checkbox" checked> ตรวจครบตามรายการแล้ว</label>
+              <label class="choice"><input type="radio" name="sh" checked> กะเช้า</label>
+              <label class="choice"><input type="radio" name="sh"> กะดึก</label>
+            </div>
+          </div>
+
+          <div style="display:grid;gap:var(--gap)">
+            <div class="card">
+              <div class="sec-head"><h2>เมนูหล่น</h2><span>สถานะเปิด</span></div>
+              <div class="menu">
+                <a href="#"><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg> ดูแนวโน้มย้อนหลัง</a>
+                <a href="#"><svg class="ico" aria-hidden="true"><use href="#i-list"/></svg> ส่งออกเป็นไฟล์</a>
+                <a href="#"><svg class="ico" aria-hidden="true"><use href="#i-gear"/></svg> ตั้งค่าการแจ้งเตือน</a>
+                <div class="sep"></div>
+                <a href="#" class="danger"><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg> ลบรายการนี้</a>
+              </div>
+            </div>
+
+            <div class="card" style="display:grid;gap:16px">
+              <div>
+                <div class="sec-head"><h2>คำอธิบายลอย</h2></div>
+                <div class="tip-wrap"><span class="tip">ค่านี้อ่านจาก PI ทุก 5 นาที — ไม่ใช่ค่าเรียลไทม์จาก DCS</span></div>
+              </div>
+              <div>
+                <div class="sec-head"><h2>ตัวเลขแจ้งเตือนบนไอคอน</h2></div>
+                <div style="display:flex;gap:22px;align-items:center">
+                  <span class="ico-badge"><svg class="ico ico-lg" aria-hidden="true"><use href="#i-inbox"/></svg><span class="count">3</span></span>
+                  <span class="ico-badge"><svg class="ico ico-lg" aria-hidden="true"><use href="#i-alert"/></svg><span class="count">12</span></span>
+                  <div class="avatars">
+                    <span class="avatar">SA</span><span class="avatar">TW</span><span class="avatar">JM</span><span class="avatar more">+4</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="display:grid;gap:14px">
+              <div class="sec-head" style="margin:0"><h2>แถบความคืบหน้า</h2></div>
+              <div class="meter">
+                <div class="row"><span>ตรวจสอบตามแผนประจำเดือน</span><span>68%</span></div>
+                <div class="bar"><div class="fill" style="width:68%"></div></div>
+              </div>
+              <div class="meter">
+                <div class="row"><span>โควตาเรียก AI วันนี้</span><span>91%</span></div>
+                <div class="bar"><div class="fill warn" style="width:91%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:var(--gap)">
+          <div class="acc">
+            <details open>
+              <summary>ขั้นตอนตรวจสอบก่อนเดินเครื่อง</summary>
+              <div class="acc-body">ตรวจระดับน้ำมันหล่อลื่น · ยืนยันวาล์วต้นทางเปิดครบ · แจ้งหัวหน้ากะก่อนเริ่มเดินเครื่องทุกครั้ง</div>
+            </details>
+            <details>
+              <summary>เกณฑ์การแจ้งเตือนที่ใช้อยู่</summary>
+              <div class="acc-body">อุณหภูมิเกิน 210°C = เฝ้าระวัง · เกิน 220°C = ต้องแก้ทันที</div>
+            </details>
+            <details>
+              <summary>ผู้รับผิดชอบแต่ละหน่วยผลิต</summary>
+              <div class="acc-body">Unit 100-200 · ทีมกระบวนการ | Unit 300 · ทีมสาธารณูปโภค</div>
+            </details>
+          </div>
+
+          <a href="#" class="card-link">
+            <div class="card">
+              <div class="eyebrow">การ์ดที่กดได้ทั้งใบ</div>
+              <div class="sec-head" style="margin:8px 0 6px"><h2>สรุปงานค้างของผม</h2></div>
+              <p style="color:var(--text-2);font-size:calc(var(--body) * .92)">มี 5 รายการรอปิดงาน · เก่าสุดค้างมา 3 วัน</p>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <span class="chip c-warn">2 เฝ้าระวัง</span><span class="chip c-crit">1 ต้องแก้</span><span class="chip c-neutral">2 ปกติ</span>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:var(--gap)">
+          <div class="card">
+            <div class="sec-head"><h2>สัดส่วนแบบวงแหวน</h2><span>เวลาเดินเครื่อง</span></div>
+            <svg class="chart" viewBox="0 0 220 180" role="img" aria-label="วงแหวนแสดงสัดส่วนเวลาเดินเครื่อง 99.1 เปอร์เซ็นต์">
+              <circle cx="110" cy="88" r="62" fill="none" stroke="var(--surface-3)" stroke-width="20"/>
+              <circle cx="110" cy="88" r="62" fill="none" stroke="var(--accent)" stroke-width="20" stroke-linecap="round"
+                      stroke-dasharray="386 390" stroke-dashoffset="96" transform="rotate(-90 110 88)"/>
+              <text x="110" y="84" text-anchor="middle" font-size="30" font-weight="700" fill="var(--text)">99.1%</text>
+              <text x="110" y="106" text-anchor="middle" font-size="12" fill="var(--text-3)">เดินเครื่อง</text>
+            </svg>
+          </div>
+          <div class="card">
+            <div class="sec-head"><h2>แท่งซ้อนชั้น</h2><span>ชั่วโมง</span></div>
+            <svg class="chart" viewBox="0 0 300 180" role="img" aria-label="กราฟแท่งซ้อนชั้นแสดงชั่วโมงเดินเครื่องเทียบหยุดเครื่อง">
+              <rect x="24" y="46" width="40" height="80" rx="5" fill="var(--accent)"/>
+              <rect x="24" y="126" width="40" height="24" rx="5" fill="var(--accent-2-soft)"/>
+              <rect x="88" y="36" width="40" height="90" rx="5" fill="var(--accent)"/>
+              <rect x="88" y="126" width="40" height="24" rx="5" fill="var(--accent-2-soft)"/>
+              <rect x="152" y="58" width="40" height="68" rx="5" fill="var(--accent)"/>
+              <rect x="152" y="126" width="40" height="24" rx="5" fill="var(--accent-2-soft)"/>
+              <rect x="216" y="30" width="40" height="96" rx="5" fill="var(--accent)"/>
+              <rect x="216" y="126" width="40" height="24" rx="5" fill="var(--accent-2-soft)"/>
+              <text class="axis" x="44" y="167" text-anchor="middle">จ</text>
+              <text class="axis" x="108" y="167" text-anchor="middle">อ</text>
+              <text class="axis" x="172" y="167" text-anchor="middle">พ</text>
+              <text class="axis" x="236" y="167" text-anchor="middle">พฤ</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sec-head"><h2>แบ่งหน้า</h2></div>
+          <div class="pager">
+            <button aria-label="หน้าก่อนหน้า">‹</button>
+            <button aria-current="page">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>4</button>
+            <button aria-label="หน้าถัดไป">›</button>
+            <span class="info">แสดง 1–20 จาก 78 รายการ</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="#" class="on"><svg class="ico"><use href="#i-home"/></svg> ภาพรวม</a>
+    <a href="#"><svg class="ico"><use href="#i-chart"/></svg> แนวโน้ม</a>
+    <a href="#"><svg class="ico"><use href="#i-list"/></svg> บันทึก</a>
+    <a href="#"><svg class="ico"><use href="#i-inbox"/></svg> แจ้งเตือน</a>
+    <a href="#"><svg class="ico"><use href="#i-gear"/></svg> ตั้งค่า</a>
+  </nav>
+</template>
+
+<script>
+/* ============================================================
+   ตรรกะของห้องแล็บ — สั้นๆ ไม่มี dependency ภายนอก
+   ============================================================ */
+(function () {
+  "use strict";
+  var root = document.documentElement;
+  var tpl = document.getElementById("app-screens");
+
+  // 1) clone เนื้อหาหน้าจอชุดเดียวกันไปทั้งจอคอมและกรอบมือถือ
+  //    ใช้ importNode ทีละครั้งเพื่อให้ได้ DOM แยกกัน แต่มาจากต้นฉบับเดียว
+  ["host-desktop", "host-phone"].forEach(function (id) {
+    document.getElementById(id).appendChild(document.importNode(tpl.content, true));
+  });
+
+  var NOTES = {
+    d4: "D4 · Supasit.A Studio — ตัวจริงรอบที่ 4: โครง สัดส่วน และจังหวะจาก D3 · สีน้ำเงินหมึก #1D4ED8 จาก D1 · ปุ่มทรงแคปซูลจาก D2 · ฟอนต์ Noto Sans Thai · สว่างเป็นหลัก",
+    d1: "D1 · Expressive — อ้างอิง Material 3 Expressive ของ Google (Play Store, แอป Google): สีสด tonal · มุมมน 18-30px · เงานุ่มไล่ระดับ · ปุ่มทรงแคปซูล · การเคลื่อนไหวแบบสปริง",
+    d2: "D2 · Clarity — อ้างอิง Apple HIG / Liquid Glass (iOS 26): พื้นเทาอ่อนแบบ grouped · การ์ดขาวสะอาด · แถบบน-ล่างโปร่งแสงเบลอ · accent สีเดียวสด · หัวข้อใหญ่หนา",
+    d3: "D3 · Studio — อ้างอิงเว็บทูลสมัยใหม่ (Linear · Notion · Vercel): neutral โทนอุ่น · มุม 9-16px · เงาบางชั้นเดียว + เส้น hairline · ตัวอักษรแน่นอ่านง่าย · การเคลื่อนไหวเร็วสั้น"
+  };
+  var note = document.getElementById("dir-note");
+  var toneNote = document.getElementById("tone-note");
+
+  // 2) เก็บค่าที่เลือกไว้ — localStorage ต้องอยู่ใน try/catch เสมอ
+  //    (โหมดส่วนตัวของเบราว์เซอร์โยน error ได้ ถ้าไม่ดักไว้หน้าจะพังทั้งหน้า)
+  function save(k, v) { try { localStorage.setItem("dpk4:" + k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem("dpk4:" + k); } catch (e) { return null; } }
+
+  function apply(group, value) {
+    if (group === "theme") {
+      // "system" = ไม่ stamp attribute เลย ปล่อยให้ prefers-color-scheme ตัดสิน
+      if (value === "system") root.removeAttribute("data-theme");
+      else root.setAttribute("data-theme", value);
+    } else if (group === "tone") {
+      /* น้ำเงินหมึกคือค่าฐานของ D4 แล้ว จึงถอด attribute ออกแทนการเขียนทับ */
+      if (value === "base") root.removeAttribute("data-tone");
+      else root.setAttribute("data-tone", value);
+      toneNote.textContent = TONE_NOTES[value];
+    } else {
+      root.setAttribute("data-" + group, value);
+      if (group === "dir") { note.textContent = NOTES[value]; syncToneAvailability(); }
+    }
+    var seg = document.getElementById("seg-" + group);
+    Array.prototype.forEach.call(seg.querySelectorAll("button"), function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.v === value));
+    });
+    save(group, value);
+  }
+
+  var TONE_NOTES = {
+    base: "โทนน้ำเงินหมึก #1D4ED8 (มาตรฐานที่เลือกแล้ว) — ห่างจากเขียว \"ปกติ\" 76 องศา จึงไม่มีทางสับสนกับสีสถานะ",
+    navy: "โทนกรมท่าอมเทา #334E68 — สุขุม กลืนกับพื้น neutral ที่สุด contrast สูง 8.64",
+    sky: "โทนฟ้าเข้ม #0369A1 — อยู่กึ่งกลางระหว่างเขียวเดิมกับน้ำเงิน เปลี่ยนแบบไม่หักดิบ",
+    plum: "โทนม่วงพลัม #7B2D8E — ห่างจากสีสถานะทุกสีมากที่สุด จำง่ายที่สุด",
+    mint: "โทนมิ้นท์ #007F70 — ระบบเดิม เก็บไว้เทียบเท่านั้น: ห่างจากเขียว \"ปกติ\" แค่ 25 องศา และเหลือ 5 องศาในสายตาคนตาบอดสีเขียว-แดง"
+  };
+
+  /* โทนสีผูกกับ D4 เท่านั้น — D1-D3 ต้องคงสีเดิมไว้เพื่อเป็นตัวอ้างอิง */
+  function syncToneAvailability() {
+    var isD4 = root.getAttribute("data-dir") === "d4";
+    var seg = document.getElementById("seg-tone");
+    seg.style.opacity = isD4 ? "1" : ".4";
+    seg.title = isD4 ? "" : "ตัวเลือกโทนสีใช้ได้กับ D4 เท่านั้น";
+    Array.prototype.forEach.call(seg.querySelectorAll("button"), function (b) { b.disabled = !isD4; });
+  }
+
+  ["dir", "tone", "theme", "font", "density"].forEach(function (group) {
+    var seg = document.getElementById("seg-" + group);
+    seg.addEventListener("click", function (ev) {
+      var btn = ev.target.closest("button");
+      if (btn) apply(group, btn.dataset.v);
+    });
+    var saved = load(group);
+    var initial = saved || (group === "theme" ? "system"
+      : seg.querySelector('[aria-pressed="true"]').dataset.v);
+    apply(group, initial);
+  });
+})();
+</script>
+</body>
+</html>

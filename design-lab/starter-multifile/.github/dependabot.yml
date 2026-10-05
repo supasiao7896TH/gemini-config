@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # ต่างจาก root .github/dependabot.yml (ปิด npm ecosystem ไว้จงใจ) เพราะที่นั่นคือ
+  # devDependency ของ claude-config เอง (~6 ตัว ไม่มีอะไรถูก ship ไปไหน)
+  #
+  # ที่นี่คือเทมเพลตที่ทุกแอปจริงถูก copy ไปใช้ (Vite/Vitest/Firebase SDK/Chart.js ฯลฯ)
+  # แล้ว deploy ให้คนอื่นใช้งานจริง — dependency ที่มีช่องโหว่ที่นี่กระทบผู้ใช้จริง
+  # จึงเปิด npm ecosystem ไว้ ต่างจากการตัดสินใจที่ root
+  #
+  # group ปิด noise: minor/patch รวมเป็น PR เดียวต่อสัปดาห์ · major แยกให้เห็นทีละตัว
+  # เพราะ major bump มักมี breaking change ต้องอ่านทีละตัว รวมกันจะยิ่งอ่านยาก
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch

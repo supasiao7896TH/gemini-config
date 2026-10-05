@@ -1,0 +1,19 @@
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+.wrangler/
+*.log
+
+# ความลับ — กันไฟล์หลุดขึ้น GitHub
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+*serviceAccount*.json
+*firebase-adminsdk*.json
+
+.DS_Store
+Thumbs.db

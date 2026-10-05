@@ -1,0 +1,19 @@
+node_modules/
+test-results/
+playwright-report/
+package-lock.json
+
+# ── markdown ทั้งหมด ─────────────────────────────────────────────────
+# เอกสารใน repo นี้จัดวางด้วยมือ (ตารางไทยที่จัดคอลัมน์ให้ตรง · บล็อก ASCII ·
+# การขึ้นบรรทัดที่ตั้งใจ) prettier จะรื้อทั้งหมด = diff 1,600 บรรทัดโดยไม่ได้คุณภาพเพิ่ม
+# เนื้อหาของ markdown มี tools/check-standards.mjs เฝ้าอยู่แล้ว ซึ่งตรวจสิ่งที่สำคัญกว่า
+*.md
+
+# ── โค้ดเดิมที่เขียนด้วยมือ ไม่ retro-format ─────────────────────────
+# format ทับ branding/src/mockups.template.html อย่างเดียวได้ diff 2,348 บรรทัด
+# โดยไม่ได้คุณภาพเพิ่ม และ build.mjs ก็ดึงข้อความจากไฟล์นี้ด้วย string matching
+# prettier มีไว้คุมไฟล์ใหม่/ไฟล์ config ให้สม่ำเสมอ ไม่ใช่ไล่จัดของเก่า
+branding/
+design-lab/
+assets/
+statusline.ps1

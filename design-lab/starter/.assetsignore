@@ -1,0 +1,21 @@
+# ไฟล์ที่ "ห้าม" ขึ้นไปอยู่บน public URL ตอน deploy ขึ้น Cloudflare Workers
+#
+# ถ้าไม่มีไฟล์นี้จะเกิด 2 ปัญหาพร้อมกัน:
+#   1. ไฟล์เทสต์และ config กลายเป็น URL สาธารณะ ใครก็เปิดอ่านได้
+#   2. node_modules ทำให้ deploy ล้มด้วย "Asset too large" (เคยเจอมาแล้ว)
+node_modules
+tests
+tools
+.husky
+.github
+package.json
+package-lock.json
+*.config.mjs
+.secretlintrc.json
+.prettierrc
+.prettierignore
+.gitignore
+.assetsignore
+playwright-report
+test-results
+README.md

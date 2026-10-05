@@ -11,6 +11,9 @@ projects/
 
 # ── Node / toolchain ──────────────────────────────────────────────────
 node_modules/
+**/node_modules/
+dist/
+build/
 npm-debug.log*
 
 # ── Test results & caches ─────────────────────────────────────────────

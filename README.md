@@ -15,8 +15,15 @@ gemini-config/
 ├── hooks.json              → Life-cycle hooks (เช่น Voice alerts บน Windows SAPI)
 ├── mcp_config.json         → การตั้งค่า MCP Servers (Firebase, Notebooks, Visualizations)
 ├── .geminiignore           → Global Ignore Pattern สำหรับ Gemini CLI
-├── .gitignore              → Strict Gitignore (ตัด /brain, /logs, credentials ออก)
+├── .gitignore              → Strict Gitignore (ตัด /brain, /logs, credentials, node_modules)
+├── .prettierrc / .ignore   → มาตรฐานการจัดฟอร์แมตโค้ด
 ├── setup-junctions.ps1     → สคริปต์ PowerShell สำหรับสร้าง Junctions และ Sync อัตโนมัติ
+├── USER.md                 → ข้อมูลบริบทส่วนตัว พี่ A, สไตล์ Vibe Coding, กฎเหล็ก
+├── branding/               → Brand Identity ชุด A(i)CODER 2025 & Supasit.A Studio (SVG/Fonts)
+├── assets/                 → Assets องค์กร GC-M PTA (โลโก้บริษัทสำหรับ Web Tools)
+├── design-lab/             → แม่แบบ Starter (Single HTML / Multi-File Vite) & Preview Kit
+├── learning/               → บันทึกการเรียนรู้ Dev Roadmap & Web App Scaling Techniques
+├── agents/                 → คลัง Subagent Prompts (sa-architect, sa-reviewer, sa-debugger ฯลฯ)
 ├── plugins/                → สำหรับ ~/.gemini/config/plugins/
 │   ├── android-cli-plugin/
 │   ├── chrome-devtools-plugin/
