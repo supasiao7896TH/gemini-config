@@ -65,11 +65,19 @@ git push origin main
 ```
 
 ### เมื่อสลับไปอีกเครื่อง:
+สามารถพิมพ์คำสั่งลัดคำเดียวใน PowerShell:
 ```powershell
-cd "$env:USERPROFILE\A(i)CODER2025TH\gemini-config"
-git pull origin main
+Sync-Gemini
 ```
-*(ข้อมูลทั้งหมดจะอัปเดตเข้า Antigravity / Gemini CLI ทันทีโดยไม่ต้องรันสคริปต์ซ้ำ เพราะเชื่อมโยงผ่าน NTFS Junction ไว้อยู่แล้ว)*
+*(ฟังก์ชันนี้จะดึง `git pull origin main` และรัน `setup-junctions.ps1` อัปเดต Junctions ให้อัตโนมัติในคำสั่งเดียว)*
+
+> [!TIP]
+> **PowerShell Shortcuts ที่ติดตั้งไว้แล้ว:**
+> - `a` → เรียก `agy` (Antigravity CLI)
+> - `c` → เรียก `claude` (Claude Code CLI)
+> - `Sync-Gemini` → ซิงค์การตั้งค่า Gemini
+> - `Sync-Claude` → ซิงค์การตั้งค่า Claude
+> *(หากเครื่องที่บ้านยังไม่มี ให้ก๊อปปี้โค้ดจาก `tools/powershell-profile-snippet.ps1` ไปวางใน `$PROFILE` ที่บ้าน)*
 
 ---
 

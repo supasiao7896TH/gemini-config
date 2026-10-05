@@ -1,0 +1,31 @@
+# =====================================================================
+# Supasit.A (พี่ A) — AI Coder PowerShell Profile Enhancements
+# สำหรับวางใน $PROFILE ทั้งเครื่อง Office และเครื่องที่บ้าน
+# =====================================================================
+
+# 1. Aliases สำหรับเปิดใช้งาน AI ทันใจ
+Set-Alias -Name a -Value agy -ErrorAction SilentlyContinue
+Set-Alias -Name c -Value claude -ErrorAction SilentlyContinue
+
+# 2. ฟังก์ชันซิงค์ Antigravity / Gemini CLI Config พร้อมอัปเดต Junctions อัตโนมัติ
+function Sync-Gemini {
+    $repo = "$env:USERPROFILE\A(i)CODER2025TH\gemini-config"
+    if (Test-Path $repo) {
+        Write-Host "Syncing gemini-config from GitHub..." -ForegroundColor Cyan
+        git -C $repo pull origin main
+        powershell -ExecutionPolicy Bypass -File "$repo\setup-junctions.ps1"
+    } else {
+        Write-Warning "gemini-config repository not found at $repo"
+    }
+}
+
+# 3. ฟังก์ชันซิงค์ Claude Code Config
+function Sync-Claude {
+    $repo = "$env:USERPROFILE\A(i)CODER2025TH\claude-config"
+    if (Test-Path $repo) {
+        Write-Host "Syncing claude-config from GitHub..." -ForegroundColor Cyan
+        git -C $repo pull origin main
+    } else {
+        Write-Warning "claude-config repository not found at $repo"
+    }
+}
