@@ -2,13 +2,32 @@
 
 > ไฟล์นี้ใช้สำหรับส่งต่องานข้ามเครื่อง (บ้าน ↔ ที่ทำงาน GC-M PTA) และเป็นแผนกู้ชีพฉุกเฉิน (Disaster Recovery Runbook) สำหรับการตั้งค่า Google Antigravity / Gemini CLI ของพี่ A (Supasit.A)
 
-**อัปเดตล่าสุด:** 2026-10-05 (เครื่อง Office — แยก gemini-config เป็น Standalone Repo อิสระจาก claude-config พร้อมระบบ Junction อัตโนมัติ)
+**อัปเดตล่าสุด:** 2026-10-05 (เพิ่มคู่มือติดตั้ง Antigravity CLI (`agy`) สำหรับเครื่องบ้าน/เครื่องใหม่ + อธิบายความต่างจาก Antigravity IDE)
 
 ---
 
-## 🚨 1. แผนกู้ชีพเมื่อย้ายเครื่องใหม่ หรือข้อมูลหาย (Disaster Recovery in 3 Steps)
+## 🚨 1. แผนกู้ชีพเมื่อย้ายเครื่องใหม่ หรือข้อมูลหาย (Disaster Recovery Runbook)
 
-หากคอมพัง, ล้างเครื่องใหม่, หรือไปเริ่มงานที่เครื่อง PC อื่น ให้ทำตาม 3 ขั้นตอนนี้เท่านั้น:
+หากคอมพัง, ล้างเครื่องใหม่, หรือไปเริ่มงานที่เครื่อง PC อื่น (เช่น เครื่องที่บ้าน) ให้ทำตามขั้นตอนนี้:
+
+### Step 0: ติดตั้ง Antigravity CLI (`agy`)
+> **ข้อสังเกต:** หากดาวน์โหลดจากหน้าเว็บหลักของ Antigravity ปุ่มดาวน์โหลดมักจะได้ **Antigravity IDE** (ไฟล์ติดตั้ง `.exe` ขนาด ~220 MB ซึ่งเป็นโปรแกรม IDE หน้าต่างแยกเดี่ยว)  
+> หากต้องการใช้งานเป็น **CLI ใน Terminal ของ VS Code** (มีโลโก้ตัว A สีรุ้งและพิมพ์คำสั่งได้เหมือนที่ทำงาน) ให้ติดตั้งตัว CLI ผ่าน PowerShell:
+
+1. เปิด **PowerShell** บนเครื่องใหม่ แล้วรันคำสั่งติดตั้งตัว CLI:
+   ```powershell
+   irm https://antigravity.google/cli/install.ps1 | iex
+   ```
+   *(สคริปต์จะติดตั้ง `agy.exe` ไว้ที่ `C:\Users\<User>\AppData\Local\agy\bin` และผูก Environment PATH ให้อัตโนมัติ)*
+
+2. ปิดแล้วเปิดหน้าต่าง PowerShell ใหม่ (หรือเปิด VS Code) แล้วตรวจเช็กเวอร์ชัน:
+   ```powershell
+   agy --version
+   ```
+
+3. เมื่อพิมพ์คำสั่ง `agy` ใน Terminal ของ VS Code ในครั้งแรก ระบบจะให้ยืนยันตัวตนด้วย Google Account (เช่น บัญชี Google AI Pro) เมื่อยืนยันเสร็จจะเข้าสู่หน้าจอ CLI ทันที
+
+---
 
 ### Step 1: Clone Repository
 เปิด PowerShell แล้วรันคำสั่ง:
