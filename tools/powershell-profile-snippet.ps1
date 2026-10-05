@@ -19,6 +19,16 @@ function Sync-Gemini {
     }
 }
 
+# 3. ฟังก์ชันตรวจสุขภาพระบบ Antigravity CLI
+function Doctor-Gemini {
+    $repo = "$env:USERPROFILE\A(i)CODER2025TH\gemini-config"
+    if (Test-Path "$repo\tools\doctor.ps1") {
+        powershell -ExecutionPolicy Bypass -File "$repo\tools\doctor.ps1"
+    } else {
+        Write-Warning "doctor.ps1 not found at $repo\tools\doctor.ps1"
+    }
+}
+
 # 3. ฟังก์ชันซิงค์ Claude Code Config
 function Sync-Claude {
     $repo = "$env:USERPROFILE\A(i)CODER2025TH\claude-config"

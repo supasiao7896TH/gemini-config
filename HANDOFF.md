@@ -75,7 +75,8 @@ Sync-Gemini
 > **PowerShell Shortcuts ที่ติดตั้งไว้แล้ว:**
 > - `a` → เรียก `agy` (Antigravity CLI)
 > - `c` → เรียก `claude` (Claude Code CLI)
-> - `Sync-Gemini` → ซิงค์การตั้งค่า Gemini
+> - `Sync-Gemini` → ซิงค์การตั้งค่า Gemini ล่าสุด
+> - `Doctor-Gemini` → ตรวจสุขภาพความพร้อมของระบบ Antigravity ใน 3 วินาที (`.\tools\doctor.ps1`)
 > - `Sync-Claude` → ซิงค์การตั้งค่า Claude
 > *(หากเครื่องที่บ้านยังไม่มี ให้ก๊อปปี้โค้ดจาก `tools/powershell-profile-snippet.ps1` ไปวางใน `$PROFILE` ที่บ้าน)*
 
