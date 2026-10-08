@@ -141,7 +141,7 @@ Sync-Gemini
 > 💡 **คำอธิบาย:** คำสั่ง `Sync-Gemini` คือฟังก์ชันลัดใน `$PROFILE` ที่จะสั่ง `git pull origin main` และรัน `setup-junctions.ps1 -Force` เพื่อเชื่อมโยง Junctions ให้อัตโนมัติในครั้งเดียว
 >
 > ⚠️ **แผนสำรอง (ถ้าพิมพ์แล้วขึ้นสีแดงว่าไม่พบคำสั่ง `Sync-Gemini`):**
-> แสดงว่าเครื่องนั้นยังไม่ได้ใส่ snippet ใน `$PROFILE` ให้พิมพ์ 2 บรรทัดนี้แทนได้เลยค่ะ:
+> แสดงว่าเครื่องนั้นยังไม่ได้ใส่ snippet ใน `$PROFILE` ให้พิมพ์ 3 บรรทัดนี้แทนได้เลยค่ะ:
 > ```powershell
 > cd "$env:USERPROFILE\A(i)CODER2025TH\gemini-config"
 > git pull origin main
