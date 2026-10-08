@@ -12,6 +12,10 @@ param(
 
 $ErrorActionPreference = "SilentlyContinue"
 
+# Force UTF-8 output encoding for emojis
+$OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
 # ANSI Color Codes
 $e = [char]27
 $cReset = "$e[0m"
@@ -22,6 +26,11 @@ $cCyan  = "$e[36m"
 $cGreen = "$e[32m"
 $cGray  = "$e[90m"
 $cWhite = "$e[97m"
+
+# Emoji Glyphs via UTF-32 (PowerShell 5.1 safe across all codepages)
+$eBattery  = [char]::ConvertFromUtf32(0x1F50B)  # 🔋
+$eCalendar = [char]::ConvertFromUtf32(0x1F4C5)  # 📅
+$eGem      = [char]::ConvertFromUtf32(0x1F48E)  # 💎
 
 $sep = " " + $cGray + "|" + $cReset + " "
 
@@ -92,7 +101,39 @@ if ($state -and $state.context_window) {
     }
 }
 
-# 5. Assemble Statusline Segments
+# 5. Resolve Quota (5h Quota & Weekly Quota)
+$quotaInfo = ""
+if ($state -and $state.quota) {
+    # 5-Hour Quota & Countdown
+    $q5 = $state.quota.'gemini-5h'
+    if ($q5 -and $null -ne $q5.remaining_fraction) {
+        $pct5 = [math]::Round([double]$q5.remaining_fraction * 100)
+        $resetCountdown = ""
+        if ($q5.reset_in_seconds -and [double]$q5.reset_in_seconds -gt 0) {
+            $totalMins = [math]::Round([double]$q5.reset_in_seconds / 60)
+            $hrs = [math]::Floor($totalMins / 60)
+            $mins = $totalMins % 60
+            $resetCountdown = if ($hrs -gt 0) { " (${hrs}h ${mins}m)" } else { " (${mins}m)" }
+        }
+        $quotaInfo += $sep + $cAmber + "$eBattery 5h: " + $pct5 + "%" + $resetCountdown + $cReset
+    }
+
+    # Weekly Quota
+    $qWk = $state.quota.'gemini-weekly'
+    if ($qWk -and $null -ne $qWk.remaining_fraction) {
+        $pctWk = [math]::Round([double]$qWk.remaining_fraction * 100)
+        $quotaInfo += $sep + $cAmber + "$eCalendar Wk: " + $pctWk + "%" + $cReset
+    }
+}
+
+# 6. Resolve Plan Tier
+$tierInfo = ""
+$tier = if ($state -and $state.plan_tier) { $state.plan_tier } else { "" }
+if ($tier) {
+    $tierInfo = $sep + $cCyan + "$eGem " + $tier + $cReset
+}
+
+# 7. Assemble Statusline Segments
 $brandBadge   = $cBold + $cBlue + "[A(i)CODER]" + $cReset
 $modelSegment = $cCyan + $modelDisplay + $cReset
 $dirSegment   = $cWhite + $dirName + $cReset
@@ -103,7 +144,7 @@ if ($gitBranch) {
 }
 
 # Final Output Line
-$statusLine = $brandBadge + " " + $modelSegment + $sep + $dirSegment + $branchSegment + $tokenInfo
+$statusLine = $brandBadge + " " + $modelSegment + $sep + $dirSegment + $branchSegment + $tokenInfo + $quotaInfo + $tierInfo
 
 Write-Output $statusLine
 exit 0
