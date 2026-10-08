@@ -121,6 +121,8 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
 | `Doctor-Gemini` | วินิจฉัยสุขภาพระบบ Antigravity ครบ 14 จุดตรวจ | `Doctor-Gemini` หรือ `.\tools\doctor.ps1` |
 | `New-VibeProject` | สั่งสร้างโปรเจกต์ใหม่ Supasit.A Starter (Multi-File) ในคำสั่งเดียว | `New-VibeProject -ProjectName my-app` |
 | `security-gate.ps1` | PreToolUse Hook คอยดักจับไฟล์ความลับและคำสั่งอันตราย | ทำงานอัตโนมัติผ่าน `hooks.json` |
+| `voice-alert.ps1` | Lifecycle Hook แจ้งเตือนเสียง Start / Stop (SAPI Speech) | ทำงานอัตโนมัติผ่าน `hooks.json` |
+| `statusline.ps1` | Dynamic Terminal Status Bar สไตล์ Supasit.A Studio | กำหนดผ่าน `statusLine` ใน `settings.json` หรือ `/statusline` |
 
 ---
 

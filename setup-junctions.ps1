@@ -168,7 +168,7 @@ foreach ($f in $filesToCopy) {
                 Write-Host "[=] $($f.Src) already exists at destination (use -Force to overwrite)" -ForegroundColor Gray
             }
         } else {
-            if (-not (Test-Path $destPath) -or $Force) {
+            if ($f.Src -eq "hooks.json" -or -not (Test-Path $destPath) -or $Force) {
                 Copy-Item -Path $srcPath -Destination $destPath -Force
                 Write-Host "[+] Synced $($f.Src) -> $destPath" -ForegroundColor Green
             } else {
@@ -176,6 +176,42 @@ foreach ($f in $filesToCopy) {
             }
         }
     }
+}
+
+# 5. Setup Antigravity CLI statusLine Configuration
+$cliSettingsDir = Join-Path $geminiDir "antigravity-cli"
+$cliSettingsPath = Join-Path $cliSettingsDir "settings.json"
+$statuslineScript = Join-Path $configDir "tools\statusline.ps1"
+
+if (-not (Test-Path $cliSettingsDir)) {
+    New-Item -ItemType Directory -Path $cliSettingsDir -Force | Out-Null
+}
+
+$statuslineConfig = [ordered]@{
+    type = "command"
+    command = "powershell -NoProfile -ExecutionPolicy Bypass -File `"$statuslineScript`""
+    enabled = $true
+}
+
+$cliSettings = @{}
+if (Test-Path $cliSettingsPath) {
+    try {
+        $raw = Get-Content -Path $cliSettingsPath -Raw -Encoding UTF8
+        if ($raw) {
+            $cliSettings = $raw | ConvertFrom-Json -AsHashtable
+        }
+    } catch {
+        $cliSettings = @{}
+    }
+}
+
+if (-not $cliSettings.ContainsKey("statusLine") -or $Force) {
+    $cliSettings["statusLine"] = $statuslineConfig
+    $newJson = $cliSettings | ConvertTo-Json -Depth 10
+    [IO.File]::WriteAllText($cliSettingsPath, $newJson, [Text.Encoding]::UTF8)
+    Write-Host "[+] Configured statusLine in $cliSettingsPath" -ForegroundColor Green
+} else {
+    Write-Host "[=] statusLine already configured in $cliSettingsPath (use -Force to overwrite)" -ForegroundColor Gray
 }
 
 Write-Host "==========================================" -ForegroundColor Cyan

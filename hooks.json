@@ -1,12 +1,13 @@
 {
   "security-gate": {
+    "enabled": true,
     "PreToolUse": [
       {
         "matcher": "run_command",
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File %USERPROFILE%\\.gemini\\config\\tools\\security-gate.ps1"
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\security-gate.ps1"
           }
         ]
       }
@@ -16,13 +17,13 @@
     "PreInvocation": [
       {
         "type": "command",
-        "command": "powershell -NoProfile -Command \"(New-Object -ComObject SAPI.SpVoice).Speak('Start', 1) | Out-Null; Write-Output '{}'\""
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\voice-alert.ps1 -Event Start"
       }
     ],
     "Stop": [
       {
         "type": "command",
-        "command": "powershell -NoProfile -Command \"(New-Object -ComObject SAPI.SpVoice).Speak('Stop', 1) | Out-Null; Write-Output '{}'\""
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\voice-alert.ps1 -Event Stop"
       }
     ]
   }

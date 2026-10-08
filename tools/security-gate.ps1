@@ -10,7 +10,12 @@ param()
 $ErrorActionPreference = "SilentlyContinue"
 
 # Read JSON payload from stdin
-$inputRaw = [Console]::In.ReadToEnd()
+$inputRaw = ""
+try {
+    if ([Console]::IsInputRedirected) {
+        $inputRaw = [Console]::In.ReadToEnd()
+    }
+} catch {}
 
 if (-not $inputRaw) {
     Write-Output '{"decision":"allow"}'
@@ -46,7 +51,8 @@ $isDestructive = ($targetText -match $destructiveRegex)
 if ($isSecret -or $isDestructive) {
     # Voice alert
     try {
-        (New-Object -ComObject SAPI.SpVoice).Speak('Please approve', 1) | Out-Null
+        $voice = New-Object -ComObject SAPI.SpVoice
+        [void]$voice.Speak('Please approve', 0)
     } catch {}
 
     $reason = if ($isSecret) {

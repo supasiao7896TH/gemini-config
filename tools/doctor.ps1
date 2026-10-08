@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Antigravity CLI System Doctor & Health Diagnostics for Supasit.A (พี่ A)
     Usage: .\tools\doctor.ps1
@@ -139,17 +139,50 @@ if (Test-Path $cfgPath) {
     Report-Check "FAIL" "config.json" "Not found at $cfgPath" "Run: .\setup-junctions.ps1 -Force"
 }
 
-# hooks.json
+# hooks.json & voice-alert.ps1
 $hooksPath = Join-Path $configDir "hooks.json"
 if (Test-Path $hooksPath) {
     $hooksRaw = Get-Content $hooksPath -Raw -Encoding UTF8
-    if ($hooksRaw -match "Speak\('[^']+',\s*1\)") {
-        Report-Check "OK" "hooks.json" "Voice alerts enabled with non-blocking async speech"
+    if ($hooksRaw -match "voice-alert\.ps1") {
+        Report-Check "OK" "hooks.json" "Voice alerts enabled -> pointing to voice-alert.ps1"
+    } elseif ($hooksRaw -match "Speak\('[^']+',\s*1\)") {
+        Report-Check "WARN" "hooks.json" "Voice alerts using inline async speech (recommend voice-alert.ps1)" "Run: .\setup-junctions.ps1 -Force"
     } else {
-        Report-Check "WARN" "hooks.json" "Voice alerts found but may not be async" "Run: .\setup-junctions.ps1 -Force"
+        Report-Check "WARN" "hooks.json" "Voice alerts found but configuration might need update" "Run: .\setup-junctions.ps1 -Force"
     }
 } else {
     Report-Check "FAIL" "hooks.json" "Not found at $hooksPath" "Run: .\setup-junctions.ps1 -Force"
+}
+
+$voiceAlertScript = Join-Path $configDir "tools\voice-alert.ps1"
+if (Test-Path $voiceAlertScript) {
+    Report-Check "OK" "Tool: voice-alert.ps1" "Voice alert handler ready"
+} else {
+    Report-Check "FAIL" "Tool: voice-alert.ps1" "voice-alert.ps1 missing in tools" "Run: .\setup-junctions.ps1 -Force"
+}
+
+# statusline.ps1 & CLI settings
+$statusScript = Join-Path $configDir "tools\statusline.ps1"
+if (Test-Path $statusScript) {
+    Report-Check "OK" "Tool: statusline.ps1" "Statusline renderer present"
+} else {
+    Report-Check "FAIL" "Tool: statusline.ps1" "Missing statusline.ps1 in tools" "Restore from git"
+}
+
+$cliSettingsPath = Join-Path (Join-Path $geminiDir "antigravity-cli") "settings.json"
+if (Test-Path $cliSettingsPath) {
+    try {
+        $cliJson = Get-Content $cliSettingsPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($cliJson.statusLine -and $cliJson.statusLine.enabled -ne $false) {
+            Report-Check "OK" "Antigravity CLI statusLine" "Active & enabled in settings.json"
+        } else {
+            Report-Check "WARN" "Antigravity CLI statusLine" "statusLine block not enabled" "Run: .\setup-junctions.ps1 -Force"
+        }
+    } catch {
+        Report-Check "WARN" "Antigravity CLI statusLine" "Could not parse settings.json" "Run: .\setup-junctions.ps1 -Force"
+    }
+} else {
+    Report-Check "WARN" "Antigravity CLI settings" "settings.json not found" "Run: .\setup-junctions.ps1 -Force"
 }
 
 # mcp_config.json
