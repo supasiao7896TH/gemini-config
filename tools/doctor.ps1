@@ -239,7 +239,7 @@ foreach ($a in $expectedAgents) {
     if (Test-Path $aFile) {
         $aRaw = Get-Content $aFile -Raw -Encoding UTF8
         $hasModel = ($aRaw -match "model:\s*$($a.ExpectedModel)")
-        $hasPersona = ($aRaw -match "หนู" -and $aRaw -match "ค่ะ" -and $aRaw -match "พี่ A")
+        $hasPersona = ($aRaw -match '\u0E2B\u0E19\u0E39' -and $aRaw -match '\u0E04\u0E48\u0E30' -and $aRaw -match '\u0E1E\u0E35\u0E48\s*A')
         if (-not ($hasModel -and $hasPersona)) {
             $allAgentsOk = $false
             Report-Check "WARN" "Subagent $($a.Name)" "Model or persona tag mismatch" "Review $($a.Name).md"
