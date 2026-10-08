@@ -5,8 +5,10 @@
     Receives session state JSON on stdin and renders an ANSI-colored status bar.
 #>
 
-[CmdletBinding()]
-param()
+param(
+    [Parameter(ValueFromPipeline = $true)]
+    [string]$InputObject
+)
 
 $ErrorActionPreference = "SilentlyContinue"
 
@@ -23,10 +25,14 @@ $cWhite = "$e[97m"
 
 $sep = " " + $cGray + "|" + $cReset + " "
 
-# Read JSON payload from stdin
+# Read JSON payload from pipeline or stdin
 $inputRaw = ""
 try {
-    if ([Console]::IsInputRedirected) {
+    if ($InputObject) {
+        $inputRaw = $InputObject
+    } elseif ($input) {
+        $inputRaw = ($input | Out-String)
+    } elseif ([Console]::IsInputRedirected) {
         $inputRaw = [Console]::In.ReadToEnd()
     }
 } catch {}

@@ -193,20 +193,25 @@ $statuslineConfig = [ordered]@{
     enabled = $true
 }
 
-$cliSettings = @{}
+$cliSettings = $null
 if (Test-Path $cliSettingsPath) {
     try {
         $raw = Get-Content -Path $cliSettingsPath -Raw -Encoding UTF8
         if ($raw) {
-            $cliSettings = $raw | ConvertFrom-Json -AsHashtable
+            $cliSettings = $raw | ConvertFrom-Json
         }
     } catch {
-        $cliSettings = @{}
+        $cliSettings = $null
     }
 }
 
-if (-not $cliSettings.ContainsKey("statusLine") -or $Force) {
-    $cliSettings["statusLine"] = $statuslineConfig
+if (-not $cliSettings) {
+    $cliSettings = [PSCustomObject]@{}
+}
+
+$hasStatusLine = [bool]($cliSettings.PSObject.Properties['statusLine'])
+if (-not $hasStatusLine -or $Force) {
+    $cliSettings | Add-Member -NotePropertyName "statusLine" -NotePropertyValue ([PSCustomObject]$statuslineConfig) -Force
     $newJson = $cliSettings | ConvertTo-Json -Depth 10
     [IO.File]::WriteAllText($cliSettingsPath, $newJson, [Text.Encoding]::UTF8)
     Write-Host "[+] Configured statusLine in $cliSettingsPath" -ForegroundColor Green
