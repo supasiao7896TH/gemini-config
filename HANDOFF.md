@@ -133,12 +133,21 @@ gemini-config/
 
 เมื่อพี่ A ไปถึงเครื่องที่ทำงาน ให้ทำตาม 4 ขั้นตอนนี้เพื่อปลดล็อกพลังให้ครบเหมือนเครื่องบ้าน:
 
-### 5.1 ดึงอัปเดตการตั้งค่าล่าสุด
-เปิด PowerShell ในเครื่องที่ทำงาน แล้วรัน:
+### 5.1 ดึงอัปเดตการตั้งค่าล่าสุด (One-Click Sync)
+เปิด PowerShell ในเครื่องที่ทำงาน แล้วพิมพ์คำสั่งเดียว:
 ```powershell
 Sync-Gemini
 ```
-*(หรือ `cd "$env:USERPROFILE\A(i)CODER2025TH\gemini-config" && git pull && powershell -ExecutionPolicy Bypass -File .\setup-junctions.ps1`)*
+> 💡 **คำอธิบาย:** คำสั่ง `Sync-Gemini` คือฟังก์ชันลัดใน `$PROFILE` ที่จะสั่ง `git pull origin main` และรัน `setup-junctions.ps1 -Force` เพื่อเชื่อมโยง Junctions ให้อัตโนมัติในครั้งเดียว
+>
+> ⚠️ **แผนสำรอง (ถ้าพิมพ์แล้วขึ้นสีแดงว่าไม่พบคำสั่ง `Sync-Gemini`):**
+> แสดงว่าเครื่องนั้นยังไม่ได้ใส่ snippet ใน `$PROFILE` ให้พิมพ์ 2 บรรทัดนี้แทนได้เลยค่ะ:
+> ```powershell
+> cd "$env:USERPROFILE\A(i)CODER2025TH\gemini-config"
+> git pull origin main
+> powershell -ExecutionPolicy Bypass -File .\setup-junctions.ps1 -Force
+> ```
+> *(และหากต้องการให้มีคำสั่งลัด `Sync-Gemini` ในเครื่องนั้นถาวร ให้ก๊อปปี้โค้ดจาก `tools\powershell-profile-snippet.ps1` ไปวางต่อท้ายใน `$PROFILE` ได้เลยค่ะ)*
 
 ### 5.2 ล็อกอิน Firebase (สำหรับ Firestore / Auth / MCP Server)
 รันคำสั่งใน PowerShell:
