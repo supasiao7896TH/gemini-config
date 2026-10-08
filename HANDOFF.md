@@ -124,3 +124,72 @@ gemini-config/
 - [x] ตรวจสอบ `.gitignore` ว่าตัดโฟลเดอร์ `brain/`, `logs/`, `projects/`, `.env*`, `credentials.json`, `*serviceAccount*.json` เรียบร้อย
 - [x] ไม่เก็บบัญชีรหัสผ่านหรือ Token ส่วนบุคคลลงใน `mcp_config.json` หรือ `config.json`
 - [x] รองรับ Multi-machine อัตโนมัติ: หากเครื่องบ้านมี User profile ชื่ออื่น (เช่น `PC 4000D` แทน `26007294`) สคริปต์ `setup-junctions.ps1` จะแปลง Path ใน `mcp_config.json` ให้ตรงกับ `$env:USERPROFILE` ประจำเครื่องนั้นๆ ให้อัตโนมัติ
+
+---
+
+## 🏢 5. คู่มือตั้งค่าเครื่องที่ทำงาน (Office GC-M PTA: `26007294`) ให้พร้อมเหมือนเครื่องบ้าน 100%
+
+> บันทึกเมื่อ: 2026-10-08 — เชื่อมต่อ Ecosystem (Firebase + Cloudflare + Golden Starter Kit) สำหรับ Solo Vibe Coder
+
+เมื่อพี่ A ไปถึงเครื่องที่ทำงาน ให้ทำตาม 4 ขั้นตอนนี้เพื่อปลดล็อกพลังให้ครบเหมือนเครื่องบ้าน:
+
+### 5.1 ดึงอัปเดตการตั้งค่าล่าสุด
+เปิด PowerShell ในเครื่องที่ทำงาน แล้วรัน:
+```powershell
+Sync-Gemini
+```
+*(หรือ `cd "$env:USERPROFILE\A(i)CODER2025TH\gemini-config" && git pull && powershell -ExecutionPolicy Bypass -File .\setup-junctions.ps1`)*
+
+### 5.2 ล็อกอิน Firebase (สำหรับ Firestore / Auth / MCP Server)
+รันคำสั่งใน PowerShell:
+```powershell
+firebase login
+```
+1. Browser จะเด้งขึ้นมา ให้เลือกบัญชี `supasiao@gmail.com`
+2. กดยอมรับสิทธิ์
+3. ตรวจสอบความถูกต้องด้วยคำสั่ง:
+   ```powershell
+   firebase projects:list
+   ```
+   *(ต้องเห็นทั้ง 6 โปรเจกต์: `pta1-check-list-su`, `walkie-talkie-pe1-gcm`, `radiosync-6662c`, `tangdee-app`, `nong-phak-nam-fruit-shop`, `t-dispatcher-465104-r2`)*
+
+### 5.3 ล็อกอิน Cloudflare Wrangler (สำหรับ Deploy เว็บแอปขึ้น Workers ฟรี)
+รันคำสั่งใน PowerShell:
+```powershell
+npx wrangler login
+```
+1. หน้า Browser จะเปิดขึ้นมาอัตโนมัติ ให้ล็อกอินบัญชี Cloudflare (`supasiao@gmail.com`) แล้วกด **"Allow"**
+2. ตรวจสอบความถูกต้องด้วยคำสั่ง:
+   ```powershell
+   npx wrangler whoami
+   ```
+   *(ต้องแสดง Account ID: `e87e6b4e7ec59834a35db192e7e37eb8`)*
+
+### 5.4 ตรวจสุขภาพระบบภาพรวม
+รันสคริปต์หมอตรวจระบบ:
+```powershell
+Doctor-Gemini
+```
+*(หรือ `powershell -ExecutionPolicy Bypass -File .\tools\doctor.ps1`)*
+
+---
+
+## ⚡ 6. เกร็ดการเริ่มโปรเจกต์ใหม่และ Deploy (Quick Reference)
+
+- **สร้างโปรเจกต์ใหม่จาก Starter Kit:**
+  ```powershell
+  New-VibeProject -ProjectName "ชื่อโปรเจกต์ใหม่"
+  cd "ชื่อโปรเจกต์ใหม่"
+  npm ci
+  ```
+- **ทดสอบในเครื่อง:**
+  ```powershell
+  npm run dev
+  ```
+- **Build & Deploy ขึ้น Cloudflare Workers (URL จริงใน 30 วิ):**
+  ```powershell
+  npm run build
+  npx wrangler deploy
+  ```
+  *(ไฟล์คอนฟิก `wrangler.jsonc` ใน starter kit ได้ใส่ `account_id: "e87e6b4e7ec59834a35db192e7e37eb8"` ไว้พร้อมใช้ทันที)*
+

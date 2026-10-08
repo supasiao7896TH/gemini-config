@@ -4,7 +4,7 @@
 // dist/ มีแต่ไฟล์ build จริงเท่านั้น ไม่มีทางมี tests/, node_modules/, package.json หลุดไปด้วย
 {
   "name": "ชื่อ-worker-ตรงกับใน-cloudflare-dashboard",
-  "account_id": "account-id-จาก-cloudflare-dashboard", // ไม่ใช่ความลับ เห็นได้ใน URL ของ dashboard
+  "account_id": "e87e6b4e7ec59834a35db192e7e37eb8", // Cloudflare Account ID ของพี่ A (supasiao@gmail.com)
   "compatibility_date": "2026-09-02", // ใส่วันที่ปัจจุบันตอน setup
   "assets": {
     "directory": "./dist"
