@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
-    Pre-Migration Backup Script สำหรับพี่ A (Supasit.A)
+    Pre-Migration Backup Script for Supasit.A
 .DESCRIPTION
-    สำรองข้อมูลโปรเจกต์ โค้ดที่ยังไม่ได้ commit และการตั้งค่า AI/Dotfiles เข้าสู่ OneDrive ก่อน IT เปลี่ยนเครื่อง PC ในวันที่ 30
+    Backup projects, uncommitted code, and AI settings to OneDrive before PC replacement.
 #>
 
 [CmdletBinding()]
@@ -14,7 +14,7 @@ Write-Host "==========================================================" -Foregro
 Write-Host "   SUPASIT.A - PRE-MIGRATION BACKUP HELPER (2026)         " -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Cyan
 
-# 1. ตรวจสอบปลายทาง OneDrive
+# 1. Check or create OneDrive destination
 if (-not (Test-Path $BackupDestination)) {
     Write-Host "[+] Creating Backup directory in OneDrive: $BackupDestination" -ForegroundColor Green
     New-Item -ItemType Directory -Path $BackupDestination -Force | Out-Null
@@ -22,7 +22,7 @@ if (-not (Test-Path $BackupDestination)) {
     Write-Host "[=] Target Backup directory: $BackupDestination" -ForegroundColor Gray
 }
 
-# 2. ตรวจสอบ Git Status และเตือนโปรเจกต์ที่ยังไม่ Commit/Push
+# 2. Check Git status and warn uncommitted/unpushed projects
 Write-Host "`n[1/3] Scanning Git repositories in A(i)CODER2025TH..." -ForegroundColor Cyan
 $projectsDir = "$env:USERPROFILE\A(i)CODER2025TH"
 if (Test-Path $projectsDir) {
@@ -41,7 +41,7 @@ if (Test-Path $projectsDir) {
     }
 }
 
-# 3. สำรองโฟลเดอร์สำคัญเข้า OneDrive
+# 3. Backup configuration folders and workspaces
 Write-Host "`n[2/3] Backing up critical configuration folders..." -ForegroundColor Cyan
 $configItems = @(
     @{ Name = "DotClaude"; Path = "$env:USERPROFILE\.claude" },
@@ -58,7 +58,6 @@ foreach ($item in $configItems) {
     }
 }
 
-# สำรองโฟลเดอร์ Projects หลัก (ตัด node_modules ออกเพื่อให้เร็วและประหยัดพื้นที่คลาวด์)
 if (Test-Path $projectsDir) {
     $projectsDest = Join-Path $BackupDestination "A(i)CODER2025TH"
     Write-Host " [*] Backing up Projects to $projectsDest (excluding node_modules)..." -ForegroundColor Cyan
@@ -66,8 +65,8 @@ if (Test-Path $projectsDir) {
     Write-Host " [+] Successfully backed up Projects to OneDrive!" -ForegroundColor Green
 }
 
-# 4. สรุปผล
+# 4. Finish
 Write-Host "`n[3/3] Backup Complete!" -ForegroundColor Green
-Write-Host "ไฟล์สำรองทั้งหมดจัดเก็บไว้ที่:" -ForegroundColor Yellow
+Write-Host "Backup files stored at:" -ForegroundColor Yellow
 Write-Host "$BackupDestination" -ForegroundColor White
-Write-Host "กรุณาตรวจสอบว่า OneDrive ซิงค์ไฟล์ขึ้น Cloud ครบทุกไฟล์เรียบร้อยค่ะ!`n" -ForegroundColor Green
+Write-Host "Please ensure OneDrive finishes syncing all files to Cloud." -ForegroundColor Green
