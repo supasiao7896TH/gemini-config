@@ -9,6 +9,7 @@
     4. IOW Plant 1 - PTA unit บน Drive K:
     5. Monitor Log Sheet Boardman Web App (Cloudflare Workers)
     6. PTTGC Laro Routines (id=2122, id=2121)
+    7. AAA PTA1 GCMP.pdi (OSIsoft PI ProcessBook) จาก Desktop
 #>
 
 [CmdletBinding()]
@@ -118,6 +119,19 @@ foreach ($app in $webApps) {
         Start-Process $app.Url
         Start-Sleep -Milliseconds 400
     }
+}
+
+# ----------------------------------------------------------
+# 7. AAA PTA1 GCMP.pdi (Desktop)
+# ----------------------------------------------------------
+$pdiDesktopFile = "C:\Users\26007294\OneDrive - PTT Global Chemical Public Company Limited\Other\Desktop\AAA PTA1 GCMP.pdi"
+if (Test-Path $pdiDesktopFile) {
+    Write-Host "[7/7] Opening PI Display    : $(Split-Path $pdiDesktopFile -Leaf)" -ForegroundColor Green
+    if (-not $WhatIf) {
+        Start-Process $pdiDesktopFile
+    }
+} else {
+    Write-Warning "[7/7] PI Display file not found: $pdiDesktopFile"
 }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
