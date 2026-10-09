@@ -113,11 +113,46 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; irm https://raw.githubusercont
 
 ---
 
-## 📝 6. เช็กลิสต์สรุปวันเปลี่ยนเครื่อง (Go-Live Day Checklist)
+## 📦 7. คู่มือพิเศษ: การจัดการ Node.js (ลิขสิทธิ์ & แผนสำรอง Non-Admin Portable)
+
+### 7.1 ข้อมูลด้านลิขสิทธิ์และความปลอดภัยองค์กร (สำหรับตอบ IT / Audit)
+- **ประเภทสิทธิ์ (License):** Open Source 100% ภายใต้สัญญาอนุญาต **MIT License**
+- **หน่วยงานกำกับดูแล:** **OpenJS Foundation** (องค์กรไม่แสวงหากำไรภายใต้ **The Linux Foundation**)
+- **การใช้งานในองค์กร:** อนุญาตให้ใช้งานในเชิงพาณิชย์ (Commercial Use) ได้อย่างอิสระ ไม่มีค่าลิขสิทธิ์ ไม่มีค่าบริการรายปี และเป็นมาตรฐานสากลที่บริษัทชั้นนำ (เช่น PTTGC, Google, Microsoft, Amazon) ใช้งานเป็นหลัก
+
+### 7.2 แผนการติดตั้ง (Plan A vs Plan B)
+
+#### 🔹 แผนหลัก (Plan A - แนะนำ): แจ้ง IT ลงให้
+ในวันที่ IT ส่งมอบเครื่องใหม่ ให้แจ้งระบุในรายการโปรแกรมที่ขอรับบริการ:
+> *"ขอความกรุณาช่วยติดตั้ง Node.js (LTS version ล่าสุด) ลงในเครื่องให้ด้วยครับ"*
+
+#### 🔹 แผนสำรอง (Plan B): ติดตั้งแบบ Portable (ไม่ต้องใช้สิทธิ์ Admin ของ IT)
+หาก IT ไม่สะดวก, ติดงานอื่น, หรือทำเรื่องอนุมัตินาน พี่ A สามารถติดตั้งใน User Profile ส่วนตัวได้ทันทีโดยไม่ต้องใช้รหัสผ่าน IT ด้วยคำสั่ง PowerShell นี้:
+
+```powershell
+# 1. สร้างโฟลเดอร์สำหรับ Node.js ใน AppData ส่วนตัว
+$nodeDir = "$env:LOCALAPPDATA\Programs\nodejs"
+New-Item -ItemType Directory -Path $nodeDir -Force | Out-Null
+
+# 2. ดาวน์โหลดและแตกไฟล์ zip ทางการของ Node.js LTS (จาก nodejs.org)
+$zipPath = "$env:TEMP\node.zip"
+Invoke-WebRequest -Uri "https://nodejs.org/dist/v22.14.0/node-v22.14.0-win-x64.zip" -OutFile $zipPath
+Expand-Archive -Path $zipPath -DestinationPath "$env:TEMP\node-extract" -Force
+Copy-Item "$env:TEMP\node-extract\node-v22.14.0-win-x64\*" $nodeDir -Recurse -Force
+
+# 3. ผูก PATH ระดับผู้ใช้ (User Scope - สิทธิ์ปกติทำได้ทันที)
+[System.Environment]::SetEnvironmentVariable("Path", "$nodeDir;" + [System.Environment]::GetEnvironmentVariable("Path", "User"), "User")
+```
+*เมื่อรันเสร็จแล้ว ปิดและเปิด PowerShell ใหม่ คำสั่ง `node -v` และ `npm -v` จะพร้อมใช้งาน 100% ทันทีค่ะ*
+
+---
+
+## 📝 8. เช็กลิสต์สรุปวันเปลี่ยนเครื่อง (Go-Live Day Checklist)
 - [ ] เซ็นรับเครื่องใหม่ และต่อเน็ตผ่านเครือข่าย GC / VPN สำเร็จ
 - [ ] เปิด OneDrive เพื่อเริ่มซิงค์ไฟล์เอกสารและ `$PROFILE` (PowerShell Profile)
 - [ ] ทดสอบเปิด Lotus Notes และเลือกไฟล์ ID ได้ถูกต้อง
 - [ ] ทดสอบเปิด Excel และตรวจดูแถบเครื่องมือ **PI DataLink**
 - [ ] ทดสอบเปิด SAP GUI
+- [ ] ตรวจสอบว่า IT ลง **Node.js** ให้เรียบร้อยหรือไม่ (ถ้าไม่มี ให้ใช้ Plan B)
 - [ ] รันคำสั่ง Master Bootstrap บรรทัดเดียวใน PowerShell
 - [ ] เปิด VS Code พิมพ์ `a` (Antigravity) และ `c` (Claude Code) ล็อกอินและใช้งานต่อได้ทันที!

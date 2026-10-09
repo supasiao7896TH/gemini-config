@@ -54,6 +54,30 @@ if (-not $SkipWinget) {
     
     # Refresh PATH environment variable in current session
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+    # ตรวจสอบ Node.js — หาก Winget ลงไม่สำเร็จ (ติดสิทธิ์ Admin) ให้ใช้ระบบสำรอง Portable อัตโนมัติ
+    $hasNode = Get-Command node -ErrorAction SilentlyContinue
+    if (-not $hasNode) {
+        Write-Host " [!] Node.js not detected in PATH. Starting Non-Admin Portable Node.js setup (Plan B)..." -ForegroundColor Yellow
+        $nodeDir = "$env:LOCALAPPDATA\Programs\nodejs"
+        if (-not (Test-Path $nodeDir)) {
+            New-Item -ItemType Directory -Path $nodeDir -Force | Out-Null
+        }
+        $zipPath = "$env:TEMP\node.zip"
+        Write-Host " [*] Downloading official Node.js LTS portable binary..." -ForegroundColor Cyan
+        try {
+            Invoke-WebRequest -Uri "https://nodejs.org/dist/v22.14.0/node-v22.14.0-win-x64.zip" -OutFile $zipPath
+            Expand-Archive -Path $zipPath -DestinationPath "$env:TEMP\node-extract" -Force
+            Copy-Item "$env:TEMP\node-extract\node-v22.14.0-win-x64\*" $nodeDir -Recurse -Force
+            [System.Environment]::SetEnvironmentVariable("Path", "$nodeDir;" + [System.Environment]::GetEnvironmentVariable("Path", "User"), "User")
+            $env:Path = "$nodeDir;$env:Path"
+            Write-Host "[+] Non-Admin Portable Node.js ready!" -ForegroundColor Green
+        } catch {
+            Write-Warning "Could not setup Portable Node.js: $($_.Exception.Message)"
+        }
+    } else {
+        Write-Host "[=] Node.js detected: $(node -v)" -ForegroundColor Green
+    }
 } else {
     Write-Host "`n[2/7] Skipped Winget installation." -ForegroundColor Yellow
 }
