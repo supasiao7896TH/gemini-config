@@ -127,11 +127,15 @@ gemini-config/
 
 ---
 
-## 🏢 5. คู่มือตั้งค่าเครื่องที่ทำงาน (Office GC-M PTA: `26007294`) ให้พร้อมเหมือนเครื่องบ้าน 100%
+## 🏢 5. คู่มือตั้งค่าเครื่องที่ทำงาน (Office GC-M PTA: `26007294`) — [✅ ตั้งค่าและยืนยันสำเร็จ 100%]
 
-> บันทึกเมื่อ: 2026-10-08 — เชื่อมต่อ Ecosystem (Firebase + Cloudflare + Golden Starter Kit) สำหรับ Solo Vibe Coder
+> บันทึกสถานะล่าสุด: **2026-10-09** — เครื่อง Office (`GCMPPC23P1103`) ได้รับการติดตั้ง, ซิงค์การตั้งค่าล่าสุด, และยืนยันการเชื่อมต่อ Ecosystem ครบถ้วนเทียบเท่าเครื่องบ้าน 100% แล้ว:
+> - **GitHub:** เชื่อมโยงบัญชี `supasiao7896TH` (`supasiao@gmail.com`) ซิงค์ Repository ล่าสุดแล้ว
+> - **Firebase CLI & MCP:** ล็อกอินและตรวจพบครบทั้ง 6 โปรเจกต์ (`pta1-check-list-su`, `walkie-talkie-pe1-gcm`, `radiosync-6662c`, `tangdee-app`, `nong-phak-nam-fruit-shop`, `t-dispatcher-465104-r2`)
+> - **Cloudflare Wrangler:** ยืนยันสิทธิ์ OAuth Token สำหรับ Account ID: `e87e6b4e7ec59834a35db192e7e37eb8` เรียบร้อย พร้อมคำสั่ง deploy ขึ้น Workers
+> - **Antigravity CLI (agy v1.3.2):** ตรวจผ่านสุขภาพระบบ `doctor.ps1` สมบูรณ์ **20/20 checks**
 
-เมื่อพี่ A ไปถึงเครื่องที่ทำงาน ให้ทำตาม 4 ขั้นตอนนี้เพื่อปลดล็อกพลังให้ครบเหมือนเครื่องบ้าน:
+หากจำเป็นต้องตรวจซ้ำหรือซิงค์ใหม่ในอนาคต สามารถทำตาม 4 ขั้นตอนนี้ได้เสมอ:
 
 ### 5.1 ดึงอัปเดตการตั้งค่าล่าสุด (One-Click Sync)
 เปิด PowerShell ในเครื่องที่ทำงาน แล้วพิมพ์คำสั่งเดียว:
@@ -149,30 +153,19 @@ Sync-Gemini
 > ```
 > *(และหากต้องการให้มีคำสั่งลัด `Sync-Gemini` ในเครื่องนั้นถาวร ให้ก๊อปปี้โค้ดจาก `tools\powershell-profile-snippet.ps1` ไปวางต่อท้ายใน `$PROFILE` ได้เลยค่ะ)*
 
-### 5.2 ล็อกอิน Firebase (สำหรับ Firestore / Auth / MCP Server)
+### 5.2 ตรวจสอบ Firebase (สำหรับ Firestore / Auth / MCP Server)
 รันคำสั่งใน PowerShell:
 ```powershell
-firebase login
+npx firebase-tools projects:list
 ```
-1. Browser จะเด้งขึ้นมา ให้เลือกบัญชี `supasiao@gmail.com`
-2. กดยอมรับสิทธิ์
-3. ตรวจสอบความถูกต้องด้วยคำสั่ง:
-   ```powershell
-   firebase projects:list
-   ```
-   *(ต้องเห็นทั้ง 6 โปรเจกต์: `pta1-check-list-su`, `walkie-talkie-pe1-gcm`, `radiosync-6662c`, `tangdee-app`, `nong-phak-nam-fruit-shop`, `t-dispatcher-465104-r2`)*
+*(ยืนยันว่าเห็นทั้ง 6 โปรเจกต์ข้างต้น)*
 
-### 5.3 ล็อกอิน Cloudflare Wrangler (สำหรับ Deploy เว็บแอปขึ้น Workers ฟรี)
+### 5.3 ตรวจสอบ Cloudflare Wrangler (สำหรับ Deploy เว็บแอปขึ้น Workers)
 รันคำสั่งใน PowerShell:
 ```powershell
-npx wrangler login
+npx wrangler whoami
 ```
-1. หน้า Browser จะเปิดขึ้นมาอัตโนมัติ ให้ล็อกอินบัญชี Cloudflare (`supasiao@gmail.com`) แล้วกด **"Allow"**
-2. ตรวจสอบความถูกต้องด้วยคำสั่ง:
-   ```powershell
-   npx wrangler whoami
-   ```
-   *(ต้องแสดง Account ID: `e87e6b4e7ec59834a35db192e7e37eb8`)*
+*(ยืนยัน Account ID: `e87e6b4e7ec59834a35db192e7e37eb8`)*
 
 ### 5.4 ตรวจสุขภาพระบบภาพรวม
 รันสคริปต์หมอตรวจระบบ:
