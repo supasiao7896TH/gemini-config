@@ -1,4 +1,7 @@
 {
   "name": "user-profile",
-  "description": "User profile for พี่ A, personal branding, and development standards."
+  "version": "1.3.2",
+  "description": "User profile for พี่ A, personal branding, and development standards.",
+  "author": "Supasit Aoothai (พี่ A)",
+  "homepage": "https://github.com/supasiao7896TH/gemini-config"
 }

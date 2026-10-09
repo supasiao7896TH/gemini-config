@@ -254,8 +254,41 @@ if ($allAgentsOk) {
 }
 
 Write-Host ""
-# 5. Git Repository Status
-Write-Host "5. Git Repository Status" -ForegroundColor Cyan
+# 5. Plugin Registry & CLI Validation (Antigravity v1.3.2)
+Write-Host "5. Plugin Registry & CLI Validation (v1.3.2)" -ForegroundColor Cyan
+$pluginsDir = Join-Path $repoRoot "plugins"
+if (Test-Path $pluginsDir) {
+    $pluginFolders = Get-ChildItem -Path $pluginsDir -Directory
+    $allPluginsValid = $true
+    $invalidCount = 0
+
+    foreach ($p in $pluginFolders) {
+        $pManifest = Join-Path $p.FullName "plugin.json"
+        if (Test-Path $pManifest) {
+            # Run agy plugin validate against each plugin folder
+            $valOut = (agy plugin validate $p.FullName 2>&1) | Out-String
+            if ($valOut -match "\[ok\]") {
+                # Valid plugin
+            } else {
+                $allPluginsValid = $false
+                $invalidCount++
+                Report-Check "WARN" "Plugin: $($p.Name)" "Validation returned warning or error" "Run: agy plugin validate $($p.FullName)"
+            }
+        }
+    }
+
+    if ($allPluginsValid -and $pluginFolders.Count -gt 0) {
+        Report-Check "OK" "Plugin Registry ($($pluginFolders.Count)/$($pluginFolders.Count))" "All plugins validated successfully via agy plugin validate"
+    } elseif ($invalidCount -gt 0) {
+        Report-Check "WARN" "Plugin Registry" "$invalidCount plugin(s) failed validation" "Check plugin manifests"
+    }
+} else {
+    Report-Check "WARN" "Plugins Directory" "Not found at $pluginsDir" "Run: .\setup-junctions.ps1 -Force"
+}
+
+Write-Host ""
+# 6. Git Repository Status
+Write-Host "6. Git Repository Status" -ForegroundColor Cyan
 $remoteUrl = (git -C $repoRoot remote get-url origin 2>&1)
 if ($remoteUrl -match "supasiao7896TH/gemini-config") {
     Report-Check "OK" "Git Remote" "Origin: $remoteUrl"

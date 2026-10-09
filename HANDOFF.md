@@ -2,7 +2,7 @@
 
 > ไฟล์นี้ใช้สำหรับส่งต่องานข้ามเครื่อง (บ้าน ↔ ที่ทำงาน GC-M PTA) และเป็นแผนกู้ชีพฉุกเฉิน (Disaster Recovery Runbook) สำหรับการตั้งค่า Google Antigravity / Gemini CLI ของพี่ A (Supasit.A)
 
-**อัปเดตล่าสุด:** 2026-10-05 (เพิ่มคู่มือติดตั้ง Antigravity CLI (`agy`) สำหรับเครื่องบ้าน/เครื่องใหม่ + อธิบายความต่างจาก Antigravity IDE)
+**อัปเดตล่าสุด:** 2026-10-09 (ยกระดับความเข้ากันได้กับ Antigravity CLI v1.3.2: ตรวจสอบความถูกต้องของ Plugins อัตโนมัติด้วย `agy plugin validate` ใน `doctor.ps1` และอัปเดต metadata ของ `user-profile`)
 
 ---
 
