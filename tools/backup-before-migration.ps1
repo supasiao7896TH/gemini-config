@@ -43,24 +43,27 @@ if (Test-Path $projectsDir) {
 
 # 3. สำรองโฟลเดอร์สำคัญเข้า OneDrive
 Write-Host "`n[2/3] Backing up critical configuration folders..." -ForegroundColor Cyan
-$itemsToBackup = @(
+$configItems = @(
     @{ Name = "DotClaude"; Path = "$env:USERPROFILE\.claude" },
     @{ Name = "DotGemini"; Path = "$env:USERPROFILE\.gemini" },
-    @{ Name = "DotConfig"; Path = "$env:USERPROFILE\.config" },
-    @{ Name = "ProjectsZip"; Path = $projectsDir }
+    @{ Name = "DotConfig"; Path = "$env:USERPROFILE\.config" }
 )
 
-foreach ($item in $itemsToBackup) {
+foreach ($item in $configItems) {
     if (Test-Path $item.Path) {
-        $destZip = Join-Path $BackupDestination "$($item.Name)_backup.zip"
-        Write-Host " [*] Compressing $($item.Path) -> $destZip ..." -ForegroundColor Cyan
-        try {
-            Compress-Archive -Path $item.Path -DestinationPath $destZip -Update -Force
-            Write-Host " [+] Successfully backed up: $($item.Name)" -ForegroundColor Green
-        } catch {
-            Write-Warning "Failed to compress $($item.Name): $($_.Exception.Message)"
-        }
+        $destFolder = Join-Path $BackupDestination $item.Name
+        Write-Host " [*] Backing up $($item.Path) -> $destFolder ..." -ForegroundColor Cyan
+        robocopy $item.Path $destFolder /E /R:1 /W:1 /MT:8 /XD cache .cache | Out-Null
+        Write-Host " [+] Backed up: $($item.Name)" -ForegroundColor Green
     }
+}
+
+# สำรองโฟลเดอร์ Projects หลัก (ตัด node_modules ออกเพื่อให้เร็วและประหยัดพื้นที่คลาวด์)
+if (Test-Path $projectsDir) {
+    $projectsDest = Join-Path $BackupDestination "A(i)CODER2025TH"
+    Write-Host " [*] Backing up Projects to $projectsDest (excluding node_modules)..." -ForegroundColor Cyan
+    robocopy $projectsDir $projectsDest /E /R:1 /W:1 /MT:8 /XD node_modules | Out-Null
+    Write-Host " [+] Successfully backed up Projects to OneDrive!" -ForegroundColor Green
 }
 
 # 4. สรุปผล
