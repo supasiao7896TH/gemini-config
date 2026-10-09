@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Auto-Open Current Month PTA1 Logbook directly in Microsoft Excel Desktop
 .DESCRIPTION
