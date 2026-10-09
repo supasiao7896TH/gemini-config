@@ -219,6 +219,14 @@ if (-not $hasStatusLine -or $Force) {
     Write-Host "[=] statusLine already configured in $cliSettingsPath (use -Force to overwrite)" -ForegroundColor Gray
 }
 
+# 6. Deploy PTA1 Logbook Auto-Start to Windows Startup
+$startupFolder = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
+$logbookVbs = Join-Path $repoRoot "tools\Open-PTA1-Logbook.vbs"
+if ((Test-Path $startupFolder) -and (Test-Path $logbookVbs)) {
+    Copy-Item $logbookVbs (Join-Path $startupFolder "Open-PTA1-Logbook.vbs") -Force
+    Write-Host "[+] Configured PTA1 Logbook auto-open on Windows Startup" -ForegroundColor Green
+}
+
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host " Setup Completed Successfully!            " -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Cyan
