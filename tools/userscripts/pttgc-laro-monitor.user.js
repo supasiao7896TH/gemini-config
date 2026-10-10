@@ -1,10 +1,12 @@
 // ==UserScript==
-// @name         PTTGC Laro Quality Monitor (PTA Routine Alert)
+// @name         PTTGC Laro Quality Monitor & Auto-Refresh (PTA Routine)
 // @namespace    https://pttgclaro.pttgcgroup.com/
-// @version      1.0.1
-// @description  ระบบตรวจสอบผลวิเคราะห์ Routine Lab PZ-402 (รอบ 16:00 น.) อัตโนมัติและแจ้งเตือน
+// @version      1.2.0
+// @description  ระบบ Auto-Refresh (5 นาที) และตรวจสอบผล Lab PZ-402 ทั้ง 8 รอบ (01:00, 04:00, 07:00, 10:00, 13:00, 16:00, 19:00, 22:00) อัตโนมัติ
 // @author       Supasit.A Studio & Antigravity
-// @match        *://pttgclaro.pttgcgroup.com/*
+// @match        https://pttgclaro.pttgcgroup.com/*
+// @match        http://pttgclaro.pttgcgroup.com/*
+// @include      *://pttgclaro.pttgcgroup.com/*
 // @grant        GM_notification
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -14,19 +16,21 @@
 (function () {
   "use strict";
 
-  console.log("[Laro Monitor] Script เริ่มทำงานแล้วบน:", window.location.href);
+  console.log("[Laro Monitor] Script v1.2.0 loaded on:", window.location.href);
 
   const CONFIG = {
-    checkIntervalNormal: 5 * 60 * 1000,
-    checkIntervalRush: 2 * 60 * 1000,
-    targetHour: 16,
-    pagesToMonitor: [
-      { id: 2122, name: "PTA-1 Routine", tableId: 4799 },
-      { id: 2121, name: "PTA-2 Routine", tableId: 4799 }
-    ],
-    targetParams: ["4-CBA", "p-TA", "b-value (Pro)", "BA"]
+    refreshSeconds: 300, // Auto-refresh ทุก 5 นาที (300 วินาที)
+    labRounds: ["01:00", "04:00", "07:00", "10:00", "13:00", "16:00", "19:00", "22:00"],
+    targetParams: ["4-CBA", "p-TA", "BA", "b-value (Pro)"]
   };
 
+  let remainingSeconds = CONFIG.refreshSeconds;
+  let isPaused = false;
+  let countdownTimer = null;
+
+  // -------------------------------------------------------------------------
+  // 1. Audio Notification (Web Audio API)
+  // -------------------------------------------------------------------------
   function playAlertSound() {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -46,144 +50,68 @@
     }
   }
 
-  function createWidget() {
-    if (document.getElementById("laro-monitor-widget")) return;
-
-    const widget = document.createElement("div");
-    widget.id = "laro-monitor-widget";
-    widget.style.cssText = `
-            position: fixed !important;
-            bottom: 24px !important;
-            right: 24px !important;
-            z-index: 2147483647 !important;
-            background: #FFFFFF !important;
-            border: 2px solid #1D4ED8 !important;
-            border-radius: 12px !important;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.18) !important;
-            padding: 12px 16px !important;
-            font-family: 'Noto Sans Thai', sans-serif, system-ui !important;
-            font-size: 13px !important;
-            color: #1E293B !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 10px !important;
-            cursor: default !important;
-        `;
-    widget.innerHTML = `
-            <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10B981;" id="laro-status-dot"></span>
-            <div>
-                <strong style="color:#1D4ED8; font-size:13px; display:block;">Laro Lab Monitor</strong>
-                <div id="laro-status-text" style="color:#64748B; font-size:11px;">พร้อมทำงาน (กำลังเตรียมตรวจ...)</div>
-            </div>
-            <button id="laro-manual-btn" style="background:#1D4ED8; color:#FFFFFF; border:none; border-radius:6px; padding:6px 10px; font-size:11px; cursor:pointer; font-weight:600; margin-left:6px;">เช็คทันที</button>
-        `;
-
-    (document.body || document.documentElement).appendChild(widget);
-    console.log("[Laro Monitor] สร้าง UI Widget สำเร็จเรียบร้อย");
-
-    document.getElementById("laro-manual-btn").addEventListener("click", () => {
-      updateWidgetStatus("กำลังตรวจสอบด้วยตนเอง...", "#3B82F6");
-      runQualityCheck();
-    });
-  }
-
-  function updateWidgetStatus(text, dotColor = "#10B981") {
-    const statusText = document.getElementById("laro-status-text");
-    const dot = document.getElementById("laro-status-dot");
-    if (statusText) statusText.innerText = text;
-    if (dot) dot.style.background = dotColor;
-  }
-
-  function getTodayDateString() {
+  // -------------------------------------------------------------------------
+  // 2. Helper: Date Formatter
+  // -------------------------------------------------------------------------
+  function getTodayString() {
     const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+    return `${y}-${m}-${day}`;
   }
 
-  async function fetchRoutineResults(pageId, tableId) {
-    const today = getTodayDateString();
-    const url = `/getReportResults?pageId=${pageId}&tableId=${tableId}&dateStart=${today}T00:00:00&dateEnd=${today}T23:59:59`;
-    const res = await fetch(url, {
-      headers: { Accept: "application/json, text/plain, */*" },
-      credentials: "include"
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  }
+  // -------------------------------------------------------------------------
+  // 3. DOM Lab Data Scanner (อ่านตารางหน้าจอตรง 100%)
+  // -------------------------------------------------------------------------
+  function scanTableData() {
+    const rows = document.querySelectorAll("tr");
+    let latestCompleted = null;
+    let nextPending = null;
+    const completedRounds = [];
 
-  async function runQualityCheck() {
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+    rows.forEach((row) => {
+      const text = row.innerText || "";
+      // หาแถวที่มีเวลารอบ เช่น 01:00, 04:00, ...
+      for (const round of CONFIG.labRounds) {
+        if (text.includes(round)) {
+          const isCompleted = text.includes("Completed");
+          const isInitial = text.includes("Initial");
 
-    for (const page of CONFIG.pagesToMonitor) {
-      try {
-        const data = await fetchRoutineResults(page.id, page.tableId);
-        if (!Array.isArray(data) || data.length === 0) continue;
+          if (isCompleted) {
+            completedRounds.push(round);
+            latestCompleted = round;
 
-        const targetHourStr = `${String(CONFIG.targetHour).padStart(2, "0")}:00:00`;
-        const records16 = data.filter(
-          (item) => item.collectionDate && item.collectionDate.includes(targetHourStr)
-        );
+            // ตรวจสอบว่าเคยแจ้งเตือนรอบนี้ของวันนี้หรือยัง
+            const alertKey = `ALERTED_${getTodayString()}_${round}`;
+            const alreadyAlerted = GM_getValue(alertKey, false);
 
-        if (records16.length === 0) {
-          updateWidgetStatus(`ยังไม่มีข้อมูลรอบ 16:00 (${timeStr})`, "#F59E0B");
-          continue;
+            if (!alreadyAlerted) {
+              triggerRoundCompleteAlert(round, row);
+              GM_setValue(alertKey, true);
+            }
+          } else if (isInitial && !nextPending) {
+            nextPending = round;
+          }
         }
-
-        const completedItems = records16.filter(
-          (item) =>
-            item.sampleStatus === "Completed" &&
-            item.displayValue &&
-            item.displayValue !== "Initial"
-        );
-
-        const hasCompletedMainParams = CONFIG.targetParams.every((paramName) =>
-          completedItems.some((item) => item.aliasParam === paramName || item.paramId === paramName)
-        );
-
-        const alertKey = `ALERTED_${getTodayDateString()}_${page.id}_${CONFIG.targetHour}`;
-        const hasAlerted = GM_getValue(alertKey, false);
-
-        if (hasCompletedMainParams && !hasAlerted) {
-          triggerLabCompleteNotification(page.name, records16);
-          GM_setValue(alertKey, true);
-          updateWidgetStatus(`✅ รอบ 16:00 ออกครบแล้ว (${timeStr})`, "#10B981");
-          return;
-        } else if (hasCompletedMainParams) {
-          updateWidgetStatus(`รอบ 16:00 ออกครบแล้ว (${timeStr})`, "#10B981");
-        } else {
-          updateWidgetStatus(
-            `รอบ 16:00 ยังไม่ครบ (${completedItems.length} ค่า, ${timeStr})`,
-            "#F59E0B"
-          );
-        }
-      } catch (err) {
-        console.error(`[Laro Monitor] Error page ${page.id}:`, err);
-        updateWidgetStatus(`ดึงข้อมูลไม่สำเร็จ (${timeStr})`, "#EF4444");
       }
-    }
+    });
+
+    return { latestCompleted, nextPending, countCompleted: completedRounds.length };
   }
 
-  function triggerLabCompleteNotification(routineName, records) {
+  function triggerRoundCompleteAlert(round, rowElement) {
     playAlertSound();
 
-    const findVal = (p) => {
-      const found = records.find(
-        (r) => (r.aliasParam === p || r.paramId === p) && r.displayValue !== "Initial"
-      );
-      return found ? `${found.displayValue} ${found.displayUnits || ""}`.trim() : "-";
-    };
+    // ดึงค่าคร่าวๆ จากแถว
+    const rowText = rowElement ? rowElement.innerText.replace(/\s+/g, " ") : "";
 
-    const cba = findVal("4-CBA");
-    const pta = findVal("p-TA");
-    const bVal = findVal("b-value (Pro)");
-    const summaryMsg = `4-CBA: ${cba} | p-TA: ${pta} | b*: ${bVal}`;
+    const title = `🔔 ผล Lab PZ-402 รอบ ${round} น. ออกแล้ว!`;
+    const message = `ตรวจพบสถานะ (Completed) ของรอบ ${round} น. เรียบร้อยแล้วค่ะพี่ A`;
 
     GM_notification({
-      title: `🔔 ผล Lab รอบ 16:00 ออกครบแล้ว! (${routineName})`,
-      text: `ค่าวิเคราะห์ออกครบเรียบร้อยแล้วค่ะพี่ A:\n${summaryMsg}`,
+      title: title,
+      text: `${message}\n${rowText.substring(0, 100)}...`,
       timeout: 15000,
       onclick: () => {
         window.focus();
@@ -191,27 +119,143 @@
     });
   }
 
-  function scheduleNextCheck() {
-    const currentHour = new Date().getHours();
-    const currentMinute = new Date().getMinutes();
-    const isRushHour =
-      (currentHour === 15 && currentMinute >= 50) ||
-      currentHour === 16 ||
-      (currentHour === 17 && currentMinute <= 15);
-    const interval = isRushHour ? CONFIG.checkIntervalRush : CONFIG.checkIntervalNormal;
+  // -------------------------------------------------------------------------
+  // 4. UI Widget (Supasit.A Studio Design)
+  // -------------------------------------------------------------------------
+  function injectWidget() {
+    if (document.getElementById("laro-monitor-widget")) return;
 
-    setTimeout(() => {
-      runQualityCheck();
-      scheduleNextCheck();
-    }, interval);
+    const widget = document.createElement("div");
+    widget.id = "laro-monitor-widget";
+    widget.style.cssText = `
+      position: fixed !important;
+      bottom: 20px !important;
+      right: 20px !important;
+      z-index: 2147483647 !important;
+      background: #FFFFFF !important;
+      border: 1.5px solid #1D4ED8 !important;
+      border-radius: 13px !important;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+      padding: 12px 16px !important;
+      font-family: 'Noto Sans Thai', sans-serif, system-ui !important;
+      font-size: 13px !important;
+      color: #1E293B !important;
+      min-width: 260px !important;
+      user-select: none !important;
+    `;
+
+    widget.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span id="laro-dot" style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10B981;"></span>
+          <strong style="color:#1D4ED8; font-size:13px; font-weight:700;">Laro Monitor & Refresh</strong>
+        </div>
+        <span id="laro-timer-badge" style="background:#F1F5F9; color:#475569; font-size:11px; padding:2px 8px; border-radius:999px; font-weight:600;">05:00</span>
+      </div>
+
+      <div style="font-size:12px; color:#475569; line-height:1.6; margin-bottom:10px;">
+        <div>รอบล่าสุด: <strong id="laro-latest-round" style="color:#059669;">-</strong></div>
+        <div>กำลังรอผล: <strong id="laro-next-round" style="color:#D97706;">-</strong></div>
+      </div>
+
+      <div style="display:flex; gap:6px;">
+        <button id="laro-refresh-btn" style="flex:1; background:#1D4ED8; color:#FFFFFF; border:none; border-radius:999px; padding:6px 12px; font-size:11px; font-weight:600; cursor:pointer;">
+          🔄 รีเฟรชทันที
+        </button>
+        <button id="laro-pause-btn" style="background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; border-radius:999px; padding:6px 10px; font-size:11px; font-weight:600; cursor:pointer;">
+          ⏸️ หยุด
+        </button>
+      </div>
+    `;
+
+    (document.body || document.documentElement).appendChild(widget);
+
+    // Event Listeners
+    document.getElementById("laro-refresh-btn").addEventListener("click", () => {
+      window.location.reload();
+    });
+
+    document.getElementById("laro-pause-btn").addEventListener("click", () => {
+      isPaused = !isPaused;
+      const pauseBtn = document.getElementById("laro-pause-btn");
+      const dot = document.getElementById("laro-dot");
+      if (isPaused) {
+        pauseBtn.innerText = "▶️ ต่อ";
+        pauseBtn.style.background = "#FEF3C7";
+        pauseBtn.style.color = "#92400E";
+        dot.style.background = "#F59E0B";
+      } else {
+        pauseBtn.innerText = "⏸️ หยุด";
+        pauseBtn.style.background = "#F1F5F9";
+        pauseBtn.style.color = "#475569";
+        dot.style.background = "#10B981";
+      }
+    });
   }
 
-  const readyTimer = setInterval(() => {
-    if (document.body) {
-      clearInterval(readyTimer);
-      createWidget();
-      runQualityCheck();
-      scheduleNextCheck();
+  function updateWidgetInfo(scanResult) {
+    const latestEl = document.getElementById("laro-latest-round");
+    const nextEl = document.getElementById("laro-next-round");
+
+    if (latestEl) {
+      latestEl.innerText = scanResult.latestCompleted
+        ? `${scanResult.latestCompleted} น. (Completed)`
+        : "ยังไม่มีรอบที่เสร็จ";
     }
-  }, 500);
+
+    if (nextEl) {
+      nextEl.innerText = scanResult.nextPending
+        ? `${scanResult.nextPending} น. (Initial)`
+        : "ครบทุกรอบแล้ว";
+    }
+  }
+
+  function updateCountdownUI() {
+    const timerBadge = document.getElementById("laro-timer-badge");
+    if (!timerBadge) return;
+
+    if (isPaused) {
+      timerBadge.innerText = "PAUSED";
+      return;
+    }
+
+    const mins = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
+    const secs = String(remainingSeconds % 60).padStart(2, "0");
+    timerBadge.innerText = `${mins}:${secs}`;
+  }
+
+  // -------------------------------------------------------------------------
+  // 5. Main Loop & Initialization
+  // -------------------------------------------------------------------------
+  function startCountdown() {
+    if (countdownTimer) clearInterval(countdownTimer);
+
+    countdownTimer = setInterval(() => {
+      if (!isPaused) {
+        remainingSeconds--;
+        updateCountdownUI();
+
+        if (remainingSeconds <= 0) {
+          clearInterval(countdownTimer);
+          console.log("[Laro Monitor] ครบ 5 นาที ทำการ reload หน้าจอ...");
+          window.location.reload();
+        }
+      }
+    }, 1000);
+  }
+
+  // เฝ้าระวังและ inject widget ซ้ำหาก Angular ลบ DOM
+  setInterval(() => {
+    injectWidget();
+    const result = scanTableData();
+    updateWidgetInfo(result);
+  }, 2000);
+
+  // เริ่มต้นทำงาน
+  setTimeout(() => {
+    injectWidget();
+    const result = scanTableData();
+    updateWidgetInfo(result);
+    startCountdown();
+  }, 1000);
 })();
