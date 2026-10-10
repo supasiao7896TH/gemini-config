@@ -113,6 +113,27 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; irm https://raw.githubusercont
 
 ---
 
+## 🏭 6. ระบบเปิดไฟล์กะ PTA1 อัตโนมัติ (PTA1 Shift Workspace Launcher)
+
+เมื่อรัน `setup-junctions.ps1` ระบบจะสร้าง Windows Shortcut `PTA1-Workspace.lnk` ในโฟลเดอร์ Startup ให้อัตโนมัติ โดยจะเปิด 9 รายการสำคัญประจำกะ PTA1 ทุกครั้งที่ล็อกอิน:
+
+### 6.1 รายการที่เปิดอัตโนมัติ
+1. **PTA1 Logbook (FM Activity Report):** เปิดตรงจาก SharePoint ผ่าน Excel Protocol (`ms-excel:ofe|u|...`)
+2. **Plant 1 Daily Consumption (OPS Logsheet):** ดึงไฟล์เดือนล่าสุดจาก Drive `K:\PE\01-WWT Daily consumption (SM)\02-Daily cons plant 1\`
+3. **Plant 1 Product Transfer Monitoring:** ดึงไฟล์เดือนล่าสุดจาก Drive `K:\PE\02-Daily PTA product CAL ( SM )\06-Product transfer\Plant 1\`
+4. **IOW Plant 1 - PTA unit:** ดึงจาก Drive `K:\`
+5. **Monitor Log Sheet Boardman Web App:** [Web App Cloudflare](https://monitor-log-sheet-boardman.supasiao.workers.dev/)
+6. **Laro Routine 2122 (PTA-1):** [PTTGC Laro Routine](https://pttgclaro.pttgcgroup.com/#/routine;id=2122;parentId=845;plantId=841)
+7. **Laro Routine 2121 (PTA-2):** [PTTGC Laro Routine](https://pttgclaro.pttgcgroup.com/#/routine;id=2121;parentId=846;plantId=841)
+8. **AAA PTA1 GCMP.pdi:** หน้าจอ PI ProcessBook ดึงจาก Desktop (OneDrive)
+
+### 6.2 การตั้งค่า Tampermonkey สำหรับระบบเตือน Lab Routine 16:00 น.
+1. ติดตั้ง Extension **Tampermonkey** บน Chrome หรือ Edge
+2. นำเข้า Userscript จากไฟล์: `tools/userscripts/pttgc-laro-monitor.user.js`
+3. สคริปต์จะตรวจสอบผลวิเคราะห์ PZ-402 รอบ 16:00 น. และส่งเสียงเตือนอัตโนมัติ
+
+---
+
 ## 📦 7. คู่มือพิเศษ: การจัดการ Node.js (ลิขสิทธิ์ & แผนสำรอง Non-Admin Portable)
 
 ### 7.1 ข้อมูลด้านลิขสิทธิ์และความปลอดภัยองค์กร (สำหรับตอบ IT / Audit)
@@ -154,5 +175,8 @@ Copy-Item "$env:TEMP\node-extract\node-v22.14.0-win-x64\*" $nodeDir -Recurse -Fo
 - [ ] ทดสอบเปิด Excel และตรวจดูแถบเครื่องมือ **PI DataLink**
 - [ ] ทดสอบเปิด SAP GUI
 - [ ] ตรวจสอบว่า IT ลง **Node.js** ให้เรียบร้อยหรือไม่ (ถ้าไม่มี ให้ใช้ Plan B)
-- [ ] รันคำสั่ง Master Bootstrap บรรทัดเดียวใน PowerShell
+- [ ] ตรวจสอบว่า IT Map Network Drive **K:\** ให้เรียบร้อย
+- [ ] ทดสอบเปิด **OSIsoft PI ProcessBook** (`Procbook.exe`)
+- [ ] ติดตั้ง Extension **Tampermonkey** ในเบราว์เซอร์ และ Import Userscript `pttgc-laro-monitor.user.js`
+- [ ] รันคำสั่ง Master Bootstrap บรรทัดเดียวใน PowerShell (จะ clone config, ทำ junctions, และวาง Startup shortcut ให้)
 - [ ] เปิด VS Code พิมพ์ `a` (Antigravity) และ `c` (Claude Code) ล็อกอินและใช้งานต่อได้ทันที!
