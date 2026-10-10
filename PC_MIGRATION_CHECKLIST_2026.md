@@ -265,3 +265,33 @@ Copy-Item "$env:TEMP\node-extract\node-v22.14.0-win-x64\*" $nodeDir -Recurse -Fo
   │ ก่อนคืนเครื่องเก่าในวันที่ 29-30 หนูแนะน​ำให้กดรัน .\tools\backup-before-migration.ps1 อีก 1 รอบเพื่อเก็บข้อมูลวันสุดท้ายให้ครบถ้วนที่สุด
   สบายใจได้เลยนะคะ
   │ ไม่สูญหายแน่นอนค่ะ! 😊
+  ▸ Thought for 5s, 387 tokens
+  The migration checklist is located in two places: locally and on the version control platform. Access the file locally at the s...
+  หนูได้จัดเก็บและบันทึกเอกสารขั้นตอนทั้งหมดนี้ไว้ให้ 3 แหล่งอย่างถาวร เพื่อให้พี่ A สามารถเปิดอ่านได้สะดวกจากทุกที่ แม้ในวันที่ยังไม่ได้เริ่มเซ็ตอัพเครื่องใหม่ค่ะ:
+  ──────
+  ### 📍 แหล่งจัดเก็บข้อมูลและคู่มือการย้ายเครื่อง (Migration Guide Locations)
+
+  #### 1. 📂 ในโฟลเดอร์ Backup บน PTTGC OneDrive (เปิดดูได้ทันทีบนเครื่องใหม่)
+
+  • Path บน OneDrive:
+  OneDrive - PTT Global Chemical Public Company Limited\PC_Migration_Backup_2026\README_MIGRATION_GUIDE.md
+  • ประโยชน์: เมื่อพี่ A ได้รับเครื่องใหม่และล็อกอิน OneDrive ไฟล์นี้จะปรากฏอยู่หน้าแรกสุดในโฟลเดอร์ Backup ทันที
+  สามารถดับเบิลคลิกเปิดอ่านขั้นตอนและเช็กลิสต์ได้เลยค่ะ
+
+  #### 2. 🌐 บน GitHub Repository (เปิดดูผ่านมือถือหรือเว็บเบราว์เซอร์ใดก็ได้)
+
+  • ไฟล์ในโปรเจกต์: PC_MIGRATION_CHECKLIST_2026.md
+  • URL บน GitHub:
+  👉 https://github.com/supasiao7896TH/gemini-config/blob/main/PC_MIGRATION_CHECKLIST_2026.md
+  • ประโยชน์: พี่ A สามารถเปิดจากสมาร์ตโฟนหรือแท็บเล็ตระหว่างที่ IT ก​ำลังเปลี่ยนเครื่องให้ได้ตลอดเวลา
+
+  #### 3. ⚡ สคริปต์ Master 1-Click Bootstrap ส​ำหรับกู้คืนเครื่องใหม่
+
+  • ไฟล์ในโปรเจกต์: bootstrap.ps1
+  • ค​ำสั่งรันบรรทัดเดียวบนเครื่องใหม่:
+    Set-ExecutionPolicy Bypass -Scope Process -Force; irm https://raw.githubusercontent.com/supasiao7896TH/gemini-
+  config/main/bootstrap.ps1 | iex
+  (ค​ำสั่งนี้จะลง Winget Tools, Clone Config, สร้าง Junctions และสร้าง Shortcut PTA1-Workspace.lnk ใน Startup
+  ให้เครื่องใหม่อัตโนมัติในรวดเดียวค่ะ)
+  ──────
+  หนูได้อัปเดตทั้งไฟล์ใน OneDrive และ Push ขึ้น GitHub (commit b4d0e4d) ครบถ้วนทุกจุดแล้วค่ะ สบายใจได้ 100% เลยนะคะพี่ A! ✨
