@@ -23,7 +23,7 @@ $year = $now.Year
 $monthNum = $now.ToString("MM", $enUS)
 $monthAbbr = $now.ToString("MMM", $enUS)
 
-$logFile = Join-Path $PSScriptRoot "open-logbook.log"
+$logFile = "C:\ProgramData\PTA1-Workspace\open-logbook.log"
 
 function Log-Message {
     param(
@@ -198,6 +198,7 @@ foreach ($app in $webApps) {
 # 7. AAA PTA1 GCMP.pdi (Desktop - PI ProcessBook)
 # ----------------------------------------------------------
 $pdiDesktopCandidates = @(
+    "C:\ProgramData\PTA1-Workspace\AAA PTA1 GCMP.pdi",
     (Join-Path $env:USERPROFILE "OneDrive - PTT Global Chemical Public Company Limited\Other\Desktop\AAA PTA1 GCMP.pdi"),
     (Join-Path $env:USERPROFILE "Desktop\AAA PTA1 GCMP.pdi"),
     ([IO.Path]::Combine([Environment]::GetFolderPath("Desktop"), "AAA PTA1 GCMP.pdi"))
