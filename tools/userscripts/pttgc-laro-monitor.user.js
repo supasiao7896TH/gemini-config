@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         PTTGC Laro Quality Monitor & Auto-Refresh (PTA Routine)
 // @namespace    https://pttgclaro.pttgcgroup.com/
-// @version      1.3.0
-// @description  ระบบ Auto-Refresh (5 นาที) และตรวจสอบผล Lab PZ-402 ทั้ง 8 รอบ (01:00, 04:00, 07:00, 10:00, 13:00, 16:00, 19:00, 22:00) วนลูปไม่รู้จบ
+// @version      1.3.1
+// @description  Auto-Refresh (5 min) and Lab PZ-402 8-round monitor (01:00, 04:00, 07:00, 10:00, 13:00, 16:00, 19:00, 22:00) with in-place refresh
 // @author       Supasit.A Studio & Antigravity
 // @match        https://pttgclaro.pttgcgroup.com/*
 // @match        http://pttgclaro.pttgcgroup.com/*
@@ -16,10 +16,10 @@
 (function () {
   "use strict";
 
-  console.log("[Laro Monitor] Script v1.3.0 loaded on:", window.location.href);
+  console.log("[Laro Monitor] Script v1.3.1 loaded on:", window.location.href);
 
   const CONFIG = {
-    refreshSeconds: 300, // นับถอยหลัง 5 นาที (300 วินาที)
+    refreshSeconds: 300, // Countdown 5 minutes (300 seconds)
     labRounds: ["01:00", "04:00", "07:00", "10:00", "13:00", "16:00", "19:00", "22:00"],
     targetParams: ["4-CBA", "p-TA", "BA", "b-value (Pro)"]
   };
@@ -59,7 +59,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 2. In-Place Table Refresh (กดปุ่ม OK บนหน้าจอเพื่อดึงข้อมูลสดโดยหน้าไม่ดับ)
+  // 2. In-Place Table Refresh (Click OK button on screen)
   // -------------------------------------------------------------------------
   function triggerInPlaceRefresh() {
     const buttons = Array.from(document.querySelectorAll("button, .dx-button"));
@@ -69,22 +69,20 @@
     );
 
     if (okBtn) {
-      console.log("[Laro Monitor] กดปุ่ม OK เพื่อโหลดข้อมูลใหม่...");
+      console.log("[Laro Monitor] Clicking OK button for in-place refresh...");
       okBtn.click();
     } else if (refreshIcon) {
-      console.log("[Laro Monitor] กดปุ่ม Refresh เพื่อโหลดข้อมูลใหม่...");
+      console.log("[Laro Monitor] Clicking refresh icon...");
       refreshIcon.click();
     } else {
-      console.log("[Laro Monitor] ไม่พบปุ่มบนจอ สั่ง location.reload()...");
+      console.log("[Laro Monitor] Button not found, fallback to location.reload()...");
       window.location.reload();
       return;
     }
 
-    // รีเซ็ตเวลานับถอยหลังกลับไปที่ 5 นาทีทันที
     remainingSeconds = CONFIG.refreshSeconds;
     updateCountdownUI();
 
-    // รอให้ Angular โหลดข้อมูลเสร็จ 2 วินาทีแล้วสแกนผลใหม่
     setTimeout(() => {
       const res = scanTableData();
       updateWidgetInfo(res);
@@ -138,8 +136,8 @@
   function triggerRoundCompleteAlert(round, rowElement) {
     playAlertSound();
     const rowText = rowElement ? rowElement.innerText.replace(/\s+/g, " ") : "";
-    const title = `🔔 ผล Lab PZ-402 รอบ ${round} น. ออกแล้ว!`;
-    const message = `ตรวจพบสถานะ (Completed) ของรอบ ${round} น. เรียบร้อยแล้วค่ะพี่ A`;
+    const title = `🔔 Lab Result Ready: PZ-402 Round ${round} (Completed)!`;
+    const message = `PZ-402 Lab round ${round} is completed!`;
 
     if (typeof GM_notification !== "undefined") {
       GM_notification({
@@ -154,10 +152,13 @@
   }
 
   // -------------------------------------------------------------------------
-  // 4. UI Widget (Supasit.A Studio)
+  // 4. UI Widget (Clean Supasit.A Studio Design)
   // -------------------------------------------------------------------------
   function injectWidget() {
-    if (document.getElementById("laro-monitor-widget")) return;
+    const existing = document.getElementById("laro-monitor-widget");
+    if (existing) {
+      existing.remove(); // Remove any older/garbled widget version
+    }
 
     const widget = document.createElement("div");
     widget.id = "laro-monitor-widget";
@@ -171,7 +172,7 @@
       border-radius: 13px !important;
       box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
       padding: 12px 16px !important;
-      font-family: 'Noto Sans Thai', sans-serif, system-ui !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif !important;
       font-size: 13px !important;
       color: #1E293B !important;
       min-width: 260px !important;
@@ -188,16 +189,16 @@
       </div>
 
       <div style="font-size:12px; color:#475569; line-height:1.6; margin-bottom:10px;">
-        <div>รอบล่าสุด: <strong id="laro-latest-round" style="color:#059669;">-</strong></div>
-        <div>กำลังรอผล: <strong id="laro-next-round" style="color:#D97706;">-</strong></div>
+        <div>Latest Round: <strong id="laro-latest-round" style="color:#059669;">-</strong></div>
+        <div>Next Pending: <strong id="laro-next-round" style="color:#D97706;">-</strong></div>
       </div>
 
       <div style="display:flex; gap:6px;">
         <button id="laro-refresh-btn" style="flex:1; background:#1D4ED8; color:#FFFFFF; border:none; border-radius:999px; padding:6px 12px; font-size:11px; font-weight:600; cursor:pointer;">
-          🔄 รีเฟรชทันที
+          🔄 Refresh Now
         </button>
         <button id="laro-pause-btn" style="background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; border-radius:999px; padding:6px 10px; font-size:11px; font-weight:600; cursor:pointer;">
-          ⏸️ หยุด
+          ⏸️ Pause
         </button>
       </div>
     `;
@@ -213,12 +214,12 @@
       const pauseBtn = document.getElementById("laro-pause-btn");
       const dot = document.getElementById("laro-dot");
       if (isPaused) {
-        pauseBtn.innerText = "▶️ ต่อ";
+        pauseBtn.innerText = "▶️ Resume";
         pauseBtn.style.background = "#FEF3C7";
         pauseBtn.style.color = "#92400E";
         dot.style.background = "#F59E0B";
       } else {
-        pauseBtn.innerText = "⏸️ หยุด";
+        pauseBtn.innerText = "⏸️ Pause";
         pauseBtn.style.background = "#F1F5F9";
         pauseBtn.style.color = "#475569";
         dot.style.background = "#10B981";
@@ -232,14 +233,14 @@
 
     if (latestEl) {
       latestEl.innerText = scanResult.latestCompleted
-        ? `${scanResult.latestCompleted} น. (Completed)`
-        : "ยังไม่มีรอบที่เสร็จ";
+        ? `${scanResult.latestCompleted} (Completed)`
+        : "None yet";
     }
 
     if (nextEl) {
       nextEl.innerText = scanResult.nextPending
-        ? `${scanResult.nextPending} น. (Initial)`
-        : "ครบทุกรอบแล้ว";
+        ? `${scanResult.nextPending} (Initial)`
+        : "All Completed";
     }
   }
 
@@ -258,7 +259,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 5. Main Loop & Perpetual Timer (วนลูปไม่รู้จบ)
+  // 5. Main Loop & Perpetual Timer
   // -------------------------------------------------------------------------
   function startCountdown() {
     if (countdownTimer) clearInterval(countdownTimer);
@@ -269,23 +270,24 @@
         updateCountdownUI();
 
         if (remainingSeconds <= 0) {
-          console.log("[Laro Monitor] ครบ 5 นาที สั่งรีเฟรชข้อมูลในหน้าแบบ In-Place...");
+          console.log("[Laro Monitor] 5 min elapsed, in-place refresh...");
           triggerInPlaceRefresh();
         }
       }
     }, 1000);
   }
 
+  // Ensure widget exists and updates every 3 seconds
   setInterval(() => {
-    injectWidget();
+    if (!document.getElementById("laro-monitor-widget")) {
+      injectWidget();
+    }
     const result = scanTableData();
     updateWidgetInfo(result);
-  }, 2000);
+  }, 3000);
 
-  setTimeout(() => {
-    injectWidget();
-    const result = scanTableData();
-    updateWidgetInfo(result);
-    startCountdown();
-  }, 1000);
+  injectWidget();
+  const result = scanTableData();
+  updateWidgetInfo(result);
+  startCountdown();
 })();
