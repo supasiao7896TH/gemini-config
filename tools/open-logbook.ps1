@@ -23,9 +23,61 @@ $year = $now.Year
 $monthNum = $now.ToString("MM", $enUS)
 $monthAbbr = $now.ToString("MMM", $enUS)
 
-Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "   Starting PTA1 Shift Workspace & Routine Launcher...     " -ForegroundColor Yellow
-Write-Host "==========================================================" -ForegroundColor Cyan
+$logFile = Join-Path $PSScriptRoot "open-logbook.log"
+
+function Log-Message {
+    param(
+        [string]$Message,
+        [string]$Level = "INFO"
+    )
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+    $logLine = "[$timestamp] [$Level] $Message"
+    
+    switch ($Level) {
+        "INFO"    { Write-Host $Message -ForegroundColor Green }
+        "WARN"    { Write-Warning $Message }
+        "TITLE"   { Write-Host $Message -ForegroundColor Cyan }
+        "SUB"     { Write-Host $Message -ForegroundColor Yellow }
+        default   { Write-Host $Message }
+    }
+    
+    try {
+        Add-Content -Path $logFile -Value $logLine -Encoding UTF8 -ErrorAction SilentlyContinue
+    } catch {}
+}
+
+# Trim log file if it exceeds 300 lines
+if (Test-Path $logFile) {
+    try {
+        $existingLines = Get-Content -Path $logFile -ErrorAction SilentlyContinue
+        if ($existingLines.Count -gt 300) {
+            $existingLines | Select-Object -Last 150 | Set-Content -Path $logFile -Encoding UTF8 -Force
+        }
+    } catch {}
+}
+
+Log-Message "==========================================================" "TITLE"
+Log-Message "   Starting PTA1 Shift Workspace & Routine Launcher...     " "SUB"
+Log-Message "==========================================================" "TITLE"
+
+# ----------------------------------------------------------
+# Pre-Check: Network & Drive K: Availability (Wait up to 15s)
+# ----------------------------------------------------------
+if (-not (Test-Path "K:\")) {
+    Log-Message "Drive K:\ not immediately detected. Waiting for network mount..." "SUB"
+    $waited = 0
+    $maxWait = 15
+    while (-not (Test-Path "K:\") -and ($waited -lt $maxWait)) {
+        Start-Sleep -Seconds 2
+        $waited += 2
+        Log-Message "Waiting for Drive K:\ ... ($waited/${maxWait}s)" "SUB"
+    }
+    if (Test-Path "K:\") {
+        Log-Message "Drive K:\ connected successfully after ${waited}s." "INFO"
+    } else {
+        Log-Message "Drive K:\ still not accessible after ${maxWait}s timeout." "WARN"
+    }
+}
 
 # ----------------------------------------------------------
 # 1. PTA1 Logbook (SharePoint via Office Protocol)
@@ -36,15 +88,21 @@ $encodedFile = [System.Uri]::EscapeDataString($logbookFile)
 $sharepointUrl = "https://pttgcgroup.sharepoint.com/sites/GCMPINtranet/pe/PEDoc/02%20-%20Plant%201/Log%20book%20PTA1/$encodedFolder/$encodedFile"
 $excelUri = "ms-excel:ofe|u|$sharepointUrl"
 
-Write-Host "[1/6] Opening PTA1 Logbook : $logbookFile" -ForegroundColor Green
+Log-Message "[1/6] Opening PTA1 Logbook : $logbookFile" "INFO"
 if (-not $WhatIf) {
     Start-Process $excelUri
+    Start-Sleep -Milliseconds 1500
 }
 
 # ----------------------------------------------------------
 # 2. Daily Cons for Shift (OPS Logsheet - เดือนล่าสุด)
 # ----------------------------------------------------------
 $dailyConsFolder = "K:\PE\01-WWT Daily consumption (SM)\02-Daily cons plant 1\$year"
+if (-not (Test-Path $dailyConsFolder)) {
+    # Fallback to previous year folder if new year folder does not exist yet
+    $dailyConsFolder = "K:\PE\01-WWT Daily consumption (SM)\02-Daily cons plant 1\$($year - 1)"
+}
+
 if (Test-Path $dailyConsFolder) {
     # ค้นหาไฟล์เดือนปัจจุบัน เช่น 10-Plant1 Daily Cons for Shift Oct'26-OPS.xlsm
     $targetCons = Get-ChildItem -Path $dailyConsFolder -Filter "${monthNum}-Plant1 Daily Cons for Shift *.xlsm" -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -53,19 +111,27 @@ if (Test-Path $dailyConsFolder) {
         $targetCons = Get-ChildItem -Path $dailyConsFolder -Filter "*-Plant1 Daily Cons for Shift *.xlsm" -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1
     }
     if ($targetCons) {
-        Write-Host "[2/6] Opening Daily Cons    : $($targetCons.Name)" -ForegroundColor Green
-        if (-not $WhatIf) { Start-Process $targetCons.FullName }
+        Log-Message "[2/6] Opening Daily Cons    : $($targetCons.Name)" "INFO"
+        if (-not $WhatIf) {
+            Start-Process $targetCons.FullName
+            Start-Sleep -Milliseconds 1500
+        }
     } else {
-        Write-Warning "[2/6] Daily Cons file not found in $dailyConsFolder"
+        Log-Message "[2/6] Daily Cons file not found in $dailyConsFolder" "WARN"
     }
 } else {
-    Write-Warning "[2/6] Drive K:\ Daily Cons folder not accessible"
+    Log-Message "[2/6] Drive K:\ Daily Cons folder not accessible" "WARN"
 }
 
 # ----------------------------------------------------------
 # 3. Product Transfer Monitoring (เดือนล่าสุด)
 # ----------------------------------------------------------
 $transferFolder = "K:\PE\02-Daily PTA product CAL ( SM )\06-Product transfer\Plant 1\$year"
+if (-not (Test-Path $transferFolder)) {
+    # Fallback to previous year folder if new year folder does not exist yet
+    $transferFolder = "K:\PE\02-Daily PTA product CAL ( SM )\06-Product transfer\Plant 1\$($year - 1)"
+}
+
 if (Test-Path $transferFolder) {
     $targetTransfer = Join-Path $transferFolder "P1_Product_Transfer_Monitoring_${year}${monthNum}.xlsm"
     if (-not (Test-Path $targetTransfer)) {
@@ -74,13 +140,16 @@ if (Test-Path $transferFolder) {
         if ($latestTransfer) { $targetTransfer = $latestTransfer.FullName }
     }
     if (Test-Path $targetTransfer) {
-        Write-Host "[3/6] Opening Product Trans : $(Split-Path $targetTransfer -Leaf)" -ForegroundColor Green
-        if (-not $WhatIf) { Start-Process $targetTransfer }
+        Log-Message "[3/6] Opening Product Trans : $(Split-Path $targetTransfer -Leaf)" "INFO"
+        if (-not $WhatIf) {
+            Start-Process $targetTransfer
+            Start-Sleep -Milliseconds 1500
+        }
     } else {
-        Write-Warning "[3/6] Product Transfer file not found in $transferFolder"
+        Log-Message "[3/6] Product Transfer file not found in $transferFolder" "WARN"
     }
 } else {
-    Write-Warning "[3/6] Drive K:\ Product Transfer folder not accessible"
+    Log-Message "[3/6] Drive K:\ Product Transfer folder not accessible" "WARN"
 }
 
 # ----------------------------------------------------------
@@ -88,19 +157,23 @@ if (Test-Path $transferFolder) {
 # ----------------------------------------------------------
 $iowCandidates = @(
     "K:\PE\01-WWT Daily consumption (SM)\02-Daily cons plant 1\$year\IOW_Plant 1 - PTA unit.xlsx",
+    "K:\PE\01-WWT Daily consumption (SM)\02-Daily cons plant 1\$($year - 1)\IOW_Plant 1 - PTA unit.xlsx",
     "K:\PE\02-Daily PTA product CAL ( SM )\06-Product transfer\Plant 1\IOW_Plant 1 - PTA unit.xlsx"
 )
 $foundIow = $false
 foreach ($p in $iowCandidates) {
     if (Test-Path $p) {
-        Write-Host "[4/6] Opening IOW           : $(Split-Path $p -Leaf)" -ForegroundColor Green
-        if (-not $WhatIf) { Start-Process $p }
+        Log-Message "[4/6] Opening IOW           : $(Split-Path $p -Leaf)" "INFO"
+        if (-not $WhatIf) {
+            Start-Process $p
+            Start-Sleep -Milliseconds 1500
+        }
         $foundIow = $true
         break
     }
 }
 if (-not $foundIow) {
-    Write-Warning "[4/6] IOW file not found on Drive K:\"
+    Log-Message "[4/6] IOW file not found on Drive K:\" "WARN"
 }
 
 # ----------------------------------------------------------
@@ -112,28 +185,37 @@ $webApps = @(
     @{ Name = "Laro Routine 2121";  Url = "https://pttgclaro.pttgcgroup.com/#/routine;id=2121;parentId=846;plantId=841" }
 )
 
-Write-Host "[5-6/6] Opening Web Applications..." -ForegroundColor Green
+Log-Message "[5-6/6] Opening Web Applications..." "INFO"
 foreach ($app in $webApps) {
-    Write-Host "        - $($app.Name)" -ForegroundColor Cyan
+    Log-Message "        - $($app.Name)" "SUB"
     if (-not $WhatIf) {
         Start-Process $app.Url
-        Start-Sleep -Milliseconds 400
+        Start-Sleep -Milliseconds 500
     }
 }
 
 # ----------------------------------------------------------
-# 7. AAA PTA1 GCMP.pdi (Desktop)
+# 7. AAA PTA1 GCMP.pdi (Desktop - PI ProcessBook)
 # ----------------------------------------------------------
-$pdiDesktopFile = "C:\Users\26007294\OneDrive - PTT Global Chemical Public Company Limited\Other\Desktop\AAA PTA1 GCMP.pdi"
-if (Test-Path $pdiDesktopFile) {
-    Write-Host "[7/7] Opening PI Display    : $(Split-Path $pdiDesktopFile -Leaf)" -ForegroundColor Green
+$pdiDesktopCandidates = @(
+    (Join-Path $env:USERPROFILE "OneDrive - PTT Global Chemical Public Company Limited\Other\Desktop\AAA PTA1 GCMP.pdi"),
+    (Join-Path $env:USERPROFILE "Desktop\AAA PTA1 GCMP.pdi"),
+    ([IO.Path]::Combine([Environment]::GetFolderPath("Desktop"), "AAA PTA1 GCMP.pdi"))
+)
+$pdiDesktopFile = $pdiDesktopCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+$isProcBookRunning = (Get-Process -Name "procbook" -ErrorAction SilentlyContinue) -ne $null
+if ($isProcBookRunning) {
+    Log-Message "[7/7] PI ProcessBook is already running, skipping launch." "INFO"
+} elseif ($pdiDesktopFile) {
+    Log-Message "[7/7] Opening PI Display    : $(Split-Path $pdiDesktopFile -Leaf)" "INFO"
     if (-not $WhatIf) {
         Start-Process $pdiDesktopFile
     }
 } else {
-    Write-Warning "[7/7] PI Display file not found: $pdiDesktopFile"
+    Log-Message "[7/7] PI Display file not found on Desktop" "WARN"
 }
 
-Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "  All Workspace files and tabs launched successfully!     " -ForegroundColor Green
-Write-Host "==========================================================" -ForegroundColor Cyan
+Log-Message "==========================================================" "TITLE"
+Log-Message "  All Workspace files and tabs launched successfully!     " "INFO"
+Log-Message "==========================================================" "TITLE"

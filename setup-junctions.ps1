@@ -219,12 +219,32 @@ if (-not $hasStatusLine -or $Force) {
     Write-Host "[=] statusLine already configured in $cliSettingsPath (use -Force to overwrite)" -ForegroundColor Gray
 }
 
-# 6. Deploy PTA1 Logbook Auto-Start to Windows Startup
+# 6. Deploy PTA1 Shift Workspace Auto-Start to Windows Startup (.lnk Shortcut)
 $startupFolder = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
-$logbookVbs = Join-Path $repoRoot "tools\Open-PTA1-Logbook.vbs"
-if ((Test-Path $startupFolder) -and (Test-Path $logbookVbs)) {
-    Copy-Item $logbookVbs (Join-Path $startupFolder "Open-PTA1-Logbook.vbs") -Force
-    Write-Host "[+] Configured PTA1 Logbook auto-open on Windows Startup" -ForegroundColor Green
+$targetScript = Join-Path $repoRoot "tools\open-logbook.ps1"
+$lnkPath = Join-Path $startupFolder "PTA1-Workspace.lnk"
+$oldVbs = Join-Path $startupFolder "Open-PTA1-Logbook.vbs"
+
+# Clean up legacy VBS if exists
+if (Test-Path $oldVbs) {
+    Remove-Item $oldVbs -Force -ErrorAction SilentlyContinue
+    Write-Host "[-] Removed legacy Open-PTA1-Logbook.vbs from Startup" -ForegroundColor Yellow
+}
+
+if ((Test-Path $startupFolder) -and (Test-Path $targetScript)) {
+    try {
+        $wsh = New-Object -ComObject WScript.Shell
+        $shortcut = $wsh.CreateShortcut($lnkPath)
+        $shortcut.TargetPath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+        $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Minimized -File `"$targetScript`""
+        $shortcut.WorkingDirectory = Join-Path $repoRoot "tools"
+        $shortcut.WindowStyle = 7 # Minimized
+        $shortcut.Description = "PTA1 Shift Workspace Auto-Launcher"
+        $shortcut.Save()
+        Write-Host "[+] Configured PTA1 Workspace auto-open (.lnk) on Windows Startup" -ForegroundColor Green
+    } catch {
+        Write-Warning "Failed to create Startup shortcut: $_"
+    }
 }
 
 Write-Host "==========================================" -ForegroundColor Cyan
