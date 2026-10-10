@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         PTTGC Laro Quality Monitor & Auto-Refresh (PTA Routine)
 // @namespace    https://pttgclaro.pttgcgroup.com/
-// @version      1.2.0
-// @description  ระบบ Auto-Refresh (5 นาที) และตรวจสอบผล Lab PZ-402 ทั้ง 8 รอบ (01:00, 04:00, 07:00, 10:00, 13:00, 16:00, 19:00, 22:00) อัตโนมัติ
+// @version      1.3.0
+// @description  ระบบ Auto-Refresh (5 นาที) และตรวจสอบผล Lab PZ-402 ทั้ง 8 รอบ (01:00, 04:00, 07:00, 10:00, 13:00, 16:00, 19:00, 22:00) วนลูปไม่รู้จบ
 // @author       Supasit.A Studio & Antigravity
 // @match        https://pttgclaro.pttgcgroup.com/*
 // @match        http://pttgclaro.pttgcgroup.com/*
@@ -16,10 +16,10 @@
 (function () {
   "use strict";
 
-  console.log("[Laro Monitor] Script v1.2.0 loaded on:", window.location.href);
+  console.log("[Laro Monitor] Script v1.3.0 loaded on:", window.location.href);
 
   const CONFIG = {
-    refreshSeconds: 300, // Auto-refresh ทุก 5 นาที (300 วินาที)
+    refreshSeconds: 300, // นับถอยหลัง 5 นาที (300 วินาที)
     labRounds: ["01:00", "04:00", "07:00", "10:00", "13:00", "16:00", "19:00", "22:00"],
     targetParams: ["4-CBA", "p-TA", "BA", "b-value (Pro)"]
   };
@@ -50,9 +50,6 @@
     }
   }
 
-  // -------------------------------------------------------------------------
-  // 2. Helper: Date Formatter
-  // -------------------------------------------------------------------------
   function getTodayString() {
     const d = new Date();
     const y = d.getFullYear();
@@ -62,7 +59,40 @@
   }
 
   // -------------------------------------------------------------------------
-  // 3. DOM Lab Data Scanner (อ่านตารางหน้าจอตรง 100%)
+  // 2. In-Place Table Refresh (กดปุ่ม OK บนหน้าจอเพื่อดึงข้อมูลสดโดยหน้าไม่ดับ)
+  // -------------------------------------------------------------------------
+  function triggerInPlaceRefresh() {
+    const buttons = Array.from(document.querySelectorAll("button, .dx-button"));
+    const okBtn = buttons.find((b) => b.innerText && b.innerText.trim() === "OK");
+    const refreshIcon = document.querySelector(
+      ".dx-icon-refresh, [title*='Refresh'], [title*='รีเฟรช']"
+    );
+
+    if (okBtn) {
+      console.log("[Laro Monitor] กดปุ่ม OK เพื่อโหลดข้อมูลใหม่...");
+      okBtn.click();
+    } else if (refreshIcon) {
+      console.log("[Laro Monitor] กดปุ่ม Refresh เพื่อโหลดข้อมูลใหม่...");
+      refreshIcon.click();
+    } else {
+      console.log("[Laro Monitor] ไม่พบปุ่มบนจอ สั่ง location.reload()...");
+      window.location.reload();
+      return;
+    }
+
+    // รีเซ็ตเวลานับถอยหลังกลับไปที่ 5 นาทีทันที
+    remainingSeconds = CONFIG.refreshSeconds;
+    updateCountdownUI();
+
+    // รอให้ Angular โหลดข้อมูลเสร็จ 2 วินาทีแล้วสแกนผลใหม่
+    setTimeout(() => {
+      const res = scanTableData();
+      updateWidgetInfo(res);
+    }, 2000);
+  }
+
+  // -------------------------------------------------------------------------
+  // 3. DOM Lab Data Scanner
   // -------------------------------------------------------------------------
   function scanTableData() {
     const rows = document.querySelectorAll("tr");
@@ -72,7 +102,6 @@
 
     rows.forEach((row) => {
       const text = row.innerText || "";
-      // หาแถวที่มีเวลารอบ เช่น 01:00, 04:00, ...
       for (const round of CONFIG.labRounds) {
         if (text.includes(round)) {
           const isCompleted = text.includes("Completed");
@@ -82,13 +111,19 @@
             completedRounds.push(round);
             latestCompleted = round;
 
-            // ตรวจสอบว่าเคยแจ้งเตือนรอบนี้ของวันนี้หรือยัง
             const alertKey = `ALERTED_${getTodayString()}_${round}`;
-            const alreadyAlerted = GM_getValue(alertKey, false);
+            const alreadyAlerted =
+              typeof GM_getValue !== "undefined"
+                ? GM_getValue(alertKey, false)
+                : sessionStorage.getItem(alertKey);
 
             if (!alreadyAlerted) {
               triggerRoundCompleteAlert(round, row);
-              GM_setValue(alertKey, true);
+              if (typeof GM_setValue !== "undefined") {
+                GM_setValue(alertKey, true);
+              } else {
+                sessionStorage.setItem(alertKey, "true");
+              }
             }
           } else if (isInitial && !nextPending) {
             nextPending = round;
@@ -102,25 +137,24 @@
 
   function triggerRoundCompleteAlert(round, rowElement) {
     playAlertSound();
-
-    // ดึงค่าคร่าวๆ จากแถว
     const rowText = rowElement ? rowElement.innerText.replace(/\s+/g, " ") : "";
-
     const title = `🔔 ผล Lab PZ-402 รอบ ${round} น. ออกแล้ว!`;
     const message = `ตรวจพบสถานะ (Completed) ของรอบ ${round} น. เรียบร้อยแล้วค่ะพี่ A`;
 
-    GM_notification({
-      title: title,
-      text: `${message}\n${rowText.substring(0, 100)}...`,
-      timeout: 15000,
-      onclick: () => {
-        window.focus();
-      }
-    });
+    if (typeof GM_notification !== "undefined") {
+      GM_notification({
+        title: title,
+        text: `${message}\n${rowText.substring(0, 100)}...`,
+        timeout: 15000,
+        onclick: () => window.focus()
+      });
+    } else {
+      alert(`${title}\n${message}`);
+    }
   }
 
   // -------------------------------------------------------------------------
-  // 4. UI Widget (Supasit.A Studio Design)
+  // 4. UI Widget (Supasit.A Studio)
   // -------------------------------------------------------------------------
   function injectWidget() {
     if (document.getElementById("laro-monitor-widget")) return;
@@ -170,9 +204,8 @@
 
     (document.body || document.documentElement).appendChild(widget);
 
-    // Event Listeners
     document.getElementById("laro-refresh-btn").addEventListener("click", () => {
-      window.location.reload();
+      triggerInPlaceRefresh();
     });
 
     document.getElementById("laro-pause-btn").addEventListener("click", () => {
@@ -225,7 +258,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 5. Main Loop & Initialization
+  // 5. Main Loop & Perpetual Timer (วนลูปไม่รู้จบ)
   // -------------------------------------------------------------------------
   function startCountdown() {
     if (countdownTimer) clearInterval(countdownTimer);
@@ -236,22 +269,19 @@
         updateCountdownUI();
 
         if (remainingSeconds <= 0) {
-          clearInterval(countdownTimer);
-          console.log("[Laro Monitor] ครบ 5 นาที ทำการ reload หน้าจอ...");
-          window.location.reload();
+          console.log("[Laro Monitor] ครบ 5 นาที สั่งรีเฟรชข้อมูลในหน้าแบบ In-Place...");
+          triggerInPlaceRefresh();
         }
       }
     }, 1000);
   }
 
-  // เฝ้าระวังและ inject widget ซ้ำหาก Angular ลบ DOM
   setInterval(() => {
     injectWidget();
     const result = scanTableData();
     updateWidgetInfo(result);
   }, 2000);
 
-  // เริ่มต้นทำงาน
   setTimeout(() => {
     injectWidget();
     const result = scanTableData();
