@@ -92,7 +92,7 @@ gemini-config/
 │   └── workflows/ci.yml    → GitHub Actions CI Pipeline (Prettier, Secretlint, Standards)
 ├── config.json             → การตั้งค่า Plugins, Remote Control Hostname, Dark Theme
 ├── hooks.json              → Life-cycle hooks (Windows SAPI Voice alerts & Security Gate)
-├── mcp_config.json         → MCP Servers (Firebase, Puppeteer, BigQuery)
+├── mcp_config.json         → MCP Servers (Firebase, BigQuery/datacloud — Puppeteer ถอดออก 2026-10-11)
 ├── package.json            → Scripts & devDependencies สำหรับ CI/CD (Prettier & Secretlint)
 ├── .secretlintrc.json      → กฎการตรวจจับ Secret / Key หลุดในโค้ด
 ├── .geminiignore           → Ignore rules สำหรับ Gemini CLI

@@ -147,7 +147,7 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
 | `tools/statusline.js` (statusline ของ `agy`) | **gemini-config** (ย้ายมาจาก claude-config + ไฟล์นอก repo ที่ root ของ workspace เมื่อ 2026-10-11) | `settings.json` ชี้ผ่าน junction `~/.gemini/config/tools/statusline.js` |
 | ตัวสร้างโปรเจกต์ใหม่ `New-VibeProject` | **claude-config** (`tools/new-vibe-project.ps1` — เจ้าของ `design-lab/starter-multifile`) | `tools/new-vibe-project.ps1` ที่นี่เป็นสำเนาเก่า ไม่ถูกเรียกจาก `$PROFILE` แล้ว (ลบได้เมื่อมั่นใจ) |
 
-**MCP pin เวอร์ชัน:** `firebase-tools@15.33.0` และ `@modelcontextprotocol/server-puppeteer@2025.5.12` (ไม่ใช้ `@latest` — npx ดึงโค้ดใหม่รันทุกครั้งโดยไม่ผ่านการทดสอบ) · ⚠️ npm แจ้งว่า `server-puppeteer` **"no longer supported"** — ควรหาตัวแทนหรือถอดออกเมื่อสะดวก · `mcp_config.json` เขียนแบบไม่มี BOM
+**MCP pin เวอร์ชัน:** `firebase-tools@15.33.0` (ไม่ใช้ `@latest` — npx ดึงโค้ดใหม่รันทุกครั้งโดยไม่ผ่านการทดสอบ) · `server-puppeteer` ถูกถอดออก 2026-10-11: npm ติดป้าย "no longer supported" และเชื่อมต่อไม่เสถียรใน log ของ agy · งาน browser ใช้ `chrome-devtools-plugin` แทน · `mcp_config.json` เขียนแบบไม่มี BOM
 
 กฎ: สคริปต์ห้าม `Remove-Item` / `Copy-Item -Force` ลงโฟลเดอร์ของเจ้าของอีกฝั่ง · ก่อนเปลี่ยนชื่อ/ย้ายไฟล์ที่อีกฝั่งอ่านอยู่ ให้ `grep` อีก repo ก่อน (บทเรียน 2026-10-11: การแยก `CLAUDE.md` ฝั่ง claude-config เกือบทำให้ bootstrap ตรงนี้ทับกฎส่วนกลางทิ้ง)
 

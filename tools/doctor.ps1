@@ -243,8 +243,10 @@ if (Test-Path $mcpPath) {
 
         if ($hasWrongProfile) {
             Report-Check "WARN" "mcp_config.json" "Detected user path that does not match current user ($env:USERNAME)" "Run: .\setup-junctions.ps1 -Force"
-        } elseif ($hasFirebase -and $hasPuppeteer) {
-            Report-Check "OK" "mcp_config.json" "Firebase and Puppeteer active (user path matches current user)"
+        } elseif ($hasPuppeteer) {
+            Report-Check "WARN" "mcp_config.json" "puppeteer MCP is still configured; npm marks it 'no longer supported' (chrome-devtools-plugin covers it)" "Remove the 'puppeteer' entry from mcp_config.json"
+        } elseif ($hasFirebase) {
+            Report-Check "OK" "mcp_config.json" "Firebase MCP active (user path matches current user)"
         } else {
             Report-Check "OK" "mcp_config.json" "Valid MCP configuration synced"
         }
