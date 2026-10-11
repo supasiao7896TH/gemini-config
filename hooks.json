@@ -41,12 +41,6 @@
     ]
   },
   "voice-alerts": {
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\voice-alert.ps1 -Event Start"
-      }
-    ],
     "Stop": [
       {
         "type": "command",

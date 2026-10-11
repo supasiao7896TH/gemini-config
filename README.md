@@ -119,7 +119,7 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
 | `Doctor-Gemini` | วินิจฉัยสุขภาพระบบ Antigravity ครบ 14 จุดตรวจ | `Doctor-Gemini` หรือ `.\tools\doctor.ps1` |
 | `New-VibeProject` | สั่งสร้างโปรเจกต์ใหม่ Supasit.A Starter (Multi-File) ในคำสั่งเดียว | `New-VibeProject -ProjectName my-app` |
 | `security-gate.ps1` | PreToolUse Hook คอยดักจับไฟล์ความลับและคำสั่งอันตราย | ทำงานอัตโนมัติผ่าน `hooks.json` |
-| `voice-alert.ps1` | Lifecycle Hook แจ้งเตือนเสียง Start / Stop (SAPI Speech) | ทำงานอัตโนมัติผ่าน `hooks.json` |
+| `voice-alert.ps1` | Lifecycle Hook แจ้งเตือนเสียง Stop (SAPI Speech) | ทำงานอัตโนมัติผ่าน `hooks.json` |
 | `statusline.js` | Dynamic Terminal Status Bar สไตล์ Supasit.A Studio (แทน `statusline.ps1` ที่เลิกใช้แล้ว 2026-10-11) | กำหนดผ่าน `statusLine` ใน `settings.json` — เขียน **ไม่มีเครื่องหมายคำพูด** |
 | `deploy-workspace.ps1` | เผยแพร่ตัวเปิดไฟล์กะ PTA1 ไป `C:\ProgramData\PTA1-Workspace` ให้ทุกผู้ใช้บนเครื่องเดียวกันใช้ (copy + ตรวจ hash + สร้าง `.lnk` + ให้ `Users` เขียนล็อกได้) | เรียกอัตโนมัติจาก `setup-junctions.ps1` · ไม่ต้อง admin · ผู้ใช้อื่นรัน `setup-user-workspace.bat` ครั้งเดียว |
 | `test-security-gate.ps1` | ทดสอบกฎของ security gate 49 เคส + fail-open 3 กรณี (รวม tool ไฟล์ `view_file`/`write_to_file`/`replace_file_content`) (กฎพอร์ตจาก claude-config) | `powershell -File .\tools\test-security-gate.ps1` · แก้กฎแล้วต้องรันเสมอ |
