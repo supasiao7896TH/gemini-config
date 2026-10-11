@@ -178,7 +178,9 @@ foreach ($f in $filesToCopy) {
             # Dynamically replace user path with current $env:USERPROFILE for multi-machine portability
             $escapedProfile = $env:USERPROFILE -replace '\\', '\\'
             $content = (Get-Content -Path $srcPath -Raw -Encoding UTF8) -replace '(?i)c:\\\\Users\\\\[^\\]+', $escapedProfile
-            if (-not (Test-Path $destPath) -or $Force) {
+            # an older copy that still pins @latest / carries the retired puppeteer server is replaced
+            $staleMcp = (Test-Path $destPath) -and ((Get-Content -Path $destPath -Raw -Encoding UTF8) -match 'firebase-tools@latest|server-puppeteer')
+            if (-not (Test-Path $destPath) -or $Force -or $staleMcp) {
                 # UTF-8 WITHOUT BOM: strict JSON parsers (node, jq) reject a leading BOM
                 [IO.File]::WriteAllText($destPath, $content, (New-Object System.Text.UTF8Encoding($false)))
                 Write-Host "[+] Synced $($f.Src) (Dynamic User Profile: $env:USERNAME) -> $destPath" -ForegroundColor Green
@@ -240,7 +242,12 @@ if (-not $cliSettings) {
 }
 
 $hasStatusLine = [bool]($cliSettings.PSObject.Properties['statusLine'])
-if (-not $hasStatusLine -or $Force) {
+$curStatusCmd = if ($hasStatusLine) { [string]$cliSettings.statusLine.command } else { '' }
+# commands written by earlier versions of this repo that no longer work: the retired statusline.ps1,
+# or a quoted path (Antigravity passes quotes to the program literally)
+$staleStatusLine = $hasStatusLine -and (($curStatusCmd -match 'statusline\.ps1') -or $curStatusCmd.Contains('"'))
+if (-not $hasStatusLine -or $Force -or $staleStatusLine) {
+    if ($staleStatusLine) { Write-Host "[!] Replacing an outdated statusLine command: $curStatusCmd" -ForegroundColor Yellow }
     $cliSettings | Add-Member -NotePropertyName "statusLine" -NotePropertyValue ([PSCustomObject]$statuslineConfig) -Force
     $newJson = $cliSettings | ConvertTo-Json -Depth 10
     [IO.File]::WriteAllText($cliSettingsPath, $newJson, (New-Object System.Text.UTF8Encoding($false)))

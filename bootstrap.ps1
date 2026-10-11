@@ -163,6 +163,7 @@ $claudeBootstrap = Join-Path $claudeRepo "tools\bootstrap.ps1"
 if (Test-Path $claudeBootstrap) {
     Write-Host " [*] Delegating Claude Code setup to claude-config\tools\bootstrap.ps1..." -ForegroundColor Cyan
     powershell -ExecutionPolicy Bypass -File $claudeBootstrap -SkipWinget
+    if ($LASTEXITCODE -ne 0) { Write-Warning "claude-config bootstrap exited with code $LASTEXITCODE - Claude Code setup may be incomplete" }
 } else {
     Write-Warning "claude-config\tools\bootstrap.ps1 not found - pull claude-config, then run it manually"
 }

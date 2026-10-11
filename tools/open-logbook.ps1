@@ -104,6 +104,13 @@ $script:PtaWinReady = $false
 # Total time the launcher may spend waiting for Excel (dialogs / windows) in one run; afterwards it
 # stops waiting and just sends the remaining requests, so a login can never stall for minutes.
 $script:WaitBudgetEnd = (Get-Date).AddSeconds(120)
+$script:MySessionId = (Get-Process -Id $PID).SessionId
+function Get-MyProcess {
+    # Only processes of THIS Windows session. The PC is shared: other users' (disconnected) sessions keep
+    # their own Excel / ProcessBook alive; those are not ours and their StartTime is not readable.
+    param([string]$Name)
+    return @(Get-Process -Name $Name -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $script:MySessionId })
+}
 try {
     Add-Type -ErrorAction Stop -TypeDefinition @'
 using System;
@@ -165,7 +172,7 @@ $script:DialogTextCache = @{}
 
 function Get-DialogTextUia {
     # Text of a DirectUI/NUIDialog window, which plain Win32 child controls cannot expose.
-    # Runs in a throw-away job with a timeout (a hung Excel can never block the launcher) and is
+    # Runs in a throw-away job with a 3s timeout (a hung Excel can never block the launcher) and is
     # cached per window handle, so a dialog is queried at most once.
     param([int64]$Hwnd)
     if ($script:DialogTextCache.ContainsKey($Hwnd)) { return $script:DialogTextCache[$Hwnd] }
@@ -187,7 +194,7 @@ function Get-DialogTextUia {
             }
             $seen -join ' / '
         }
-        if (Wait-Job $job -Timeout 8) { $text = (@(Receive-Job $job -ErrorAction SilentlyContinue) -join ' ') }
+        if (Wait-Job $job -Timeout 3) { $text = (@(Receive-Job $job -ErrorAction SilentlyContinue) -join ' ') }
         Remove-Job $job -Force -ErrorAction SilentlyContinue
     } catch { $text = '' }
     $script:DialogTextCache[$Hwnd] = $text
@@ -200,7 +207,7 @@ function Get-ExcelWindows {
     $res = @{ Main = @(); Dialogs = @() }
     if (-not $script:PtaWinReady) { return $res }
     $set = New-Object 'System.Collections.Generic.HashSet[uint32]'
-    foreach ($p in @(Get-Process excel -ErrorAction SilentlyContinue)) { [void]$set.Add([uint32]$p.Id) }
+    foreach ($p in @(Get-MyProcess 'excel')) { [void]$set.Add([uint32]$p.Id) }
     if ($set.Count -eq 0) { return $res }
     foreach ($row in [PtaWin]::Windows($set)) {
         $f = $row.Split('|', 4)
@@ -417,7 +424,7 @@ $pdiDesktopCandidates = @(
 )
 $pdiDesktopFile = $pdiDesktopCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 
-$isProcBookRunning = (Get-Process -Name "procbook" -ErrorAction SilentlyContinue) -ne $null
+$isProcBookRunning = (@(Get-MyProcess 'procbook').Count -gt 0)
 if ($isProcBookRunning) {
     Log-Message "[8/$totalItems] PI ProcessBook is already running, skipping launch." "INFO"
 } elseif ($pdiDesktopFile) {
@@ -477,7 +484,7 @@ function Get-ExcelSnapshot {
     # One line describing Excel right now, for the diagnostic log. Returns @{ Text; HasDialog }.
     # Never talks to Excel through COM while a dialog window is open (a COM call into a modal Excel
     # is exactly what produces "Excel can't do this because a dialog box is open").
-    $procs = @(Get-Process excel -ErrorAction SilentlyContinue)
+    $procs = @(Get-MyProcess 'excel')
     $p = if ($procs.Count -gt 0) {
         ($procs | ForEach-Object { "{0}@{1}" -f $_.Id, $_.StartTime.ToString('HH:mm:ss') }) -join ','
     } else { 'none' }
@@ -540,8 +547,8 @@ if ($WhatIf) {
             $lastSnap = $snap
             $lastChange = Get-Date
         }
-        if ((-not $logsheetSeenAt) -and ($snap -match 'P1-F-2002')) { $logsheetSeenAt = $elapsed }
-        if ((-not $logbookSeenAt) -and ($snap.Contains($logbookBase))) { $logbookSeenAt = $elapsed }
+        if (($null -eq $logsheetSeenAt) -and ($snap -match 'P1-F-2002')) { $logsheetSeenAt = $elapsed }
+        if (($null -eq $logbookSeenAt) -and ($snap.Contains($logbookBase))) { $logbookSeenAt = $elapsed }
         if ($shot.HasDialog -and ($null -eq $dialogSeenAt)) { $dialogSeenAt = $elapsed }
 
         if (((Get-Date) -lt $tidyUntil) -and (-not $shot.HasDialog)) {   # never poke Excel while it shows a dialog
@@ -556,7 +563,7 @@ if ($WhatIf) {
         }
 
         # settled: past the tidy window, logbook seen, and nothing changed for 30s
-        if (((Get-Date) -ge $tidyUntil) -and $logbookSeenAt -and (-not $shot.HasDialog) -and (((Get-Date) - $lastChange).TotalSeconds -ge 30)) { break }
+        if (((Get-Date) -ge $tidyUntil) -and ($null -ne $logbookSeenAt) -and (-not $shot.HasDialog) -and (((Get-Date) - $lastChange).TotalSeconds -ge 30)) { break }
         Start-Sleep -Seconds 3
     }
 
