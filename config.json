@@ -13,7 +13,7 @@
       "enabled": true
     },
     "googlecloudtools.datacloud_telemetry": {
-      "enabled": true
+      "enabled": false
     },
     "modern-web-guidance-plugin": {
       "enabled": true

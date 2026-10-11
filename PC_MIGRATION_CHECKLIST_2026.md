@@ -81,10 +81,15 @@ winget install Git.Git Microsoft.VisualStudioCode OpenJS.NodeJS.LTS Starship.Sta
 ## ⚡ 4. ทางลัดกู้คืนเครื่องใหม่ในคำสั่งเดียว (Master 1-Click Bootstrap)
 > **สำหรับพี่ A:** ไม่ต้องพิมพ์ทีละข้อ! หนูได้เขียนสคริปต์ [bootstrap.ps1](file:///C:/Users/26007294/A(i)CODER2025TH/gemini-config/bootstrap.ps1) รวมทุกขั้นตอนไว้ให้หมดแล้วค่ะ
 
-เมื่อได้เครื่องใหม่ เปิด **PowerShell** แล้วรันคำสั่งนี้เพียงบรรทัดเดียว:
+เมื่อได้เครื่องใหม่ เปิด **PowerShell** แล้ว **ดาวน์โหลด → ดูเนื้อหา → ค่อยรัน** (ไม่ใช้ `irm … | iex` เพราะรันโค้ดจาก branch `main` ที่เปลี่ยนได้ตลอดโดยไม่ได้อ่านก่อน และไม่เปลี่ยน ExecutionPolicy ของเครื่อง — ใช้ `-ExecutionPolicy Bypass` เฉพาะ process นี้แทน):
 
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; irm https://raw.githubusercontent.com/supasiao7896TH/gemini-config/main/bootstrap.ps1 | iex
+# แทน <COMMIT_SHA> ด้วย commit ล่าสุดที่พี่ A ตรวจแล้ว (git -C <gemini-config> rev-parse HEAD หรือดูบน GitHub)
+$sha = '<COMMIT_SHA>'
+$f = Join-Path $env:TEMP 'gemini-bootstrap.ps1'
+Invoke-WebRequest "https://raw.githubusercontent.com/supasiao7896TH/gemini-config/$sha/bootstrap.ps1" -OutFile $f
+Get-Content $f | more            # อ่านก่อนรัน
+powershell -ExecutionPolicy Bypass -File $f
 ```
 
 **สิ่งที่สคริปต์นี้จะจัดการให้พี่ A ทันทีแบบอัตโนมัติ 100%:**
@@ -93,7 +98,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; irm https://raw.githubusercont
 3. ติดตั้ง Antigravity CLI (`agy`) และ Claude Code CLI (`claude`)
 4. Clone ทั้ง `gemini-config` และ `claude-config` มาไว้ที่ `A(i)CODER2025TH`
 5. รัน `setup-junctions.ps1` ผูกระบบ Skills, Agents, MCP, Hooks, StatusLine ของ Antigravity
-6. ทำ Junction `~/.claude/skills` และ `~/.claude/agents` พร้อมก๊อบปี้ `CLAUDE.md` และ `statusline.ps1`
+6. ฝั่ง Claude Code: **เรียก `claude-config\tools\bootstrap.ps1` ให้** (junction `skills`/`agents`, copy `global\CLAUDE.md` + `USER.md` + `statusline.ps1`, ไม่ทับ `settings.json` เดิม) — สคริปต์นี้ไม่เขียน `~/.claude` เองอีกแล้ว
 7. ติดตั้ง VS Code Extensions ครบทั้ง 24 ตัว
 8. รัน Doctor ตรวจสอบความสมบูรณ์ของระบบ
 

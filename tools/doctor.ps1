@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Antigravity CLI System Doctor & Health Diagnostics for Supasit.A (พี่ A)
     Usage: .\tools\doctor.ps1
@@ -161,12 +161,25 @@ if (Test-Path $voiceAlertScript) {
     Report-Check "FAIL" "Tool: voice-alert.ps1" "voice-alert.ps1 missing in tools" "Run: .\setup-junctions.ps1 -Force"
 }
 
-# statusline.ps1 & CLI settings
-$statusScript = Join-Path $configDir "tools\statusline.ps1"
+# statusline.js & CLI settings (statusline.ps1 was retired 2026-10-11)
+$statusScript = Join-Path $configDir "tools\statusline.js"
 if (Test-Path $statusScript) {
-    Report-Check "OK" "Tool: statusline.ps1" "Statusline renderer present"
+    Report-Check "OK" "Tool: statusline.js" "Statusline renderer present"
 } else {
-    Report-Check "FAIL" "Tool: statusline.ps1" "Missing statusline.ps1 in tools" "Restore from git"
+    Report-Check "FAIL" "Tool: statusline.js" "Missing statusline.js in tools" "Restore from git"
+}
+
+# Antigravity passes quotes in hook/statusline commands to the child literally -> they break.
+$liveHooks = Join-Path $configDir "hooks.json"
+if (Test-Path $liveHooks) {
+    $hookText = Get-Content $liveHooks -Raw -Encoding UTF8
+    if ($hookText -match '\\"') {
+        Report-Check "FAIL" "hooks.json quoting" "A hook command contains quote characters; Antigravity passes them literally" "Run: .\setup-junctions.ps1"
+    } elseif ($hookText -match '-File \.\\\\') {
+        Report-Check "WARN" "hooks.json paths" "Hook uses a relative path (works only when cwd is the config dir)" "Run: .\setup-junctions.ps1"
+    } else {
+        Report-Check "OK" "hooks.json commands" "Absolute paths, no quote characters"
+    }
 }
 
 $cliSettingsPath = Join-Path (Join-Path $geminiDir "antigravity-cli") "settings.json"

@@ -16,7 +16,6 @@ package-lock.json
 branding/
 design-lab/
 assets/
-statusline.ps1
 skills/
 plugins/
 sidecars/

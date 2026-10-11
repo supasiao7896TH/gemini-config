@@ -31,11 +31,9 @@ gemini-config/
 │   ├── google-antigravity-sdk/
 │   ├── modern-web-guidance-plugin/
 │   └── user-profile/       → กฎเหล็กประจำตัว (rules/AGENTS.md) และ Persona
-├── skills/                 → สำหรับ ~/.gemini/config/skills/
-│   ├── accidental-data-loss-prevention/
-│   ├── bigquery-sql/
-│   ├── dataform-bigquery/
-│   ├── dbt-bigquery/
+├── skills/                 → สำหรับ ~/.gemini/config/skills/ (เก็บใน git เฉพาะ skill ของเราเอง 26 ตัว)
+│   │                         skill ของ Google datacloud (21 ตัว เช่น bigquery-sql, dbt-bigquery)
+│   │                         extension ติดตั้งให้เองและถูก `.gitignore` — ไม่ใช่ของเรา ไม่เผยแพร่ซ้ำ
 │   ├── pta-*/              → PTA Domain Skills (Exapilot, DCS, Kaizen, Safety)
 │   ├── vibe-coding-*/      → Web Architecture Skills (Core, Multifile, Firebase)
 │   └── ...
@@ -122,7 +120,8 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
 | `New-VibeProject` | สั่งสร้างโปรเจกต์ใหม่ Supasit.A Starter (Multi-File) ในคำสั่งเดียว | `New-VibeProject -ProjectName my-app` |
 | `security-gate.ps1` | PreToolUse Hook คอยดักจับไฟล์ความลับและคำสั่งอันตราย | ทำงานอัตโนมัติผ่าน `hooks.json` |
 | `voice-alert.ps1` | Lifecycle Hook แจ้งเตือนเสียง Start / Stop (SAPI Speech) | ทำงานอัตโนมัติผ่าน `hooks.json` |
-| `statusline.ps1` | Dynamic Terminal Status Bar สไตล์ Supasit.A Studio | กำหนดผ่าน `statusLine` ใน `settings.json` หรือ `/statusline` |
+| `statusline.js` | Dynamic Terminal Status Bar สไตล์ Supasit.A Studio (แทน `statusline.ps1` ที่เลิกใช้แล้ว 2026-10-11) | กำหนดผ่าน `statusLine` ใน `settings.json` — เขียน **ไม่มีเครื่องหมายคำพูด** |
+| `test-security-gate.ps1` | ทดสอบกฎของ security gate 33 เคส + fail-open 3 กรณี (กฎพอร์ตจาก claude-config) | `powershell -File .\tools\test-security-gate.ps1` · แก้กฎแล้วต้องรันเสมอ |
 
 ---
 
