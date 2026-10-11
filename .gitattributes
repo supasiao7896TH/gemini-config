@@ -8,6 +8,8 @@
 # บรรทัดล่างนี้ทำให้ git checkout ไฟล์ข้อความทุกไฟล์เป็น LF เสมอทุกเครื่อง
 # เลิกพึ่งการตั้งค่า core.autocrlf ที่ต่างกันได้ระหว่างเครื่องบ้าน/office ตั้งแต่นี้ไป
 * text=auto eol=lf
+# batch files must keep CRLF: cmd.exe can mis-handle labels (goto :x) in LF-only files
+*.bat text eol=crlf
 
 # ไบนารี — ห้าม git ไปยุ่งเรื่อง line ending เด็ดขาด ไม่งั้นไฟล์เสีย
 *.png binary

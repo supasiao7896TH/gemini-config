@@ -132,6 +132,14 @@ powershell -ExecutionPolicy Bypass -File $f
 7. **Laro Routine 2121 (PTA-2):** [PTTGC Laro Routine](https://pttgclaro.pttgcgroup.com/#/routine;id=2121;parentId=846;plantId=841)
 8. **AAA PTA1 GCMP.pdi:** หน้าจอ PI ProcessBook ดึงจาก Desktop (OneDrive)
 
+### 6.1.1 ใช้หลายผู้ใช้บนเครื่องเดียว (ผลัดกะ — ปรับ 2026-10-11)
+เครื่องนี้มีผู้ใช้กะละคน และ repo อยู่ในโปรไฟล์ของพี่ A (คนอื่นอ่านไม่ได้) ดังนั้นสคริปต์ที่ทุกคนรันตอน login คือสำเนาที่ **`C:\ProgramData\PTA1-Workspace\`** เท่านั้น:
+- **เจ้าของ (พี่ A):** แก้ `tools/open-logbook.ps1` แล้วรัน `powershell -File .\tools\deploy-workspace.ps1` (หรือ `setup-junctions.ps1` ซึ่งเรียกให้) — ไม่ต้องใช้สิทธิ์ admin · `npm`/`doctor.ps1` จะเตือนถ้าสำเนาไม่ตรง repo
+- **ผู้ใช้อีกคน (ครั้งเดียวต่อคน, ไม่ต้อง admin):** ดับเบิลคลิก `C:\ProgramData\PTA1-Workspace\setup-user-workspace.bat`
+- **ห้าม** ติดตั้งแบบ All Users: ต้องใช้ admin และจะเปิด Excel/PI ให้ทุกโปรไฟล์ในเครื่อง (~17 บัญชี) ไม่ใช่เฉพาะผู้ใช้กะ — `enable-for-all-users.bat` จึงถูกลบแล้ว
+- ล็อกรวม `C:\ProgramData\PTA1-Workspace\open-logbook.log` มีชื่อผู้ใช้ทุกบรรทัด (ผู้ใช้ทุกคนเขียนต่อท้ายได้ แต่แก้สคริปต์ไม่ได้)
+- แต่ละคนต้องมี: ไดรฟ์ `K:`, สิทธิ์ SharePoint ของ Logbook, PI ProcessBook (ยืนยันจากพี่ A แล้ว 2026-10-11)
+
 ### 6.2 การตั้งค่า Tampermonkey สำหรับระบบเตือน Lab Routine 16:00 น.
 1. ติดตั้ง Extension **Tampermonkey** บน Chrome หรือ Edge
 2. นำเข้า Userscript จากไฟล์: `tools/userscripts/pttgc-laro-monitor.user.js`

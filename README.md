@@ -121,6 +121,7 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
 | `security-gate.ps1` | PreToolUse Hook คอยดักจับไฟล์ความลับและคำสั่งอันตราย | ทำงานอัตโนมัติผ่าน `hooks.json` |
 | `voice-alert.ps1` | Lifecycle Hook แจ้งเตือนเสียง Start / Stop (SAPI Speech) | ทำงานอัตโนมัติผ่าน `hooks.json` |
 | `statusline.js` | Dynamic Terminal Status Bar สไตล์ Supasit.A Studio (แทน `statusline.ps1` ที่เลิกใช้แล้ว 2026-10-11) | กำหนดผ่าน `statusLine` ใน `settings.json` — เขียน **ไม่มีเครื่องหมายคำพูด** |
+| `deploy-workspace.ps1` | เผยแพร่ตัวเปิดไฟล์กะ PTA1 ไป `C:\ProgramData\PTA1-Workspace` ให้ทุกผู้ใช้บนเครื่องเดียวกันใช้ (copy + ตรวจ hash + สร้าง `.lnk` + ให้ `Users` เขียนล็อกได้) | เรียกอัตโนมัติจาก `setup-junctions.ps1` · ไม่ต้อง admin · ผู้ใช้อื่นรัน `setup-user-workspace.bat` ครั้งเดียว |
 | `test-security-gate.ps1` | ทดสอบกฎของ security gate 33 เคส + fail-open 3 กรณี (กฎพอร์ตจาก claude-config) | `powershell -File .\tools\test-security-gate.ps1` · แก้กฎแล้วต้องรันเสมอ |
 
 ---
