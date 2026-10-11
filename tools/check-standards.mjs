@@ -131,6 +131,22 @@ check("mcp_config.json: no BOM, no @latest, npx packages pinned", () => {
   if (problems.length) throw new Error(`unpinned: ${problems.join(", ")}`);
 });
 
+// 6b. The SHA pinned in the new-PC runbook must still point at the same bootstrap.ps1 as HEAD,
+//     otherwise a later edit of bootstrap.ps1 silently leaves the runbook downloading the old one.
+check("PC_MIGRATION: pinned bootstrap SHA still matches bootstrap.ps1 at HEAD", () => {
+  const doc = readFileSync(join(root, "PC_MIGRATION_CHECKLIST_2026.md"), "utf8");
+  const m = doc.match(/\$sha\s*=\s*'([0-9a-f]{40})'/);
+  if (!m) throw new Error("no pinned $sha = '<40 hex>' found in PC_MIGRATION_CHECKLIST_2026.md");
+  const git = (args) => spawnSync("git", args, { cwd: root, encoding: "utf8" });
+  const pinned = git(["rev-parse", `${m[1]}:bootstrap.ps1`]);
+  if (pinned.status !== 0) return; // commit not present here (shallow CI clone): cannot be verified, not an error
+  const head = git(["rev-parse", "HEAD:bootstrap.ps1"]);
+  if (pinned.stdout.trim() !== head.stdout.trim())
+    throw new Error(
+      `bootstrap.ps1 changed after ${m[1].slice(0, 7)}: update the $sha in PC_MIGRATION_CHECKLIST_2026.md to the new reviewed commit`
+    );
+});
+
 // 7. PowerShell 5.1 reads BOM-less files as ANSI: any .ps1 with non-ASCII text needs a UTF-8 BOM.
 check("*.ps1 with non-ASCII text must start with a UTF-8 BOM", () => {
   const dirs = [root, join(root, "tools")];
