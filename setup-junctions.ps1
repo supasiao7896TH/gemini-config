@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Setup Junctions and Configurations for Google Antigravity / Gemini CLI
     Repository: https://github.com/supasiao7896TH/gemini-config

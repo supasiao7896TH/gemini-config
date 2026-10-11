@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Antigravity Voice Alert Hook for Supasit.A (พี่ A)
     Plays short audible notifications for agent lifecycle events via Windows SAPI.

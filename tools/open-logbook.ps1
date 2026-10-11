@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Auto-Open PTA1 Shift Workspace & Routine Launcher
 .DESCRIPTION
