@@ -10,6 +10,33 @@
             "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\security-gate.ps1"
           }
         ]
+      },
+      {
+        "matcher": "view_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\security-gate.ps1"
+          }
+        ]
+      },
+      {
+        "matcher": "write_to_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\security-gate.ps1"
+          }
+        ]
+      },
+      {
+        "matcher": "replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\security-gate.ps1"
+          }
+        ]
       }
     ]
   },

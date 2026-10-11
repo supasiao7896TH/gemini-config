@@ -34,6 +34,18 @@ $cases = @(
   @('run_command', 'CommandLine', 'git reset --hard HEAD~1', 'ask'),
   @('run_command', 'CommandLine', 'git reset --soft HEAD~1', 'allow'),
   @('run_command', 'CommandLine', 'git clean -fd', 'ask'),
+  @('run_command', 'CommandLine', 'git clean -d -f', 'ask'),
+  @('run_command', 'CommandLine', 'git clean -x -d -f', 'ask'),
+  @('run_command', 'CommandLine', 'git clean --force', 'ask'),
+  @('run_command', 'CommandLine', 'git clean -n', 'allow'),
+  @('run_command', 'CommandLine', 'git clean -nd', 'allow'),
+  @('run_command', 'CommandLine', 'Remove-Item C:\x -r -Force', 'ask'),
+  @('run_command', 'CommandLine', 'ri C:\x -Recurse', 'ask'),
+  @('run_command', 'CommandLine', 'del C:\x -Recurse', 'ask'),
+  @('run_command', 'CommandLine', 'Remove-Item C:\x\a.txt', 'allow'),
+  @('run_command', 'CommandLine', 'Get-ChildItem C:\x -Recurse', 'allow'),
+  @('run_command', 'CommandLine', 'DELETE FROM dbo.users;', 'ask'),
+  @('run_command', 'CommandLine', 'DELETE FROM dbo.users WHERE id = 1', 'allow'),
   @('run_command', 'CommandLine', 'git status', 'allow'),
   @('run_command', 'CommandLine', 'rm -rf src', 'ask'),
   @('run_command', 'CommandLine', 'rm -fr /', 'ask'),
@@ -48,9 +60,15 @@ $cases = @(
   @('run_command', 'CommandLine', 'Set-ExecutionPolicy Bypass -Scope LocalMachine -Force', 'ask'),
   @('run_command', 'CommandLine', 'npm publish', 'ask'),
   @('run_command', 'CommandLine', 'npm test', 'allow'),
+  # file tools: names and argument fields taken from Antigravity's own transcripts (view_file uses
+  # AbsolutePath, write_to_file / replace_file_content use TargetFile)
+  @('view_file', 'AbsolutePath', 'C:/p/.env', 'ask'),
+  @('view_file', 'AbsolutePath', 'C:/Users/x/.claude/.credentials.json', 'ask'),
+  @('view_file', 'AbsolutePath', 'C:/p/README.md', 'allow'),
   @('write_to_file', 'TargetFile', 'C:/p/.env', 'ask'),
   @('write_to_file', 'TargetFile', 'C:/p/src/main.js', 'allow'),
-  @('write_to_file', 'TargetFile', 'C:/p/.env.example', 'allow')
+  @('replace_file_content', 'TargetFile', 'C:/p/server.key', 'ask'),
+  @('replace_file_content', 'TargetFile', 'C:/p/.env.example', 'allow')
 )
 
 $bad = 0
