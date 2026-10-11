@@ -168,7 +168,18 @@ foreach ($f in $filesToCopy) {
                 Write-Host "[=] $($f.Src) already exists at destination (use -Force to overwrite)" -ForegroundColor Gray
             }
         } else {
-            if ($f.Src -eq "hooks.json" -or -not (Test-Path $destPath) -or $Force) {
+            if ($f.Src -eq "hooks.json") {
+                # Hook commands in the repo use ".\tools\x.ps1", which only resolves when the
+                # hook's working directory is the config dir. Rewrite to the absolute (quoted,
+                # so a user name with a space still works) junction path and write without BOM.
+                $toolsJson = (Join-Path $configDir "tools") -replace '\\', '\\'
+                $text = Get-Content -Path $srcPath -Raw -Encoding UTF8
+                $text = [regex]::Replace($text, '-File \.\\\\tools\\\\([\w.-]+)', {
+                    param($m) '-File \"' + $toolsJson + '\\' + $m.Groups[1].Value + '\"'
+                })
+                [IO.File]::WriteAllText($destPath, $text, (New-Object System.Text.UTF8Encoding($false)))
+                Write-Host "[+] Synced $($f.Src) with absolute tool paths -> $destPath" -ForegroundColor Green
+            } elseif (-not (Test-Path $destPath) -or $Force) {
                 Copy-Item -Path $srcPath -Destination $destPath -Force
                 Write-Host "[+] Synced $($f.Src) -> $destPath" -ForegroundColor Green
             } else {

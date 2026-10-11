@@ -130,4 +130,17 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
 - **ห้าม Commit:** API Keys, Firebase Service Account JSON, Credentials, และ Session Data
 - **`.gitignore`** ถูกตั้งค่าให้อัตโนมัติ ไม่แทร็กโฟลเดอร์ `brain/`, `antigravity-cli/`, `projects/` และนามสกุลคีย์ที่มีความเสี่ยง
 - **Security Gate:** ดักจับคำสั่งที่แตะไฟล์ Sensitive หรือคำสั่ง Destructive ผ่าน Hook อัตโนมัติ
+  — `setup-junctions.ps1` เขียน path ของ gate เป็น **path เต็ม (ใส่เครื่องหมายคำพูด)** ลง `~/.gemini/config/hooks.json` เพราะ `.\tools\...` ใช้ได้เฉพาะเมื่อ cwd ของ hook คือโฟลเดอร์ config · ยังไม่ได้ยืนยันว่า Antigravity เรียก hook ตัวนี้จริงใน session ให้ลอง `cat .env` แล้วดูว่าถูกถามหรือไม่
+- **ห้ามใส่ `C:\Users\<ชื่อ>` (HOME) หรือ `~/.claude` ใน `trustedWorkspaces`** ของ `~/.gemini/antigravity-cli/settings.json` — ไม่งั้น Antigravity จะแก้ settings/hook ของ Claude Code ได้โดยไม่ผ่าน gate ใดๆ (ถอดออกแล้ว 2026-10-11)
+- **hooks.json มีที่เดียว:** `hooks.json` ที่ root repo เท่านั้น (ห้ามวางสำเนาใน `plugins/*/hooks.json` — Antigravity โหลดทั้งสองแล้ว hook ชื่อซ้ำ ทำให้ error ซ้ำ ~3,600 ครั้งเมื่อ 4–10 ต.ค.)
+
+## 🧭 เจ้าของไฟล์ (ใครเขียนที่ไหน — กันสองเครื่องมือทับกัน)
+
+| ตำแหน่ง | เจ้าของ (เขียนได้ผู้เดียว) | ฝั่งนี้ต้อง |
+|---|---|---|
+| `~/.gemini/**`, `~/GEMINI.md`, shortcut Startup `PTA1-Workspace.lnk` | **gemini-config** (`setup-junctions.ps1`) | — |
+| `~/.claude/**` (settings.json, CLAUDE.md, USER.md, skills/, agents/) | **claude-config** (`tools/bootstrap.ps1`) | **ห้ามเขียน/ลบ** — `bootstrap.ps1` ของ repo นี้เรียก bootstrap ของ claude-config ให้แทน |
+| ไฟล์ที่ทั้งสอง repo ถือสำเนา (`USER.md`, skills `pta-*` / `vibe-coding-*`) | ต้นฉบับอยู่ที่ **claude-config** | แก้ที่ต้นฉบับก่อนแล้วค่อยตามมาที่นี่ (ยังไม่มีตัวตรวจ drift อัตโนมัติข้าม repo) |
+
+กฎ: สคริปต์ห้าม `Remove-Item` / `Copy-Item -Force` ลงโฟลเดอร์ของเจ้าของอีกฝั่ง · ก่อนเปลี่ยนชื่อ/ย้ายไฟล์ที่อีกฝั่งอ่านอยู่ ให้ `grep` อีก repo ก่อน (บทเรียน 2026-10-11: การแยก `CLAUDE.md` ฝั่ง claude-config เกือบทำให้ bootstrap ตรงนี้ทับกฎส่วนกลางทิ้ง)
 

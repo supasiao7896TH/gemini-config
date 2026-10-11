@@ -1,4 +1,4 @@
-# =====================================================================
+﻿# =====================================================================
 # Supasit.A Studio — Master PC Bootstrap & Restoration Script (2026)
 # สคริปต์กู้คืนและตั้งค่าระบบ AI Coder อัตโนมัติ (Antigravity & Claude Code)
 # สำหรับใช้งานบน PC เครื่องใหม่ของพี่ A รันเพียงคำสั่งเดียว!
@@ -153,46 +153,18 @@ if (Test-Path "$geminiRepo\setup-junctions.ps1") {
     powershell -ExecutionPolicy Bypass -File "$geminiRepo\setup-junctions.ps1" -Force
 }
 
-# 6.2 Setup Claude Code (~/.claude) Junctions and Files
-$claudeHome = Join-Path $userHome ".claude"
-if (-not (Test-Path $claudeHome)) {
-    New-Item -ItemType Directory -Path $claudeHome -Force | Out-Null
-}
-
-$claudeSkillsTarget = Join-Path $claudeHome "skills"
-$claudeSkillsSource = Join-Path $claudeRepo "skills"
-if (Test-Path $claudeSkillsTarget) {
-    $item = Get-Item $claudeSkillsTarget
-    if (-not ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
-        Remove-Item $claudeSkillsTarget -Recurse -Force
-        New-Item -ItemType Junction -Path $claudeSkillsTarget -Target $claudeSkillsSource | Out-Null
-    }
+# 6.2 Claude Code (~/.claude) is owned by claude-config - delegate, never write it here.
+# Why: this script used to copy claude-config/CLAUDE.md over ~/.claude/CLAUDE.md and to
+# Remove-Item a real ~/.claude/skills folder without a backup. The root CLAUDE.md is now
+# repo-only (global rules live in claude-config/global/CLAUDE.md), so that copy would have
+# wiped the persona and review-gate rules. One owner per folder: only claude-config
+# writes ~/.claude, only gemini-config writes ~/.gemini.
+$claudeBootstrap = Join-Path $claudeRepo "tools\bootstrap.ps1"
+if (Test-Path $claudeBootstrap) {
+    Write-Host " [*] Delegating Claude Code setup to claude-config\tools\bootstrap.ps1..." -ForegroundColor Cyan
+    powershell -ExecutionPolicy Bypass -File $claudeBootstrap -SkipWinget
 } else {
-    New-Item -ItemType Junction -Path $claudeSkillsTarget -Target $claudeSkillsSource | Out-Null
-}
-Write-Host "[+] Linked ~/.claude/skills -> $claudeSkillsSource" -ForegroundColor Green
-
-$claudeAgentsTarget = Join-Path $claudeHome "agents"
-$claudeAgentsSource = Join-Path $claudeRepo "agents"
-if (Test-Path $claudeAgentsTarget) {
-    $item = Get-Item $claudeAgentsTarget
-    if (-not ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
-        Remove-Item $claudeAgentsTarget -Recurse -Force
-        New-Item -ItemType Junction -Path $claudeAgentsTarget -Target $claudeAgentsSource | Out-Null
-    }
-} else {
-    New-Item -ItemType Junction -Path $claudeAgentsTarget -Target $claudeAgentsSource | Out-Null
-}
-Write-Host "[+] Linked ~/.claude/agents -> $claudeAgentsSource" -ForegroundColor Green
-
-# Copy CLAUDE.md & statusline.ps1
-if (Test-Path "$claudeRepo\CLAUDE.md") {
-    Copy-Item "$claudeRepo\CLAUDE.md" "$claudeHome\CLAUDE.md" -Force
-    Write-Host "[+] Synced CLAUDE.md to $claudeHome" -ForegroundColor Green
-}
-if (Test-Path "$claudeRepo\statusline.ps1") {
-    Copy-Item "$claudeRepo\statusline.ps1" "$claudeHome\statusline.ps1" -Force
-    Write-Host "[+] Synced statusline.ps1 to $claudeHome" -ForegroundColor Green
+    Write-Warning "claude-config\tools\bootstrap.ps1 not found - pull claude-config, then run it manually"
 }
 
 # -------------------------------------------------------------
