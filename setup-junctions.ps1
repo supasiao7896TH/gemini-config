@@ -162,7 +162,8 @@ foreach ($f in $filesToCopy) {
             $escapedProfile = $env:USERPROFILE -replace '\\', '\\'
             $content = (Get-Content -Path $srcPath -Raw -Encoding UTF8) -replace '(?i)c:\\\\Users\\\\[^\\]+', $escapedProfile
             if (-not (Test-Path $destPath) -or $Force) {
-                [IO.File]::WriteAllText($destPath, $content, [Text.Encoding]::UTF8)
+                # UTF-8 WITHOUT BOM: strict JSON parsers (node, jq) reject a leading BOM
+                [IO.File]::WriteAllText($destPath, $content, (New-Object System.Text.UTF8Encoding($false)))
                 Write-Host "[+] Synced $($f.Src) (Dynamic User Profile: $env:USERNAME) -> $destPath" -ForegroundColor Green
             } else {
                 Write-Host "[=] $($f.Src) already exists at destination (use -Force to overwrite)" -ForegroundColor Gray
@@ -192,7 +193,7 @@ foreach ($f in $filesToCopy) {
 # 5. Setup Antigravity CLI statusLine Configuration
 $cliSettingsDir = Join-Path $geminiDir "antigravity-cli"
 $cliSettingsPath = Join-Path $cliSettingsDir "settings.json"
-$statuslineScript = Join-Path $configDir "tools\statusline.ps1"
+$statuslineScript = Join-Path $configDir "tools\statusline.js"   # tracked in this repo (tools/statusline.js)
 
 if (-not (Test-Path $cliSettingsDir)) {
     New-Item -ItemType Directory -Path $cliSettingsDir -Force | Out-Null
@@ -200,7 +201,7 @@ if (-not (Test-Path $cliSettingsDir)) {
 
 $statuslineConfig = [ordered]@{
     type = "command"
-    command = "powershell -NoProfile -ExecutionPolicy Bypass -File `"$statuslineScript`""
+    command = "node `"$statuslineScript`""
     enabled = $true
 }
 
@@ -224,7 +225,7 @@ $hasStatusLine = [bool]($cliSettings.PSObject.Properties['statusLine'])
 if (-not $hasStatusLine -or $Force) {
     $cliSettings | Add-Member -NotePropertyName "statusLine" -NotePropertyValue ([PSCustomObject]$statuslineConfig) -Force
     $newJson = $cliSettings | ConvertTo-Json -Depth 10
-    [IO.File]::WriteAllText($cliSettingsPath, $newJson, [Text.Encoding]::UTF8)
+    [IO.File]::WriteAllText($cliSettingsPath, $newJson, (New-Object System.Text.UTF8Encoding($false)))
     Write-Host "[+] Configured statusLine in $cliSettingsPath" -ForegroundColor Green
 } else {
     Write-Host "[=] statusLine already configured in $cliSettingsPath (use -Force to overwrite)" -ForegroundColor Gray

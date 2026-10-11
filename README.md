@@ -141,6 +141,10 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
 | `~/.gemini/**`, `~/GEMINI.md`, shortcut Startup `PTA1-Workspace.lnk` | **gemini-config** (`setup-junctions.ps1`) | — |
 | `~/.claude/**` (settings.json, CLAUDE.md, USER.md, skills/, agents/) | **claude-config** (`tools/bootstrap.ps1`) | **ห้ามเขียน/ลบ** — `bootstrap.ps1` ของ repo นี้เรียก bootstrap ของ claude-config ให้แทน |
 | ไฟล์ที่ทั้งสอง repo ถือสำเนา (`USER.md`, skills `pta-*` / `vibe-coding-*`) | ต้นฉบับอยู่ที่ **claude-config** | แก้ที่ต้นฉบับก่อนแล้วค่อยตามมาที่นี่ (ยังไม่มีตัวตรวจ drift อัตโนมัติข้าม repo) |
+| `tools/statusline.js` (statusline ของ `agy`) | **gemini-config** (ย้ายมาจาก claude-config + ไฟล์นอก repo ที่ root ของ workspace เมื่อ 2026-10-11) | `settings.json` ชี้ผ่าน junction `~/.gemini/config/tools/statusline.js` |
+| ตัวสร้างโปรเจกต์ใหม่ `New-VibeProject` | **claude-config** (`tools/new-vibe-project.ps1` — เจ้าของ `design-lab/starter-multifile`) | `tools/new-vibe-project.ps1` ที่นี่เป็นสำเนาเก่า ไม่ถูกเรียกจาก `$PROFILE` แล้ว (ลบได้เมื่อมั่นใจ) |
+
+**MCP pin เวอร์ชัน:** `firebase-tools@15.33.0` และ `@modelcontextprotocol/server-puppeteer@2025.5.12` (ไม่ใช้ `@latest` — npx ดึงโค้ดใหม่รันทุกครั้งโดยไม่ผ่านการทดสอบ) · ⚠️ npm แจ้งว่า `server-puppeteer` **"no longer supported"** — ควรหาตัวแทนหรือถอดออกเมื่อสะดวก · `mcp_config.json` เขียนแบบไม่มี BOM
 
 กฎ: สคริปต์ห้าม `Remove-Item` / `Copy-Item -Force` ลงโฟลเดอร์ของเจ้าของอีกฝั่ง · ก่อนเปลี่ยนชื่อ/ย้ายไฟล์ที่อีกฝั่งอ่านอยู่ ให้ `grep` อีก repo ก่อน (บทเรียน 2026-10-11: การแยก `CLAUDE.md` ฝั่ง claude-config เกือบทำให้ bootstrap ตรงนี้ทับกฎส่วนกลางทิ้ง)
 
