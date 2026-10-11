@@ -48,7 +48,8 @@ function Log-Message {
         [string]$Level = "INFO"
     )
     $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-    $logLine = "[$timestamp] [$Level] $Message"
+    # shared log (several shift users on one PC): say who ran it
+    $logLine = "[$timestamp] [$Level] [$env:USERNAME] $Message"
     
     switch ($Level) {
         "INFO"    { Write-Host $Message -ForegroundColor Green }

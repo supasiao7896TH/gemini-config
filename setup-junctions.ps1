@@ -251,7 +251,23 @@ if (-not $hasStatusLine -or $Force) {
 
 # 6. Deploy PTA1 Shift Workspace Auto-Start to Windows Startup (.lnk Shortcut)
 $startupFolder = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
-$targetScript = Join-Path $repoRoot "tools\open-logbook.ps1"
+# This PC is shared by several shift users who cannot read this user's profile, so the launcher
+# every login runs is the SHARED copy in ProgramData. deploy-workspace.ps1 refreshes it from
+# this repo; falling back to the repo copy only when no shared copy can be made.
+$deployScript = Join-Path $repoRoot "tools\deploy-workspace.ps1"
+$sharedDir = "C:\ProgramData\PTA1-Workspace"
+if (Test-Path $deployScript) {
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $deployScript -Dest $sharedDir
+    if ($LASTEXITCODE -ne 0) { Write-Warning "deploy-workspace.ps1 reported problems - see above" }
+}
+$sharedScript = Join-Path $sharedDir "open-logbook.ps1"
+if (Test-Path $sharedScript) {
+    $targetScript = $sharedScript
+    $targetWorkDir = $sharedDir
+} else {
+    $targetScript = Join-Path $repoRoot "tools\open-logbook.ps1"
+    $targetWorkDir = Join-Path $repoRoot "tools"
+}
 $lnkPath = Join-Path $startupFolder "PTA1-Workspace.lnk"
 $oldVbs = Join-Path $startupFolder "Open-PTA1-Logbook.vbs"
 
@@ -267,7 +283,7 @@ if ((Test-Path $startupFolder) -and (Test-Path $targetScript)) {
         $shortcut = $wsh.CreateShortcut($lnkPath)
         $shortcut.TargetPath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
         $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Minimized -File `"$targetScript`""
-        $shortcut.WorkingDirectory = Join-Path $repoRoot "tools"
+        $shortcut.WorkingDirectory = $targetWorkDir
         $shortcut.WindowStyle = 7 # Minimized
         $shortcut.Description = "PTA1 Shift Workspace Auto-Launcher"
         $shortcut.Save()

@@ -182,6 +182,37 @@ if (Test-Path $liveHooks) {
     }
 }
 
+# PTA1 login launcher: several shift users share this PC and read the ProgramData copy
+$sharedDir = "C:\ProgramData\PTA1-Workspace"
+$repoLauncher = Join-Path $PSScriptRoot "open-logbook.ps1"
+$sharedLauncher = Join-Path $sharedDir "open-logbook.ps1"
+if (-not (Test-Path $sharedLauncher)) {
+    Report-Check "WARN" "PTA1 launcher (shared)" "No copy in $sharedDir" "Run: .\tools\deploy-workspace.ps1"
+} elseif ((Test-Path $repoLauncher) -and ((Get-FileHash $repoLauncher).Hash -ne (Get-FileHash $sharedLauncher).Hash)) {
+    Report-Check "WARN" "PTA1 launcher (shared)" "ProgramData copy differs from the repo copy" "Run: .\tools\deploy-workspace.ps1"
+} else {
+    Report-Check "OK" "PTA1 launcher (shared)" "ProgramData copy matches the repo"
+}
+if (Test-Path (Join-Path $sharedDir "setup-user-workspace.bat")) {
+    Report-Check "OK" "PTA1 installer for other users" "setup-user-workspace.bat is in $sharedDir"
+} else {
+    Report-Check "WARN" "PTA1 installer for other users" "Other shift users cannot read this repo and have no installer" "Run: .\tools\deploy-workspace.ps1"
+}
+$sharedLog = Join-Path $sharedDir "open-logbook.log"
+if (Test-Path $sharedLog) {
+    $usersCanWrite = (Get-Acl $sharedLog).Access | Where-Object {
+        $_.IdentityReference.Value -match '(^|\\)Users$' -and $_.AccessControlType -eq 'Allow' -and
+        ($_.FileSystemRights -band ([System.Security.AccessControl.FileSystemRights]::Write -bor [System.Security.AccessControl.FileSystemRights]::Modify)) }
+    if ($usersCanWrite) {
+        Report-Check "OK" "PTA1 launcher log" "Users can append (every shift user is logged)"
+    } else {
+        Report-Check "WARN" "PTA1 launcher log" "Users cannot write the log - runs by other users are not recorded" "Run: .\tools\deploy-workspace.ps1"
+    }
+}
+if (Test-Path (Join-Path $env:ProgramData "Microsoft\Windows\Start Menu\Programs\StartUp\PTA1-Workspace.lnk")) {
+    Report-Check "WARN" "PTA1 All-Users startup" "Shortcut is in All-Users Startup: it would open for EVERY profile on this PC" "Remove it; use per-user setup-user-workspace.bat"
+}
+
 $cliSettingsPath = Join-Path (Join-Path $geminiDir "antigravity-cli") "settings.json"
 if (Test-Path $cliSettingsPath) {
     try {
