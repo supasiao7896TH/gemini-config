@@ -20,6 +20,23 @@ Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host " Setting up Gemini Config & Junctions...  " -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 
+# Antigravity does NOT interpret quotes in hook / statusline commands: it passes them to
+# the child process as literal characters ("Illegal characters in path" for powershell
+# -File, "Cannot find module" for node). So commands must be written WITHOUT quotes, which
+# means the path must contain no space. When the profile path has a space (e.g. a user
+# name like "PC 4000D"), fall back to the 8.3 short path.
+function Get-ArgSafePath([string]$Path) {
+    if ($Path -notmatch '\s') { return $Path }
+    try {
+        $fso = New-Object -ComObject Scripting.FileSystemObject
+        $short = $fso.GetFolder($Path).ShortPath
+        if ($short -and $short -notmatch '\s') { return $short }
+    } catch {}
+    Write-Warning "Path contains a space and no 8.3 short name is available: $Path - hooks/statusline may fail"
+    return $Path
+}
+$configDirArg = Get-ArgSafePath $configDir   # use this (not $configDir) inside command strings
+
 # 1. Ensure Target Directories
 if (-not (Test-Path $configDir)) {
     Write-Host "[+] Creating directory: $configDir" -ForegroundColor Yellow
@@ -171,12 +188,13 @@ foreach ($f in $filesToCopy) {
         } else {
             if ($f.Src -eq "hooks.json") {
                 # Hook commands in the repo use ".\tools\x.ps1", which only resolves when the
-                # hook's working directory is the config dir. Rewrite to the absolute (quoted,
-                # so a user name with a space still works) junction path and write without BOM.
-                $toolsJson = (Join-Path $configDir "tools") -replace '\\', '\\'
+                # hook's working directory is the config dir. Rewrite to the absolute junction
+                # path. NO quotes (Antigravity passes them through literally) - see
+                # Get-ArgSafePath above for paths with spaces. Written without BOM.
+                $toolsJson = (Join-Path $configDirArg "tools") -replace '\\', '\\'
                 $text = Get-Content -Path $srcPath -Raw -Encoding UTF8
                 $text = [regex]::Replace($text, '-File \.\\\\tools\\\\([\w.-]+)', {
-                    param($m) '-File \"' + $toolsJson + '\\' + $m.Groups[1].Value + '\"'
+                    param($m) '-File ' + $toolsJson + '\\' + $m.Groups[1].Value
                 })
                 [IO.File]::WriteAllText($destPath, $text, (New-Object System.Text.UTF8Encoding($false)))
                 Write-Host "[+] Synced $($f.Src) with absolute tool paths -> $destPath" -ForegroundColor Green
@@ -193,7 +211,7 @@ foreach ($f in $filesToCopy) {
 # 5. Setup Antigravity CLI statusLine Configuration
 $cliSettingsDir = Join-Path $geminiDir "antigravity-cli"
 $cliSettingsPath = Join-Path $cliSettingsDir "settings.json"
-$statuslineScript = Join-Path $configDir "tools\statusline.js"   # tracked in this repo (tools/statusline.js)
+$statuslineScript = Join-Path $configDirArg "tools\statusline.js"   # tracked in this repo (tools/statusline.js)
 
 if (-not (Test-Path $cliSettingsDir)) {
     New-Item -ItemType Directory -Path $cliSettingsDir -Force | Out-Null
@@ -201,7 +219,7 @@ if (-not (Test-Path $cliSettingsDir)) {
 
 $statuslineConfig = [ordered]@{
     type = "command"
-    command = "node `"$statuslineScript`""
+    command = "node $statuslineScript"   # unquoted on purpose: quotes reach node literally
     enabled = $true
 }
 

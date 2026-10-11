@@ -130,7 +130,10 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
 - **ห้าม Commit:** API Keys, Firebase Service Account JSON, Credentials, และ Session Data
 - **`.gitignore`** ถูกตั้งค่าให้อัตโนมัติ ไม่แทร็กโฟลเดอร์ `brain/`, `antigravity-cli/`, `projects/` และนามสกุลคีย์ที่มีความเสี่ยง
 - **Security Gate:** ดักจับคำสั่งที่แตะไฟล์ Sensitive หรือคำสั่ง Destructive ผ่าน Hook อัตโนมัติ
-  — `setup-junctions.ps1` เขียน path ของ gate เป็น **path เต็ม (ใส่เครื่องหมายคำพูด)** ลง `~/.gemini/config/hooks.json` เพราะ `.\tools\...` ใช้ได้เฉพาะเมื่อ cwd ของ hook คือโฟลเดอร์ config · ยังไม่ได้ยืนยันว่า Antigravity เรียก hook ตัวนี้จริงใน session ให้ลอง `cat .env` แล้วดูว่าถูกถามหรือไม่
+  — `setup-junctions.ps1` เขียน path ของ gate เป็น **path เต็ม แบบ "ไม่มีเครื่องหมายคำพูด"** ลง `~/.gemini/config/hooks.json` เพราะ `.\tools\...` ใช้ได้เฉพาะเมื่อ cwd ของ hook คือโฟลเดอร์ config
+  - **Antigravity ไม่ตีความเครื่องหมายคำพูด** (ไม่ใช่ shell) — ส่งผ่านเป็นตัวอักษรจริงให้โปรแกรมปลายทาง: `powershell -File "..."` ได้ `Illegal characters in path`, `node "..."` ได้ `Cannot find module '<cwd>\"..."'` (เจอจริง 2026-10-11 ตอนหนูใส่ quote ผิด) ดังนั้น **ห้ามใส่ quote ใน `command` ของ hook/statusline** · ถ้า path ของ user มีช่องว่าง (เช่น `PC 4000D`) สคริปต์จะใช้ชื่อสั้น 8.3 แทน
+  - ทดสอบ hook ต้องส่ง argument แบบไม่ผ่าน shell (อย่าใช้ `cmd /c` ตัดสิน เพราะ cmd ตีความ quote ให้ จึงได้ผลผ่านทั้งที่ของจริงพัง)
+  - ยังไม่ได้ยืนยันกับ session จริงว่า Antigravity เรียก gate ตัวนี้ ให้ลอง `cat .env` แล้วดูว่าถูกถามหรือไม่
 - **ห้ามใส่ `C:\Users\<ชื่อ>` (HOME) หรือ `~/.claude` ใน `trustedWorkspaces`** ของ `~/.gemini/antigravity-cli/settings.json` — ไม่งั้น Antigravity จะแก้ settings/hook ของ Claude Code ได้โดยไม่ผ่าน gate ใดๆ (ถอดออกแล้ว 2026-10-11)
 - **hooks.json มีที่เดียว:** `hooks.json` ที่ root repo เท่านั้น (ห้ามวางสำเนาใน `plugins/*/hooks.json` — Antigravity โหลดทั้งสองแล้ว hook ชื่อซ้ำ ทำให้ error ซ้ำ ~3,600 ครั้งเมื่อ 4–10 ต.ค.)
 
