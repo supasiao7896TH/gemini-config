@@ -123,7 +123,7 @@ powershell -ExecutionPolicy Bypass -File $f
 เมื่อรัน `setup-junctions.ps1` ระบบจะสร้าง Windows Shortcut `PTA1-Workspace.lnk` ในโฟลเดอร์ Startup ให้อัตโนมัติ โดยจะเปิด 9 รายการสำคัญประจำกะ PTA1 ทุกครั้งที่ล็อกอิน:
 
 ### 6.1 รายการที่เปิดอัตโนมัติ
-1. **PTA1 Logbook (FM Activity Report):** เปิดตรงจาก SharePoint ผ่าน Excel Protocol (`ms-excel:ofe|u|...`)
+1. **PTA1 Logbook (FM Activity Report):** เปิดตรงจาก SharePoint ผ่าน Excel Protocol (`ms-excel:ofe|u|...`) — สคริปต์ตรวจไม่ได้ว่าไฟล์เดือนใหม่มีแล้วหรือยัง (SharePoint ตอบ 403 เหมือนกันทั้งมี/ไม่มี) ถ้าต้นเดือน Excel ฟ้องว่าไม่พบไฟล์ ให้รัน `open-logbook.ps1 -LogbookMonthOffset -1` เพื่อเปิดไฟล์เดือนก่อน · รวมทั้งหมดที่เปิด **8 รายการ** (ไฟล์ 4 + เว็บ 3 + PI Display 1)
 2. **Plant 1 Daily Consumption (OPS Logsheet):** ดึงไฟล์เดือนล่าสุดจาก Drive `K:\PE\01-WWT Daily consumption (SM)\02-Daily cons plant 1\`
 3. **Plant 1 Product Transfer Monitoring:** ดึงไฟล์เดือนล่าสุดจาก Drive `K:\PE\02-Daily PTA product CAL ( SM )\06-Product transfer\Plant 1\`
 4. **IOW Plant 1 - PTA unit:** ดึงจาก Drive `K:\`

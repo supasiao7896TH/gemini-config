@@ -10,7 +10,7 @@ set "DEST_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
 if exist "%SOURCE_LNK%" (
     copy /y "%SOURCE_LNK%" "%DEST_DIR%\" >nul
     echo [SUCCESS] Auto-start configured for your user account!
-    echo Next time you log in, all 9 shift files will open automatically.
+    echo Next time you log in, all 8 shift items (4 files, 3 web pages, 1 PI display) will open automatically.
 ) else (
     echo [ERROR] Source shortcut not found at %SOURCE_LNK%
 )

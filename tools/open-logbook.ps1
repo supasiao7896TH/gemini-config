@@ -2,19 +2,28 @@
 .SYNOPSIS
     Auto-Open PTA1 Shift Workspace & Routine Launcher
 .DESCRIPTION
-    เปิดไฟล์และเว็บแอปที่จำเป็นสำหรับการปฏิบัติงานกะ PTA1 อัตโนมัติตอน Login PC:
+    เปิดไฟล์และเว็บแอปที่จำเป็นสำหรับการปฏิบัติงานกะ PTA1 อัตโนมัติตอน Login PC (รวม 8 รายการ):
     1. PTA1 Logbook (FM Activity Report) ตรงจาก SharePoint ผ่าน Microsoft Excel Desktop
     2. Plant 1 Daily Consumption (OPS Logsheet ประจำเดือนล่าสุด) บน Drive K:
     3. Plant 1 Product Transfer Monitoring (ประจำเดือนล่าสุด) บน Drive K:
     4. IOW Plant 1 - PTA unit บน Drive K:
     5. Monitor Log Sheet Boardman Web App (Cloudflare Workers)
-    6. PTTGC Laro Routines (id=2122, id=2121)
-    7. AAA PTA1 GCMP.pdi (OSIsoft PI ProcessBook) จาก Desktop
+    6. PTTGC Laro Routine id=2122 (PTA-1)
+    7. PTTGC Laro Routine id=2121 (PTA-2)
+    8. AAA PTA1 GCMP.pdi (OSIsoft PI ProcessBook) จาก Desktop
+.PARAMETER WhatIf
+    ค้นหา/แสดงรายการอย่างเดียว ไม่เปิดอะไรจริง
+.PARAMETER LogbookMonthOffset
+    เลื่อนเดือนของ Logbook (SharePoint): 0 = เดือนนี้ (ค่าเริ่มต้น), -1 = เดือนก่อน
+    ใช้ช่วงต้นเดือนที่ไฟล์เดือนใหม่ยังไม่ถูกสร้าง — สคริปต์ตรวจไม่ได้เองว่าไฟล์มีหรือยัง
+    (SharePoint ตอบ HTTP 403 ทั้งไฟล์ที่มีและไม่มี) จึงไม่เดาถอยเดือนให้อัตโนมัติ
+    ตัวอย่าง: powershell -File .\open-logbook.ps1 -LogbookMonthOffset -1
 #>
 
 [CmdletBinding()]
 param(
-    [switch]$WhatIf
+    [switch]$WhatIf,
+    [int]$LogbookMonthOffset = 0
 )
 
 $enUS = [System.Globalization.CultureInfo]::GetCultureInfo("en-US")
@@ -22,6 +31,14 @@ $now = Get-Date
 $year = $now.Year
 $monthNum = $now.ToString("MM", $enUS)
 $monthAbbr = $now.ToString("MMM", $enUS)
+
+# Logbook (SharePoint) has its own month so it can be shifted without touching the K: lookups
+$lbDate = $now.AddMonths($LogbookMonthOffset)
+$lbYear = $lbDate.Year
+$lbMonthNum = $lbDate.ToString("MM", $enUS)
+$lbMonthAbbr = $lbDate.ToString("MMM", $enUS)
+
+$totalItems = 8
 
 $logFile = "C:\ProgramData\PTA1-Workspace\open-logbook.log"
 
@@ -82,13 +99,19 @@ if (-not (Test-Path "K:\")) {
 # ----------------------------------------------------------
 # 1. PTA1 Logbook (SharePoint via Office Protocol)
 # ----------------------------------------------------------
-$logbookFile = "${monthNum}.${monthAbbr}_${year} PTA1 FM Activity Report.xlsm"
-$encodedFolder = [System.Uri]::EscapeDataString("Report FM,BM $year")
+$logbookFile = "${lbMonthNum}.${lbMonthAbbr}_${lbYear} PTA1 FM Activity Report.xlsm"
+$encodedFolder = [System.Uri]::EscapeDataString("Report FM,BM $lbYear")
 $encodedFile = [System.Uri]::EscapeDataString($logbookFile)
 $sharepointUrl = "https://pttgcgroup.sharepoint.com/sites/GCMPINtranet/pe/PEDoc/02%20-%20Plant%201/Log%20book%20PTA1/$encodedFolder/$encodedFile"
 $excelUri = "ms-excel:ofe|u|$sharepointUrl"
 
-Log-Message "[1/6] Opening PTA1 Logbook : $logbookFile" "INFO"
+Log-Message "[1/$totalItems] Requesting PTA1 Logbook : $logbookFile" "INFO"
+if ($LogbookMonthOffset -eq 0 -and $now.Day -le 2) {
+    # Existence on SharePoint cannot be checked from here (HTTP 403 for existing and missing files
+    # alike), so no automatic fallback - just make the manual escape hatch visible.
+    $prev = $now.AddMonths(-1)
+    Log-Message "        Note: first days of the month - if Excel says the file was not found, the new monthly logbook is not created yet. Previous month: -LogbookMonthOffset -1 ($($prev.ToString('MM', $enUS)).$($prev.ToString('MMM', $enUS))_$($prev.Year))" "WARN"
+}
 if (-not $WhatIf) {
     Start-Process $excelUri
     Start-Sleep -Milliseconds 1500
@@ -111,16 +134,16 @@ if (Test-Path $dailyConsFolder) {
         $targetCons = Get-ChildItem -Path $dailyConsFolder -Filter "*-Plant1 Daily Cons for Shift *.xlsm" -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1
     }
     if ($targetCons) {
-        Log-Message "[2/6] Opening Daily Cons    : $($targetCons.Name)" "INFO"
+        Log-Message "[2/$totalItems] Opening Daily Cons    : $($targetCons.Name)" "INFO"
         if (-not $WhatIf) {
             Start-Process $targetCons.FullName
             Start-Sleep -Milliseconds 1500
         }
     } else {
-        Log-Message "[2/6] Daily Cons file not found in $dailyConsFolder" "WARN"
+        Log-Message "[2/$totalItems] Daily Cons file not found in $dailyConsFolder" "WARN"
     }
 } else {
-    Log-Message "[2/6] Drive K:\ Daily Cons folder not accessible" "WARN"
+    Log-Message "[2/$totalItems] Drive K:\ Daily Cons folder not accessible" "WARN"
 }
 
 # ----------------------------------------------------------
@@ -140,16 +163,16 @@ if (Test-Path $transferFolder) {
         if ($latestTransfer) { $targetTransfer = $latestTransfer.FullName }
     }
     if (Test-Path $targetTransfer) {
-        Log-Message "[3/6] Opening Product Trans : $(Split-Path $targetTransfer -Leaf)" "INFO"
+        Log-Message "[3/$totalItems] Opening Product Trans : $(Split-Path $targetTransfer -Leaf)" "INFO"
         if (-not $WhatIf) {
             Start-Process $targetTransfer
             Start-Sleep -Milliseconds 1500
         }
     } else {
-        Log-Message "[3/6] Product Transfer file not found in $transferFolder" "WARN"
+        Log-Message "[3/$totalItems] Product Transfer file not found in $transferFolder" "WARN"
     }
 } else {
-    Log-Message "[3/6] Drive K:\ Product Transfer folder not accessible" "WARN"
+    Log-Message "[3/$totalItems] Drive K:\ Product Transfer folder not accessible" "WARN"
 }
 
 # ----------------------------------------------------------
@@ -163,7 +186,7 @@ $iowCandidates = @(
 $foundIow = $false
 foreach ($p in $iowCandidates) {
     if (Test-Path $p) {
-        Log-Message "[4/6] Opening IOW           : $(Split-Path $p -Leaf)" "INFO"
+        Log-Message "[4/$totalItems] Opening IOW           : $(Split-Path $p -Leaf)" "INFO"
         if (-not $WhatIf) {
             Start-Process $p
             Start-Sleep -Milliseconds 1500
@@ -173,11 +196,11 @@ foreach ($p in $iowCandidates) {
     }
 }
 if (-not $foundIow) {
-    Log-Message "[4/6] IOW file not found on Drive K:\" "WARN"
+    Log-Message "[4/$totalItems] IOW file not found on Drive K:\" "WARN"
 }
 
 # ----------------------------------------------------------
-# 5 & 6. Web Apps & PTTGC Laro Routines
+# 5-7. Web Apps & PTTGC Laro Routines
 # ----------------------------------------------------------
 $webApps = @(
     @{ Name = "Boardman Log Sheet"; Url = "https://monitor-log-sheet-boardman.supasiao.workers.dev/" },
@@ -185,9 +208,10 @@ $webApps = @(
     @{ Name = "Laro Routine 2121";  Url = "https://pttgclaro.pttgcgroup.com/#/routine;id=2121;parentId=846;plantId=841" }
 )
 
-Log-Message "[5-6/6] Opening Web Applications..." "INFO"
+$itemNo = 5
 foreach ($app in $webApps) {
-    Log-Message "        - $($app.Name)" "SUB"
+    Log-Message "[$itemNo/$totalItems] Opening Web App     : $($app.Name)" "INFO"
+    $itemNo++
     if (-not $WhatIf) {
         Start-Process $app.Url
         Start-Sleep -Milliseconds 500
@@ -195,7 +219,7 @@ foreach ($app in $webApps) {
 }
 
 # ----------------------------------------------------------
-# 7. AAA PTA1 GCMP.pdi (Desktop - PI ProcessBook)
+# 8. AAA PTA1 GCMP.pdi (Desktop - PI ProcessBook)
 # ----------------------------------------------------------
 $pdiDesktopCandidates = @(
     "C:\ProgramData\PTA1-Workspace\AAA PTA1 GCMP.pdi",
@@ -207,16 +231,16 @@ $pdiDesktopFile = $pdiDesktopCandidates | Where-Object { Test-Path $_ } | Select
 
 $isProcBookRunning = (Get-Process -Name "procbook" -ErrorAction SilentlyContinue) -ne $null
 if ($isProcBookRunning) {
-    Log-Message "[7/7] PI ProcessBook is already running, skipping launch." "INFO"
+    Log-Message "[8/$totalItems] PI ProcessBook is already running, skipping launch." "INFO"
 } elseif ($pdiDesktopFile) {
-    Log-Message "[7/7] Opening PI Display    : $(Split-Path $pdiDesktopFile -Leaf)" "INFO"
+    Log-Message "[8/$totalItems] Opening PI Display    : $(Split-Path $pdiDesktopFile -Leaf)" "INFO"
     if (-not $WhatIf) {
         Start-Process $pdiDesktopFile
     }
 } else {
-    Log-Message "[7/7] PI Display file not found on Desktop" "WARN"
+    Log-Message "[8/$totalItems] PI Display file not found on Desktop" "WARN"
 }
 
 Log-Message "==========================================================" "TITLE"
-Log-Message "  All Workspace files and tabs launched successfully!     " "INFO"
+Log-Message "  $totalItems launch requests sent (Windows cannot confirm each app opened)  " "INFO"
 Log-Message "==========================================================" "TITLE"
