@@ -49,3 +49,28 @@ skills/synced/
 
 # ── Local junction symlinks ───────────────────────────────────────────
 plugins/user-profile/agents/
+
+# Vendor skills (Google datacloud extension) - installed and rewritten by the extension itself,
+# not ours to redistribute. The manifest below lists exactly which ones.
+skills/.datacloud_skills_manifest
+skills/accidental-data-loss-prevention/
+skills/bigquery-data-transfer-service/
+skills/bigquery-sql/
+skills/building-data-apps/
+skills/data-autocleaning/
+skills/dataform-bigquery/
+skills/dbt-bigquery/
+skills/discovering-gcp-data-assets/
+skills/enforcing-resource-attribution/
+skills/gcp-data-pipelines/
+skills/gcp-dataflow/
+skills/gcp-pipeline-orchestration/
+skills/gcp-pipeline-resource-provisioning/
+skills/gcp-spark/
+skills/gcp-spark-troubleshooting/
+skills/google-cloud-auth-verification/
+skills/managing-python-dependencies/
+skills/ml-best-practices/
+skills/notebook-guidance/
+skills/schema-mapping/
+skills/skill-repair/
