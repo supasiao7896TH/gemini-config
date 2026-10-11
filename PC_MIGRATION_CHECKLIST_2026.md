@@ -84,8 +84,10 @@ winget install Git.Git Microsoft.VisualStudioCode OpenJS.NodeJS.LTS Starship.Sta
 เมื่อได้เครื่องใหม่ เปิด **PowerShell** แล้ว **ดาวน์โหลด → ดูเนื้อหา → ค่อยรัน** (ไม่ใช้ `irm … | iex` เพราะรันโค้ดจาก branch `main` ที่เปลี่ยนได้ตลอดโดยไม่ได้อ่านก่อน และไม่เปลี่ยน ExecutionPolicy ของเครื่อง — ใช้ `-ExecutionPolicy Bypass` เฉพาะ process นี้แทน):
 
 ```powershell
-# แทน <COMMIT_SHA> ด้วย commit ล่าสุดที่พี่ A ตรวจแล้ว (git -C <gemini-config> rev-parse HEAD หรือดูบน GitHub)
-$sha = '<COMMIT_SHA>'
+# $sha = commit ที่ล็อกไว้ = 0cc83f2 (2026-10-11, ตรวจ raw URL ได้ HTTP 200)
+# ถ้าแก้ bootstrap.ps1 ภายหลัง ต้องเปลี่ยนเลขนี้เป็น commit ใหม่ที่ตรวจแล้ว: git -C <gemini-config> rev-parse HEAD
+# (ใช้ได้เฉพาะตอน repo เป็น public — ถ้าตั้งเป็น private ลิงก์ raw นี้จะดาวน์โหลดไม่ได้)
+$sha = '0cc83f21e7cd8e8e6b1f9bb5f82d3e9dc71c84df'
 $f = Join-Path $env:TEMP 'gemini-bootstrap.ps1'
 Invoke-WebRequest "https://raw.githubusercontent.com/supasiao7896TH/gemini-config/$sha/bootstrap.ps1" -OutFile $f
 Get-Content $f | more            # อ่านก่อนรัน
