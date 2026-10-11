@@ -98,6 +98,156 @@ if (-not (Test-Path "K:\")) {
 }
 
 # ----------------------------------------------------------
+# Excel window helpers (Win32 only, no COM into Excel): used to wait out dialogs and for diagnostics
+# ----------------------------------------------------------
+$script:PtaWinReady = $false
+try {
+    Add-Type -ErrorAction Stop -TypeDefinition @'
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+
+public static class PtaWin {
+    public delegate bool EnumProc(IntPtr h, IntPtr l);
+    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc p, IntPtr l);
+    [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr h, EnumProc p, IntPtr l);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetClassName(IntPtr h, StringBuilder s, int n);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
+    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    static extern IntPtr SendMessageTimeout(IntPtr h, uint msg, IntPtr w, StringBuilder l, uint flags, uint timeout, out IntPtr result);
+
+    static string Cls(IntPtr h) { StringBuilder s = new StringBuilder(256); GetClassName(h, s, 256); return s.ToString(); }
+    static string Txt(IntPtr h) { StringBuilder s = new StringBuilder(512); GetWindowText(h, s, 512); return s.ToString(); }
+
+    // visible top-level windows owned by the given process ids: "hwnd|pid|class|title"
+    public static List<string> Windows(HashSet<uint> pids) {
+        List<string> res = new List<string>();
+        EnumWindows(delegate (IntPtr h, IntPtr l) {
+            uint pid; GetWindowThreadProcessId(h, out pid);
+            if (pids.Contains(pid) && IsWindowVisible(h)) {
+                res.Add(h.ToInt64() + "|" + pid + "|" + Cls(h) + "|" + Txt(h));
+            }
+            return true;
+        }, IntPtr.Zero);
+        return res;
+    }
+
+    // text of the static/button/edit controls inside a dialog (read with a short timeout, never blocks)
+    public static string ChildTexts(long hwnd) {
+        List<string> parts = new List<string>();
+        EnumChildWindows(new IntPtr(hwnd), delegate (IntPtr h, IntPtr l) {
+            string c = Cls(h);
+            if (c == "Static" || c == "Button" || c == "Edit" || c == "DirectUIHWND" || c == "RichEdit20W") {
+                StringBuilder sb = new StringBuilder(1024);
+                IntPtr r;
+                SendMessageTimeout(h, 0x000D, new IntPtr(1024), sb, 0x2, 150, out r);   // WM_GETTEXT, SMTO_ABORTIFHUNG
+                string t = sb.ToString().Trim();
+                if (t.Length > 0) parts.Add(t);
+            }
+            return true;
+        }, IntPtr.Zero);
+        return string.Join(" / ", parts.ToArray());
+    }
+}
+'@
+    $script:PtaWinReady = $true
+} catch {
+    $script:PtaWinReady = $false   # detection unavailable; the launcher itself is unaffected
+}
+
+$script:DialogTextCache = @{}
+
+function Get-DialogTextUia {
+    # Text of a DirectUI/NUIDialog window, which plain Win32 child controls cannot expose.
+    # Runs in a throw-away job with a timeout (a hung Excel can never block the launcher) and is
+    # cached per window handle, so a dialog is queried at most once.
+    param([int64]$Hwnd)
+    if ($script:DialogTextCache.ContainsKey($Hwnd)) { return $script:DialogTextCache[$Hwnd] }
+    $text = ''
+    try {
+        $job = Start-Job -ArgumentList $Hwnd -ScriptBlock {
+            param($h)
+            Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
+            $el = [System.Windows.Automation.AutomationElement]::FromHandle([IntPtr]$h)
+            if (-not $el) { return '' }
+            $seen = New-Object System.Collections.Generic.List[string]
+            $n0 = ([string]$el.Current.Name).Trim()
+            if ($n0) { [void]$seen.Add($n0) }
+            $all = $el.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
+            foreach ($c in $all) {
+                $n = ([string]$c.Current.Name).Trim()
+                if ($n -and -not $seen.Contains($n)) { [void]$seen.Add($n) }
+                if ($seen.Count -ge 12) { break }
+            }
+            $seen -join ' / '
+        }
+        if (Wait-Job $job -Timeout 8) { $text = (@(Receive-Job $job -ErrorAction SilentlyContinue) -join ' ') }
+        Remove-Job $job -Force -ErrorAction SilentlyContinue
+    } catch { $text = '' }
+    $script:DialogTextCache[$Hwnd] = $text
+    return $text
+}
+
+function Get-ExcelWindows {
+    # Visible top-level windows of every Excel process, split into main windows and "other" windows
+    # (dialogs, splash, prompts). No COM calls into Excel: safe to run while Excel shows a modal dialog.
+    $res = @{ Main = @(); Dialogs = @() }
+    if (-not $script:PtaWinReady) { return $res }
+    $set = New-Object 'System.Collections.Generic.HashSet[uint32]'
+    foreach ($p in @(Get-Process excel -ErrorAction SilentlyContinue)) { [void]$set.Add([uint32]$p.Id) }
+    if ($set.Count -eq 0) { return $res }
+    foreach ($row in [PtaWin]::Windows($set)) {
+        $f = $row.Split('|', 4)
+        $o = [pscustomobject]@{ Hwnd = [int64]$f[0]; Pid = [int]$f[1]; Class = $f[2]; Title = $f[3] }
+        if ($o.Class -eq 'XLMAIN') { $res.Main += $o }
+        elseif ($o.Class -match '^(XLDESK|EXCEL7|EXCEL6|EXCEL;|MSO_BORDEREFFECT_WINDOW_CLASS|MsoSplash|NetUIHWND|tooltips_class32|SysShadow)$') { }
+        else {
+            $txt = [PtaWin]::ChildTexts($o.Hwnd)
+            if ([string]::IsNullOrWhiteSpace($txt)) { $txt = Get-DialogTextUia -Hwnd $o.Hwnd }   # NUIDialog etc.
+            $o | Add-Member -NotePropertyName Texts -NotePropertyValue $txt -Force
+            $res.Dialogs += $o
+        }
+    }
+    return $res
+}
+
+function Format-ExcelDialogs {
+    param($Dialogs)
+    return (@($Dialogs) | ForEach-Object {
+        $t = [string]$_.Texts
+        if ($t.Length -gt 200) { $t = $t.Substring(0, 200) + '...' }
+        "pid={0} class={1} title='{2}' text='{3}'" -f $_.Pid, $_.Class, $_.Title, $t
+    }) -join ' ; '
+}
+
+function Wait-ExcelIdle {
+    # Called right BEFORE each request that goes to Excel: if Excel is showing a dialog, a further
+    # open request is what produces "Excel can't do this because a dialog box is open", so wait until
+    # the dialog is gone. Uses window enumeration only (no COM), is bounded, and never blocks the login.
+    param([int]$MaxSeconds = 20, [string]$Before = 'the next file')
+    if (-not $script:PtaWinReady) { return }
+    $deadline = (Get-Date).AddSeconds($MaxSeconds)
+    $announced = $false
+    while ($true) {
+        $w = Get-ExcelWindows
+        if ($w.Dialogs.Count -eq 0) { break }
+        if (-not $announced) {
+            Log-Message "        Excel shows a dialog - waiting before $Before : $(Format-ExcelDialogs $w.Dialogs)" "SUB"
+            $announced = $true
+        }
+        if ((Get-Date) -ge $deadline) {
+            Log-Message "        Excel dialog still open after ${MaxSeconds}s - continuing anyway: $(Format-ExcelDialogs $w.Dialogs)" "WARN"
+            return
+        }
+        Start-Sleep -Milliseconds 500
+    }
+    if ($announced) { Log-Message "        Excel dialog closed - continuing with $Before" "INFO" }
+}
+
+# ----------------------------------------------------------
 # 1. PTA1 Logbook (SharePoint via Office Protocol)
 # ----------------------------------------------------------
 $logbookFile = "${lbMonthNum}.${lbMonthAbbr}_${lbYear} PTA1 FM Activity Report.xlsm"
@@ -114,6 +264,7 @@ if ($LogbookMonthOffset -eq 0 -and $now.Day -le 2) {
     Log-Message "        Note: first days of the month - if Excel says the file was not found, the new monthly logbook is not created yet. Previous month: -LogbookMonthOffset -1 ($($prev.ToString('MM', $enUS)).$($prev.ToString('MMM', $enUS))_$($prev.Year))" "WARN"
 }
 if (-not $WhatIf) {
+    Wait-ExcelIdle -Before 'the logbook'
     Start-Process $excelUri
     Start-Sleep -Milliseconds 1500
 }
@@ -137,6 +288,7 @@ if (Test-Path $dailyConsFolder) {
     if ($targetCons) {
         Log-Message "[2/$totalItems] Opening Daily Cons    : $($targetCons.Name)" "INFO"
         if (-not $WhatIf) {
+            Wait-ExcelIdle -Before 'Daily Cons'
             Start-Process $targetCons.FullName
             Start-Sleep -Milliseconds 1500
         }
@@ -166,6 +318,7 @@ if (Test-Path $transferFolder) {
     if (Test-Path $targetTransfer) {
         Log-Message "[3/$totalItems] Opening Product Trans : $(Split-Path $targetTransfer -Leaf)" "INFO"
         if (-not $WhatIf) {
+            Wait-ExcelIdle -Before 'Product Transfer'
             Start-Process $targetTransfer
             Start-Sleep -Milliseconds 1500
         }
@@ -189,6 +342,7 @@ foreach ($p in $iowCandidates) {
     if (Test-Path $p) {
         Log-Message "[4/$totalItems] Opening IOW           : $(Split-Path $p -Leaf)" "INFO"
         if (-not $WhatIf) {
+            Wait-ExcelIdle -Before 'IOW'
             Start-Process $p
             Start-Sleep -Milliseconds 1500
         }
@@ -286,85 +440,6 @@ function Invoke-ExcelTidy {
     return $result
 }
 
-$script:PtaWinReady = $false
-try {
-    Add-Type -ErrorAction Stop -TypeDefinition @'
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-
-public static class PtaWin {
-    public delegate bool EnumProc(IntPtr h, IntPtr l);
-    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc p, IntPtr l);
-    [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr h, EnumProc p, IntPtr l);
-    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetClassName(IntPtr h, StringBuilder s, int n);
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
-    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    static extern IntPtr SendMessageTimeout(IntPtr h, uint msg, IntPtr w, StringBuilder l, uint flags, uint timeout, out IntPtr result);
-
-    static string Cls(IntPtr h) { StringBuilder s = new StringBuilder(256); GetClassName(h, s, 256); return s.ToString(); }
-    static string Txt(IntPtr h) { StringBuilder s = new StringBuilder(512); GetWindowText(h, s, 512); return s.ToString(); }
-
-    // visible top-level windows owned by the given process ids: "hwnd|pid|class|title"
-    public static List<string> Windows(HashSet<uint> pids) {
-        List<string> res = new List<string>();
-        EnumWindows(delegate (IntPtr h, IntPtr l) {
-            uint pid; GetWindowThreadProcessId(h, out pid);
-            if (pids.Contains(pid) && IsWindowVisible(h)) {
-                res.Add(h.ToInt64() + "|" + pid + "|" + Cls(h) + "|" + Txt(h));
-            }
-            return true;
-        }, IntPtr.Zero);
-        return res;
-    }
-
-    // text of the static/button/edit controls inside a dialog (read with a short timeout, never blocks)
-    public static string ChildTexts(long hwnd) {
-        List<string> parts = new List<string>();
-        EnumChildWindows(new IntPtr(hwnd), delegate (IntPtr h, IntPtr l) {
-            string c = Cls(h);
-            if (c == "Static" || c == "Button" || c == "Edit" || c == "DirectUIHWND" || c == "RichEdit20W") {
-                StringBuilder sb = new StringBuilder(1024);
-                IntPtr r;
-                SendMessageTimeout(h, 0x000D, new IntPtr(1024), sb, 0x2, 150, out r);   // WM_GETTEXT, SMTO_ABORTIFHUNG
-                string t = sb.ToString().Trim();
-                if (t.Length > 0) parts.Add(t);
-            }
-            return true;
-        }, IntPtr.Zero);
-        return string.Join(" / ", parts.ToArray());
-    }
-}
-'@
-    $script:PtaWinReady = $true
-} catch {
-    $script:PtaWinReady = $false   # detection unavailable; the launcher itself is unaffected
-}
-
-function Get-ExcelWindows {
-    # Visible top-level windows of every Excel process, split into main windows and "other" windows
-    # (dialogs, splash, prompts). No COM calls: safe to run while Excel shows a modal dialog.
-    $res = @{ Main = @(); Dialogs = @() }
-    if (-not $script:PtaWinReady) { return $res }
-    $set = New-Object 'System.Collections.Generic.HashSet[uint32]'
-    foreach ($p in @(Get-Process excel -ErrorAction SilentlyContinue)) { [void]$set.Add([uint32]$p.Id) }
-    if ($set.Count -eq 0) { return $res }
-    foreach ($row in [PtaWin]::Windows($set)) {
-        $f = $row.Split('|', 4)
-        $o = [pscustomobject]@{ Hwnd = [int64]$f[0]; Pid = [int]$f[1]; Class = $f[2]; Title = $f[3] }
-        if ($o.Class -eq 'XLMAIN') { $res.Main += $o }
-        elseif ($o.Class -match '^(XLDESK|EXCEL7|EXCEL6|EXCEL;|MSO_BORDEREFFECT_WINDOW_CLASS|MsoSplash|NetUIHWND|tooltips_class32|SysShadow)$') { }
-        else {
-            $o | Add-Member -NotePropertyName Texts -NotePropertyValue ([PtaWin]::ChildTexts($o.Hwnd)) -Force
-            $res.Dialogs += $o
-        }
-    }
-    return $res
-}
-
 function Get-ExcelSnapshot {
     # One line describing Excel right now, for the diagnostic log. Returns @{ Text; HasDialog }.
     # Never talks to Excel through COM while a dialog window is open (a COM call into a modal Excel
@@ -377,13 +452,7 @@ function Get-ExcelSnapshot {
     $win = Get-ExcelWindows
     $main = if ($win.Main.Count -gt 0) { ($win.Main | ForEach-Object { "{0}:'{1}'" -f $_.Pid, $_.Title }) -join ' ; ' } else { 'none' }
     $hasDialog = ($win.Dialogs.Count -gt 0)
-    $dlg = if ($hasDialog) {
-        ($win.Dialogs | ForEach-Object {
-            $t = [string]$_.Texts
-            if ($t.Length -gt 160) { $t = $t.Substring(0, 160) + '...' }
-            "pid={0} class={1} title='{2}' text='{3}'" -f $_.Pid, $_.Class, $_.Title, $t
-        }) -join ' ; '
-    } else { 'none' }
+    $dlg = if ($hasDialog) { Format-ExcelDialogs $win.Dialogs    } else { 'none' }
 
     $w = '(skipped: a dialog is open)'
     if (-not $hasDialog) {
