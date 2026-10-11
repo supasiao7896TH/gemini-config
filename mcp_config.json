@@ -2,11 +2,11 @@
   "mcpServers": {
     "firebase-mcp-server": {
       "command": "npx",
-      "args": ["-y", "firebase-tools@latest", "mcp"]
+      "args": ["-y", "firebase-tools@15.33.0", "mcp"]
     },
     "puppeteer": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer@2025.5.12"]
     },
     "notebooks": {
       "command": "node",
