@@ -133,7 +133,9 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
   — `setup-junctions.ps1` เขียน path ของ gate เป็น **path เต็ม แบบ "ไม่มีเครื่องหมายคำพูด"** ลง `~/.gemini/config/hooks.json` เพราะ `.\tools\...` ใช้ได้เฉพาะเมื่อ cwd ของ hook คือโฟลเดอร์ config
   - **Antigravity ไม่ตีความเครื่องหมายคำพูด** (ไม่ใช่ shell) — ส่งผ่านเป็นตัวอักษรจริงให้โปรแกรมปลายทาง: `powershell -File "..."` ได้ `Illegal characters in path`, `node "..."` ได้ `Cannot find module '<cwd>\"..."'` (เจอจริง 2026-10-11 ตอนหนูใส่ quote ผิด) ดังนั้น **ห้ามใส่ quote ใน `command` ของ hook/statusline** · ถ้า path ของ user มีช่องว่าง (เช่น `PC 4000D`) สคริปต์จะใช้ชื่อสั้น 8.3 แทน
   - ทดสอบ hook ต้องส่ง argument แบบไม่ผ่าน shell (อย่าใช้ `cmd /c` ตัดสิน เพราะ cmd ตีความ quote ให้ จึงได้ผลผ่านทั้งที่ของจริงพัง)
-  - ยังไม่ได้ยืนยันกับ session จริงว่า Antigravity เรียก gate ตัวนี้ ให้ลอง `cat .env` แล้วดูว่าถูกถามหรือไม่
+  - **ยืนยันใน session จริงของ agy 1.3.3 (2026-10-11):** `run_command` (ถามเมื่อแตะ `.env` / คำสั่งทำลาย), `view_file` (อ่าน `.env` → หน้า "File access … Security Gate"), `write_to_file` และ `replace_file_content` ถูกส่งเข้า hook จริงด้วยชื่อ step และ field `AbsolutePath` / `TargetFile` ตามที่ gate อ่าน
+  - matcher เป็น **regex ของชื่อ step ตัวพิมพ์เล็ก** (`run_command|view_file`, `*`, `browser_.*` — จากเอกสารที่ฝังใน `agy.exe`) hook รันผ่าน `cmd /c` โดย working dir = โฟลเดอร์ของ `hooks.json` · `decision` มี `allow` / `ask` / `force_ask` / `deny`
+  - **ข้อจำกัดที่ยังมี:** การค้นหา (grep/find) หรือ list ทั้งโฟลเดอร์ระบุแค่ path ของโฟลเดอร์ gate จึงมองไม่เห็นชื่อ `.env` ข้างใน และชื่อ step ของ tool กลุ่มนี้ยังไม่ได้เก็บ · ให้ใช้ `.geminiignore` และอย่าให้ agent ค้นในโฟลเดอร์ที่มีไฟล์ความลับ
 - **ห้ามใส่ `C:\Users\<ชื่อ>` (HOME) หรือ `~/.claude` ใน `trustedWorkspaces`** ของ `~/.gemini/antigravity-cli/settings.json` — ไม่งั้น Antigravity จะแก้ settings/hook ของ Claude Code ได้โดยไม่ผ่าน gate ใดๆ (ถอดออกแล้ว 2026-10-11)
 - **hooks.json มีที่เดียว:** `hooks.json` ที่ root repo เท่านั้น (ห้ามวางสำเนาใน `plugins/*/hooks.json` — Antigravity โหลดทั้งสองแล้ว hook ชื่อซ้ำ ทำให้ error ซ้ำ ~3,600 ครั้งเมื่อ 4–10 ต.ค.)
 

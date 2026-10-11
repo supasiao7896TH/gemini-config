@@ -116,6 +116,29 @@ check("security gate: hooks.json command asks for `git reset --hard`", () => {
     throw new Error(`gate did not ask; stdout=${JSON.stringify((r.stdout ?? "").slice(0, 80))}`);
 });
 
+// 5b. The step names below were confirmed in a real agy 1.3.3 session (2026-10-11): the gate must stay
+//     wired to all of them, otherwise reading/writing a secret file through a file tool is not checked.
+check(
+  "security gate matcher covers run_command, view_file, write_to_file, replace_file_content",
+  () => {
+    const hooks = JSON.parse(readFileSync(join(root, "hooks.json"), "utf8"));
+    const entries = hooks["security-gate"]?.PreToolUse ?? [];
+    const covers = (tool) =>
+      entries.some((e) => {
+        try {
+          return new RegExp("^(?:" + (e.matcher || ".*") + ")$").test(tool);
+        } catch {
+          return false;
+        }
+      });
+    const missing = ["run_command", "view_file", "write_to_file", "replace_file_content"].filter(
+      (n) => !covers(n)
+    );
+    if (missing.length)
+      throw new Error("not covered by any PreToolUse matcher: " + missing.join(", "));
+  }
+);
+
 // 6. MCP servers: pinned versions, no BOM (strict JSON parsers reject it).
 check("mcp_config.json: no BOM, no @latest, npx packages pinned", () => {
   const buf = readFileSync(join(root, "mcp_config.json"));
