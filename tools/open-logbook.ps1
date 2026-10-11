@@ -286,22 +286,117 @@ function Invoke-ExcelTidy {
     return $result
 }
 
+$script:PtaWinReady = $false
+try {
+    Add-Type -ErrorAction Stop -TypeDefinition @'
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+
+public static class PtaWin {
+    public delegate bool EnumProc(IntPtr h, IntPtr l);
+    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc p, IntPtr l);
+    [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr h, EnumProc p, IntPtr l);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetClassName(IntPtr h, StringBuilder s, int n);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
+    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    static extern IntPtr SendMessageTimeout(IntPtr h, uint msg, IntPtr w, StringBuilder l, uint flags, uint timeout, out IntPtr result);
+
+    static string Cls(IntPtr h) { StringBuilder s = new StringBuilder(256); GetClassName(h, s, 256); return s.ToString(); }
+    static string Txt(IntPtr h) { StringBuilder s = new StringBuilder(512); GetWindowText(h, s, 512); return s.ToString(); }
+
+    // visible top-level windows owned by the given process ids: "hwnd|pid|class|title"
+    public static List<string> Windows(HashSet<uint> pids) {
+        List<string> res = new List<string>();
+        EnumWindows(delegate (IntPtr h, IntPtr l) {
+            uint pid; GetWindowThreadProcessId(h, out pid);
+            if (pids.Contains(pid) && IsWindowVisible(h)) {
+                res.Add(h.ToInt64() + "|" + pid + "|" + Cls(h) + "|" + Txt(h));
+            }
+            return true;
+        }, IntPtr.Zero);
+        return res;
+    }
+
+    // text of the static/button/edit controls inside a dialog (read with a short timeout, never blocks)
+    public static string ChildTexts(long hwnd) {
+        List<string> parts = new List<string>();
+        EnumChildWindows(new IntPtr(hwnd), delegate (IntPtr h, IntPtr l) {
+            string c = Cls(h);
+            if (c == "Static" || c == "Button" || c == "Edit" || c == "DirectUIHWND" || c == "RichEdit20W") {
+                StringBuilder sb = new StringBuilder(1024);
+                IntPtr r;
+                SendMessageTimeout(h, 0x000D, new IntPtr(1024), sb, 0x2, 150, out r);   // WM_GETTEXT, SMTO_ABORTIFHUNG
+                string t = sb.ToString().Trim();
+                if (t.Length > 0) parts.Add(t);
+            }
+            return true;
+        }, IntPtr.Zero);
+        return string.Join(" / ", parts.ToArray());
+    }
+}
+'@
+    $script:PtaWinReady = $true
+} catch {
+    $script:PtaWinReady = $false   # detection unavailable; the launcher itself is unaffected
+}
+
+function Get-ExcelWindows {
+    # Visible top-level windows of every Excel process, split into main windows and "other" windows
+    # (dialogs, splash, prompts). No COM calls: safe to run while Excel shows a modal dialog.
+    $res = @{ Main = @(); Dialogs = @() }
+    if (-not $script:PtaWinReady) { return $res }
+    $set = New-Object 'System.Collections.Generic.HashSet[uint32]'
+    foreach ($p in @(Get-Process excel -ErrorAction SilentlyContinue)) { [void]$set.Add([uint32]$p.Id) }
+    if ($set.Count -eq 0) { return $res }
+    foreach ($row in [PtaWin]::Windows($set)) {
+        $f = $row.Split('|', 4)
+        $o = [pscustomobject]@{ Hwnd = [int64]$f[0]; Pid = [int]$f[1]; Class = $f[2]; Title = $f[3] }
+        if ($o.Class -eq 'XLMAIN') { $res.Main += $o }
+        elseif ($o.Class -match '^(XLDESK|EXCEL7|EXCEL6|EXCEL;|MSO_BORDEREFFECT_WINDOW_CLASS|MsoSplash|NetUIHWND|tooltips_class32|SysShadow)$') { }
+        else {
+            $o | Add-Member -NotePropertyName Texts -NotePropertyValue ([PtaWin]::ChildTexts($o.Hwnd)) -Force
+            $res.Dialogs += $o
+        }
+    }
+    return $res
+}
+
 function Get-ExcelSnapshot {
-    # One line describing what Excel looks like right now (for the diagnostic log).
+    # One line describing Excel right now, for the diagnostic log. Returns @{ Text; HasDialog }.
+    # Never talks to Excel through COM while a dialog window is open (a COM call into a modal Excel
+    # is exactly what produces "Excel can't do this because a dialog box is open").
     $procs = @(Get-Process excel -ErrorAction SilentlyContinue)
     $p = if ($procs.Count -gt 0) {
         ($procs | ForEach-Object { "{0}@{1}" -f $_.Id, $_.StartTime.ToString('HH:mm:ss') }) -join ','
     } else { 'none' }
-    $w = '?'
-    try {
-        $x = [Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
-        $w = (@($x.Workbooks) | ForEach-Object { $_.Name }) -join ' | '
-        if (-not $w) { $w = '(no workbook)' }
-    } catch {
-        $m = ($_.Exception.Message -split "`n")[0]
-        $w = '(COM: ' + $m.Substring(0, [Math]::Min(60, $m.Length)) + ')'
+
+    $win = Get-ExcelWindows
+    $main = if ($win.Main.Count -gt 0) { ($win.Main | ForEach-Object { "{0}:'{1}'" -f $_.Pid, $_.Title }) -join ' ; ' } else { 'none' }
+    $hasDialog = ($win.Dialogs.Count -gt 0)
+    $dlg = if ($hasDialog) {
+        ($win.Dialogs | ForEach-Object {
+            $t = [string]$_.Texts
+            if ($t.Length -gt 160) { $t = $t.Substring(0, 160) + '...' }
+            "pid={0} class={1} title='{2}' text='{3}'" -f $_.Pid, $_.Class, $_.Title, $t
+        }) -join ' ; '
+    } else { 'none' }
+
+    $w = '(skipped: a dialog is open)'
+    if (-not $hasDialog) {
+        try {
+            $x = [Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+            $w = (@($x.Workbooks) | ForEach-Object { $_.Name }) -join ' | '
+            if (-not $w) { $w = '(no workbook)' }
+        } catch {
+            $m = ($_.Exception.Message -split "`n")[0]
+            $w = '(COM: ' + $m.Substring(0, [Math]::Min(60, $m.Length)) + ')'
+        }
     }
-    return "excel=[$p] workbooks=[$w]"
+    return @{ Text = "excel=[$p] windows=[$main] dialogs=[$dlg] workbooks(first instance)=[$w]"; HasDialog = $hasDialog }
 }
 
 function Get-BridgeStatus {
@@ -330,20 +425,24 @@ if ($WhatIf) {
     $closedAll = @()
     $logsheetSeenAt = $null
     $logbookSeenAt = $null
+    $dialogSeenAt = $null
+    $logbookBase = [IO.Path]::GetFileNameWithoutExtension($logbookFile)   # window titles hide the extension
 
     Log-Message "[diag] t+0s $(Get-BridgeStatus)" "SUB"
     while ((Get-Date) -lt $obsEnd) {
         $elapsed = [int]((Get-Date) - $obsStart).TotalSeconds
-        $snap = Get-ExcelSnapshot
+        $shot = Get-ExcelSnapshot
+        $snap = $shot.Text
         if ($snap -ne $lastSnap) {
             Log-Message "[diag] t+${elapsed}s $snap" "SUB"
             $lastSnap = $snap
             $lastChange = Get-Date
         }
         if ((-not $logsheetSeenAt) -and ($snap -match 'P1-F-2002')) { $logsheetSeenAt = $elapsed }
-        if ((-not $logbookSeenAt) -and ($snap.Contains($logbookFile))) { $logbookSeenAt = $elapsed }
+        if ((-not $logbookSeenAt) -and ($snap.Contains($logbookBase))) { $logbookSeenAt = $elapsed }
+        if ($shot.HasDialog -and ($null -eq $dialogSeenAt)) { $dialogSeenAt = $elapsed }
 
-        if ((Get-Date) -lt $tidyUntil) {
+        if (((Get-Date) -lt $tidyUntil) -and (-not $shot.HasDialog)) {   # never poke Excel while it shows a dialog
             try {
                 $xl = [Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
                 $r = Invoke-ExcelTidy -Excel $xl -LogbookName $logbookFile
@@ -363,9 +462,10 @@ if ($WhatIf) {
     $closedTxt = if ($closedAll.Count -gt 0) { $closedAll -join ', ' } else { 'none' }
     $lbTxt = if ($null -ne $logbookSeenAt) { "t+${logbookSeenAt}s" } else { 'NEVER' }
     $lsTxt = if ($null -ne $logsheetSeenAt) { "t+${logsheetSeenAt}s" } else { 'NEVER' }
-    Log-Message "[diag] done after ${took}s: logbook seen=$lbTxt | logsheet (P1-F-2002*) seen=$lsTxt | blank closed=$closedTxt | $(Get-BridgeStatus)" "INFO"
+    $dgTxt = if ($null -ne $dialogSeenAt) { "t+${dialogSeenAt}s" } else { 'none' }
+    Log-Message "[diag] done after ${took}s: logbook seen=$lbTxt | logsheet (P1-F-2002*) seen=$lsTxt | dialog seen=$dgTxt | blank closed=$closedTxt | $(Get-BridgeStatus)" "INFO"
     if ($null -eq $logbookSeenAt) {
-        Log-Message "[diag] logbook workbook never appeared in Excel within ${took}s (blocked, signed-out or still loading?)" "WARN"
+        Log-Message "[diag] logbook not seen within ${took}s (note: COM only sees the FIRST Excel instance; check windows=[...] above for the others)" "WARN"
     }
 }
 
