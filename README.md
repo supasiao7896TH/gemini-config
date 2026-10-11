@@ -138,6 +138,12 @@ Copy-Item "$env:USERPROFILE\A(i)CODER2025TH\gemini-config\.geminiignore" "$env:U
   - **ข้อจำกัดที่ยังมี:** การค้นหา (grep/find) หรือ list ทั้งโฟลเดอร์ระบุแค่ path ของโฟลเดอร์ gate จึงมองไม่เห็นชื่อ `.env` ข้างใน และชื่อ step ของ tool กลุ่มนี้ยังไม่ได้เก็บ · ให้ใช้ `.geminiignore` และอย่าให้ agent ค้นในโฟลเดอร์ที่มีไฟล์ความลับ
 - **ห้ามใส่ `C:\Users\<ชื่อ>` (HOME) หรือ `~/.claude` ใน `trustedWorkspaces`** ของ `~/.gemini/antigravity-cli/settings.json` — ไม่งั้น Antigravity จะแก้ settings/hook ของ Claude Code ได้โดยไม่ผ่าน gate ใดๆ (ถอดออกแล้ว 2026-10-11)
 - **hooks.json มีที่เดียว:** `hooks.json` ที่ root repo เท่านั้น (ห้ามวางสำเนาใน `plugins/*/hooks.json` — Antigravity โหลดทั้งสองแล้ว hook ชื่อซ้ำ ทำให้ error ซ้ำ ~3,600 ครั้งเมื่อ 4–10 ต.ค.)
+- **ถามอนุมัติถี่ = allowlist เต็มไปด้วยคำสั่งใช้ครั้งเดียว (เจอจริง 2026-10-11):** ที่ prompt ตัวเลือก **3** ("always allow … Persist to settings.json") บันทึก **ทั้งบรรทัดของคำสั่งนั้นเป๊ะๆ** เป็น `command(<คำสั่งเต็ม>)` ใน `~/.gemini/antigravity-cli/settings.json` — พอคำสั่งเปลี่ยนแค่ argument เดียวก็ถามใหม่ (ตอนไล่ดูมี ~45 รายการ เป็น `scratch\<uuid>\*.ps1` ใช้ซ้ำไม่ได้ ~9 รายการ)
+  - **กดข้อ 1** กับคำสั่งเฉพาะกิจ · ส่วนคำสั่งอ่านอย่างเดียวที่ใช้บ่อยให้เขียน rule กว้างเองด้วย `command(regex:...)` แทนการกดข้อ 3
+  - เหตุผล: CLI ไม่มี "โหมดอนุมัติ" ให้ตั้ง ค่าเริ่มต้นของ `command` คือ Ask · match แบบ prefix ทีละคำ · บน **Windows** คำสั่งที่แยกเป็นคำสะอาดๆ ไม่ได้ (pipe, `$_`, `-ErrorAction`) ต้อง match เป๊ะทั้งบรรทัด จึงต้องใช้ `regex:` · ลำดับความสำคัญ deny > ask > allow ([docs](https://antigravity.google/docs/permissions?tab=cli))
+  - ตัวอย่างที่ **ยืนยันใน session จริง** (`Get-Process | Sort-Object CPU -Descending | Select-Object -First 35` ไม่ถามแล้ว): `command(regex:Get-Process( [^;&|]*)?( \\| (Sort-Object|Select-Object|Where-Object|Group-Object|Measure-Object|Format-Table|Format-List)( [^;&|]*)?)*)` — ใน JSON ต้องเขียน `\\|` (backslash สองตัว)
+  - **ห้ามใช้ `.*` เฉยๆ** ท้าย regex เพราะกลืน `; Remove-Item …` ที่ต่อท้ายมาด้วย ให้ใช้ `[^;&|]*` และอนุญาต pipe เฉพาะ cmdlet ที่แค่เลือก/เรียง/จัดรูป (ถ้าเป็น `Stop-Process` / `Remove-Item` ต้องยังถามอยู่) · `Where-Object { … }` รับ script block ได้ จึงยังมีช่องเล็กน้อย — gate ยังจับ `rm`/`Remove-Item -Recurse` ไว้
+  - agy เขียน `settings.json` ซ้ำเองตอนใช้งานและแปลง `&` เป็นรูป escape ของ JSON (ยังเป็น JSON ถูกต้อง) · ไฟล์นี้อยู่นอก git จึง **ต้องแก้ซ้ำบนแต่ละเครื่อง** · สำรองก่อนแก้เสมอ
 
 ## 🧭 เจ้าของไฟล์ (ใครเขียนที่ไหน — กันสองเครื่องมือทับกัน)
 
