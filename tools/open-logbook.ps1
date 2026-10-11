@@ -101,6 +101,9 @@ if (-not (Test-Path "K:\")) {
 # Excel window helpers (Win32 only, no COM into Excel): used to wait out dialogs and for diagnostics
 # ----------------------------------------------------------
 $script:PtaWinReady = $false
+# Total time the launcher may spend waiting for Excel (dialogs / windows) in one run; afterwards it
+# stops waiting and just sends the remaining requests, so a login can never stall for minutes.
+$script:WaitBudgetEnd = (Get-Date).AddSeconds(120)
 try {
     Add-Type -ErrorAction Stop -TypeDefinition @'
 using System;
@@ -229,7 +232,9 @@ function Wait-ExcelIdle {
     # the dialog is gone. Uses window enumeration only (no COM), is bounded, and never blocks the login.
     param([int]$MaxSeconds = 20, [string]$Before = 'the next file')
     if (-not $script:PtaWinReady) { return }
+    if ($script:WaitBudgetEnd -and ((Get-Date) -ge $script:WaitBudgetEnd)) { return }
     $deadline = (Get-Date).AddSeconds($MaxSeconds)
+    if ($script:WaitBudgetEnd -and ($deadline -gt $script:WaitBudgetEnd)) { $deadline = $script:WaitBudgetEnd }
     $announced = $false
     while ($true) {
         $w = Get-ExcelWindows
@@ -245,6 +250,30 @@ function Wait-ExcelIdle {
         Start-Sleep -Milliseconds 500
     }
     if ($announced) { Log-Message "        Excel dialog closed - continuing with $Before" "INFO" }
+}
+
+function Wait-ExcelFileLoaded {
+    # After a request to open a file in Excel: wait (window enumeration only, no COM) until Excel shows a
+    # window for it, then until any dialog it raised (typically the "update links" prompt) is answered.
+    # The next request is sent only after that, so it can never hit a modal Excel
+    # ("Excel can't do this because a dialog box is open"). Bounded; never blocks the login for good.
+    param([string]$FileName, [int]$LoadSeconds = 25, [int]$DialogSeconds = 45)
+    if (-not $script:PtaWinReady) { return }
+    $base = [IO.Path]::GetFileNameWithoutExtension($FileName)   # window titles read "<name> - Excel"
+    if ($script:WaitBudgetEnd -and ((Get-Date) -ge $script:WaitBudgetEnd)) { return }
+    $t0 = Get-Date
+    $deadline = $t0.AddSeconds($LoadSeconds)
+    if ($script:WaitBudgetEnd -and ($deadline -gt $script:WaitBudgetEnd)) { $deadline = $script:WaitBudgetEnd }
+    $loaded = $false
+    while ((Get-Date) -lt $deadline) {
+        $w = Get-ExcelWindows
+        if (@($w.Main | Where-Object { $_.Title.StartsWith($base, [StringComparison]::OrdinalIgnoreCase) }).Count -gt 0) { $loaded = $true; break }
+        if ($w.Dialogs.Count -gt 0) { break }   # a prompt is already up: the dialog wait below takes over
+        Start-Sleep -Milliseconds 500
+    }
+    $took = [int]((Get-Date) - $t0).TotalSeconds
+    if ($loaded) { Log-Message "        window shown after ${took}s: $base" "SUB" }
+    Wait-ExcelIdle -MaxSeconds $DialogSeconds -Before 'the next file'
 }
 
 # ----------------------------------------------------------
@@ -266,7 +295,8 @@ if ($LogbookMonthOffset -eq 0 -and $now.Day -le 2) {
 if (-not $WhatIf) {
     Wait-ExcelIdle -Before 'the logbook'
     Start-Process $excelUri
-    Start-Sleep -Milliseconds 1500
+    Start-Sleep -Milliseconds 500
+    Wait-ExcelFileLoaded -FileName $logbookFile
 }
 
 # ----------------------------------------------------------
@@ -290,7 +320,8 @@ if (Test-Path $dailyConsFolder) {
         if (-not $WhatIf) {
             Wait-ExcelIdle -Before 'Daily Cons'
             Start-Process $targetCons.FullName
-            Start-Sleep -Milliseconds 1500
+            Start-Sleep -Milliseconds 500
+            Wait-ExcelFileLoaded -FileName $targetCons.Name
         }
     } else {
         Log-Message "[2/$totalItems] Daily Cons file not found in $dailyConsFolder" "WARN"
@@ -320,7 +351,8 @@ if (Test-Path $transferFolder) {
         if (-not $WhatIf) {
             Wait-ExcelIdle -Before 'Product Transfer'
             Start-Process $targetTransfer
-            Start-Sleep -Milliseconds 1500
+            Start-Sleep -Milliseconds 500
+            Wait-ExcelFileLoaded -FileName (Split-Path $targetTransfer -Leaf)
         }
     } else {
         Log-Message "[3/$totalItems] Product Transfer file not found in $transferFolder" "WARN"
@@ -344,7 +376,8 @@ foreach ($p in $iowCandidates) {
         if (-not $WhatIf) {
             Wait-ExcelIdle -Before 'IOW'
             Start-Process $p
-            Start-Sleep -Milliseconds 1500
+            Start-Sleep -Milliseconds 500
+            Wait-ExcelFileLoaded -FileName (Split-Path $p -Leaf)
         }
         $foundIow = $true
         break
@@ -523,7 +556,7 @@ if ($WhatIf) {
         }
 
         # settled: past the tidy window, logbook seen, and nothing changed for 30s
-        if (((Get-Date) -ge $tidyUntil) -and $logbookSeenAt -and (((Get-Date) - $lastChange).TotalSeconds -ge 30)) { break }
+        if (((Get-Date) -ge $tidyUntil) -and $logbookSeenAt -and (-not $shot.HasDialog) -and (((Get-Date) - $lastChange).TotalSeconds -ge 30)) { break }
         Start-Sleep -Seconds 3
     }
 
