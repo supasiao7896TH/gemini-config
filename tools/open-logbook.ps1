@@ -242,6 +242,133 @@ if ($isProcBookRunning) {
     Log-Message "[8/$totalItems] PI Display file not found on Desktop" "WARN"
 }
 
+# ----------------------------------------------------------
+# 9. Tidy Excel (not counted in $totalItems)
+#    When Excel is started by the ms-excel: link it creates a blank "Book1" while the logbook
+#    is still loading from SharePoint, and that blank window ends up in front of the logbook.
+#    Close ONLY a pristine blank workbook (unsaved, one sheet, A1 empty, no shapes) and bring
+#    the logbook to the front. Anything with content is never touched.
+# ----------------------------------------------------------
+function Invoke-ExcelTidy {
+    param(
+        [Parameter(Mandatory = $true)] $Excel,
+        [Parameter(Mandatory = $true)] [string]$LogbookName,
+        [switch]$ActivateLogbook
+    )
+    $result = @{ LogbookOpen = $false; Closed = @(); Kept = @(); Error = $null }
+    try {
+        $all = @($Excel.Workbooks)
+        $names = @($all | ForEach-Object { $_.Name })
+        if ($names -notcontains $LogbookName) { return $result }
+        $result.LogbookOpen = $true
+
+        foreach ($wb in $all) {
+            if ($wb.Name -notmatch '^Book\d+$') { continue }
+            $pristine = $false
+            try {
+                if (($wb.Path -eq '') -and $wb.Saved -and (-not $wb.ReadOnly) -and ($wb.Worksheets.Count -eq 1)) {
+                    $sheet = $wb.Worksheets.Item(1)
+                    $isA1 = ($sheet.UsedRange.Address($false, $false) -eq 'A1')
+                    $a1Empty = [string]::IsNullOrEmpty([string]$sheet.Range('A1').Formula)
+                    if ($isA1 -and $a1Empty -and ($sheet.Shapes.Count -eq 0)) { $pristine = $true }
+                }
+            } catch { $pristine = $false }
+
+            $wbName = $wb.Name   # read BEFORE Close(): the COM object is gone afterwards
+            if ($pristine) { $wb.Close($false); $result.Closed += $wbName }
+            else { $result.Kept += $wbName }
+        }
+
+        if ($ActivateLogbook) { $Excel.Workbooks.Item($LogbookName).Activate() | Out-Null }
+    } catch {
+        $result.Error = $_.Exception.Message
+    }
+    return $result
+}
+
+function Get-ExcelSnapshot {
+    # One line describing what Excel looks like right now (for the diagnostic log).
+    $procs = @(Get-Process excel -ErrorAction SilentlyContinue)
+    $p = if ($procs.Count -gt 0) {
+        ($procs | ForEach-Object { "{0}@{1}" -f $_.Id, $_.StartTime.ToString('HH:mm:ss') }) -join ','
+    } else { 'none' }
+    $w = '?'
+    try {
+        $x = [Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+        $w = (@($x.Workbooks) | ForEach-Object { $_.Name }) -join ' | '
+        if (-not $w) { $w = '(no workbook)' }
+    } catch {
+        $m = ($_.Exception.Message -split "`n")[0]
+        $w = '(COM: ' + $m.Substring(0, [Math]::Min(60, $m.Length)) + ')'
+    }
+    return "excel=[$p] workbooks=[$w]"
+}
+
+function Get-BridgeStatus {
+    # The Boardman Excel bridge (scheduled task at logon) is the other thing that starts Excel at login.
+    $b = $null
+    try {
+        $b = Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction Stop |
+            Where-Object { $_.CommandLine -match 'excel-bridge' } | Select-Object -First 1
+    } catch {}
+    $listen = $false
+    try { $listen = [bool](Get-NetTCPConnection -LocalPort 5175 -State Listen -ErrorAction Stop) } catch {}
+    $bs = if ($b) { "pid=$($b.ProcessId) start=$($b.CreationDate.ToString('HH:mm:ss'))" } else { 'not running' }
+    return "bridge=[$bs] port5175=" + $(if ($listen) { 'listening' } else { 'closed' })
+}
+
+if ($WhatIf) {
+    Log-Message "[diag] would observe Excel for up to 90s (log what opens when) and close a blank Book1 during the first 40s" "SUB"
+} else {
+    # Phase 1 (0-40s): once the logbook is open, close a PRISTINE blank Book1 (never anything with content).
+    # Phase 2 (to 90s): read-only observation, so the next login's log shows the real order of events.
+    $obsStart = Get-Date
+    $tidyUntil = $obsStart.AddSeconds(40)
+    $obsEnd = $obsStart.AddSeconds(90)
+    $lastSnap = ''
+    $lastChange = $obsStart
+    $closedAll = @()
+    $logsheetSeenAt = $null
+    $logbookSeenAt = $null
+
+    Log-Message "[diag] t+0s $(Get-BridgeStatus)" "SUB"
+    while ((Get-Date) -lt $obsEnd) {
+        $elapsed = [int]((Get-Date) - $obsStart).TotalSeconds
+        $snap = Get-ExcelSnapshot
+        if ($snap -ne $lastSnap) {
+            Log-Message "[diag] t+${elapsed}s $snap" "SUB"
+            $lastSnap = $snap
+            $lastChange = Get-Date
+        }
+        if ((-not $logsheetSeenAt) -and ($snap -match 'P1-F-2002')) { $logsheetSeenAt = $elapsed }
+        if ((-not $logbookSeenAt) -and ($snap.Contains($logbookFile))) { $logbookSeenAt = $elapsed }
+
+        if ((Get-Date) -lt $tidyUntil) {
+            try {
+                $xl = [Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+                $r = Invoke-ExcelTidy -Excel $xl -LogbookName $logbookFile
+                if ($r.Closed.Count -gt 0) {
+                    $closedAll += $r.Closed
+                    Log-Message "[tidy] t+${elapsed}s closed blank workbook(s): $($r.Closed -join ', ')" "INFO"
+                }
+            } catch {}   # Excel not started / busy loading: try again next pass
+        }
+
+        # settled: past the tidy window, logbook seen, and nothing changed for 30s
+        if (((Get-Date) -ge $tidyUntil) -and $logbookSeenAt -and (((Get-Date) - $lastChange).TotalSeconds -ge 30)) { break }
+        Start-Sleep -Seconds 3
+    }
+
+    $took = [int]((Get-Date) - $obsStart).TotalSeconds
+    $closedTxt = if ($closedAll.Count -gt 0) { $closedAll -join ', ' } else { 'none' }
+    $lbTxt = if ($null -ne $logbookSeenAt) { "t+${logbookSeenAt}s" } else { 'NEVER' }
+    $lsTxt = if ($null -ne $logsheetSeenAt) { "t+${logsheetSeenAt}s" } else { 'NEVER' }
+    Log-Message "[diag] done after ${took}s: logbook seen=$lbTxt | logsheet (P1-F-2002*) seen=$lsTxt | blank closed=$closedTxt | $(Get-BridgeStatus)" "INFO"
+    if ($null -eq $logbookSeenAt) {
+        Log-Message "[diag] logbook workbook never appeared in Excel within ${took}s (blocked, signed-out or still loading?)" "WARN"
+    }
+}
+
 Log-Message "==========================================================" "TITLE"
 Log-Message "  $totalItems launch requests sent (Windows cannot confirm each app opened)  " "INFO"
 Log-Message "==========================================================" "TITLE"
