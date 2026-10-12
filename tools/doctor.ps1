@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Antigravity CLI System Doctor & Health Diagnostics for Supasit.A (พี่ A)
+    Antigravity CLI System Doctor & Health Diagnostics for Supasit.A (เธเธตเน A)
     Usage: .\tools\doctor.ps1
 #>
 
@@ -82,6 +82,33 @@ if ($agyCmd) {
     Report-Check "OK" "Antigravity CLI (agy)" "v$agyVer ($($agyCmd.Source))"
 } else {
     Report-Check "FAIL" "Antigravity CLI (agy)" "Not found in PATH" "Run: irm https://antigravity.google/cli/install.ps1 | iex"
+}
+
+$ghCmd = Get-Command gh -ErrorAction SilentlyContinue
+if ($ghCmd) {
+    $ghAuth = (gh auth status 2>&1 | Out-String)
+    if ($LASTEXITCODE -eq 0 -or $ghAuth -match "Logged in to") {
+        $ghUser = if ($ghAuth -match "account ([^\s\(\)]+)") { $matches[1] } else { "Active" }
+        $ghVerLine = (gh --version 2>&1 | Select-Object -First 1) -replace 'gh version\s*', 'v'
+        Report-Check "OK" "GitHub CLI (gh)" "$ghVerLine (Account: $ghUser)"
+    } else {
+        Report-Check "WARN" "GitHub CLI (gh)" "Installed but not logged in" "Run: gh auth login"
+    }
+} else {
+    Report-Check "WARN" "GitHub CLI (gh)" "Not found in PATH" "Install via: winget install GitHub.cli"
+}
+
+$pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+if ($pythonCmd) {
+    $pyCheck = (python -c "import pandas, openpyxl; print(f'pandas v{pandas.__version__}, openpyxl v{openpyxl.__version__}')" 2>&1 | Out-String).Trim()
+    if ($LASTEXITCODE -eq 0) {
+        $pyVer = (python --version 2>&1 | Out-String).Trim()
+        Report-Check "OK" "Python Data Stack" "$pyVer ($pyCheck)"
+    } else {
+        Report-Check "WARN" "Python Data Stack" "Python installed but missing pandas or openpyxl" "Run: pip install pandas openpyxl"
+    }
+} else {
+    Report-Check "WARN" "Python Data Stack" "Python not found in PATH" "Install Python 3.13"
 }
 
 Write-Host ""
@@ -236,6 +263,7 @@ if (Test-Path $mcpPath) {
         $mcpRaw = Get-Content $mcpPath -Raw -Encoding UTF8
         $mcpJson = $mcpRaw | ConvertFrom-Json
         $hasFirebase = $null -ne $mcpJson.mcpServers."firebase-mcp-server"
+        $hasPlaywright = $null -ne $mcpJson.mcpServers.playwright
         $hasPuppeteer = $null -ne $mcpJson.mcpServers.puppeteer
         
         $escapedProfile = [regex]::Escape(($env:USERPROFILE -replace '\\', '\\'))
@@ -245,10 +273,15 @@ if (Test-Path $mcpPath) {
             Report-Check "WARN" "mcp_config.json" "Detected user path that does not match current user ($env:USERNAME)" "Run: .\setup-junctions.ps1 -Force"
         } elseif ($hasPuppeteer) {
             Report-Check "WARN" "mcp_config.json" "puppeteer MCP is still configured; npm marks it 'no longer supported' (chrome-devtools-plugin covers it)" "Remove the 'puppeteer' entry from mcp_config.json"
-        } elseif ($hasFirebase) {
-            Report-Check "OK" "mcp_config.json" "Firebase MCP active (user path matches current user)"
         } else {
-            Report-Check "OK" "mcp_config.json" "Valid MCP configuration synced"
+            $servers = @()
+            if ($hasFirebase) { $servers += "Firebase" }
+            if ($hasPlaywright) { $servers += "Playwright" }
+            if ($servers.Count -gt 0) {
+                Report-Check "OK" "mcp_config.json" "Active servers: $($servers -join ', ') (user path matches current user)"
+            } else {
+                Report-Check "OK" "mcp_config.json" "Valid MCP configuration synced"
+            }
         }
     } catch {
         Report-Check "FAIL" "mcp_config.json" "Invalid JSON: $_" "Run: .\setup-junctions.ps1 -Force"

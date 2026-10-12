@@ -4,6 +4,10 @@
       "command": "npx",
       "args": ["-y", "firebase-tools@15.33.0", "mcp"]
     },
+    "playwright": {
+      "command": "python",
+      "args": ["-m", "playwright", "mcp", "--headless"]
+    },
     "notebooks": {
       "command": "node",
       "args": [
