@@ -2,7 +2,7 @@
 
 > ไฟล์นี้ใช้สำหรับส่งต่องานข้ามเครื่อง (บ้าน ↔ ที่ทำงาน GC-M PTA) และเป็นแผนกู้ชีพฉุกเฉิน (Disaster Recovery Runbook) สำหรับการตั้งค่า Google Antigravity / Gemini CLI ของพี่ A (Supasit.A)
 
-**อัปเดตล่าสุด:** 2026-10-09 (ยกระดับความเข้ากันได้กับ Antigravity CLI v1.3.2: ตรวจสอบความถูกต้องของ Plugins อัตโนมัติด้วย `agy plugin validate` ใน `doctor.ps1` และอัปเดต metadata ของ `user-profile`)
+**อัปเดตล่าสุด:** 2026-10-12 (ติดตั้งและเชื่อมต่อ 3 Mods สำคัญ: GitHub CLI Ops, Python Data Stack (pandas + openpyxl), และ Playwright Headless MCP Server พร้อมยกระดับ `doctor.ps1` เป็น 26 จุดตรวจ ผ่านฉลุย 100%)
 
 ---
 
@@ -92,7 +92,7 @@ gemini-config/
 │   └── workflows/ci.yml    → GitHub Actions CI Pipeline (Prettier, Secretlint, Standards)
 ├── config.json             → การตั้งค่า Plugins, Remote Control Hostname, Dark Theme
 ├── hooks.json              → Life-cycle hooks (Windows SAPI Voice alerts & Security Gate)
-├── mcp_config.json         → MCP Servers (Firebase, BigQuery/datacloud — Puppeteer ถอดออก 2026-10-11)
+├── mcp_config.json         → MCP Servers (Firebase, Playwright Headless, BigQuery/datacloud)
 ├── package.json            → Scripts & devDependencies สำหรับ CI/CD (Prettier & Secretlint)
 ├── .secretlintrc.json      → กฎการตรวจจับ Secret / Key หลุดในโค้ด
 ├── .geminiignore           → Ignore rules สำหรับ Gemini CLI
@@ -101,7 +101,7 @@ gemini-config/
 ├── setup-junctions.ps1     → สคริปต์ติดตั้งและสร้าง Junction อัตโนมัติ (มี Per-plugin Fallback)
 ├── USER.md                 → ข้อมูลบริบทส่วนตัว พี่ A, สไตล์ Vibe Coding, กฎเหล็ก
 ├── tools/                  → เครื่องมือสนับสนุน CLI
-│   ├── doctor.ps1          → สคริปต์วินิจฉัยสุขภาพระบบ Antigravity (14 จุดตรวจ)
+│   ├── doctor.ps1          → สคริปต์วินิจฉัยสุขภาพระบบ Antigravity (26 จุดตรวจ ครอบคลุม gh CLI, Python Data Stack, Playwright MCP)
 │   ├── security-gate.ps1   → PreToolUse Hook ป้องกันไฟล์หลุดและคำสั่งอันตราย
 │   ├── new-vibe-project.ps1→ สคริปต์สร้างโปรเจกต์ใหม่ Supasit.A Starter อัตโนมัติ
 │   ├── check-standards.mjs → Node.js CI Doctor สำหรับรันบน GitHub Actions runner
@@ -194,4 +194,19 @@ Doctor-Gemini
   npx wrangler deploy
   ```
   *(ไฟล์คอนฟิก `wrangler.jsonc` ใน starter kit ได้ใส่ `account_id: "e87e6b4e7ec59834a35db192e7e37eb8"` ไว้พร้อมใช้ทันที)*
+
+---
+
+## 🧩 7. บันทึกการติดตั้ง Mods เสริม (Extended Tooling & MCP — 2026-10-12)
+
+| Mod / Tool | บทบาทและหน้าที่หลัก | การเรียกใช้งาน / คำสั่งสำคัญ |
+| :--- | :--- | :--- |
+| **1. GitHub CLI (`gh`)** | ตรวจเช็คสถานะ **GitHub Actions CI/CD** และ Pull Requests จาก Terminal โดยไม่ต้องสลับไปเปิดเบราว์เซอร์ | `gh run list`<br>`gh run view --log-failed`<br>`gh pr status` |
+| **2. Python Data Stack** | สกัดและวิเคราะห์ข้อมูลดิบจาก **PI Tag Archive / DCS Alarm Logs** ก้อนใหญ่จากไฟล์ Excel (`.xlsx`) แบบ Zero-Hallucination | `python -c "import pandas, openpyxl; ..."`<br>ติดตั้ง: `pip install pandas openpyxl` |
+| **3. Playwright MCP Server** | ให้ Agent สามารถเปิดเบราว์เซอร์จริง (Headless), แคปภาพหน้าจอ (Screenshot), และรัน E2E UI Test ก่อน Deploy | ผูกใน `mcp_config.json`<br>Command: `python -m playwright mcp --headless` |
+
+> 💡 **การซิงค์ไปยังเครื่อง Office GC-M PTA (`26007294`):**  
+> 1. เมื่อเปิดเครื่อง Office ให้พิมพ์ `Sync-Gemini` — ระบบจะดึง `mcp_config.json` และ `doctor.ps1` เวอร์ชัน 26 จุดตรวจลงมา  
+> 2. รัน `Doctor-Gemini` เพื่อตรวจสอบ — หากเครื่อง Office ยังไม่ได้ลง `pandas` สคริปต์จะแจ้งคำสั่ง `pip install pandas` ให้รันครั้งเดียวจบค่ะ
+
 
