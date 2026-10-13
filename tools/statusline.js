@@ -93,13 +93,20 @@ process.stdin.on("end", () => {
       parts.push(`🔋 5h: ${pct}%${resetCountdown}`);
     }
 
-    // 4. Git Branch & Dirty status
+    // 4. Weekly Quota
+    const qWk = data.quota?.["gemini-weekly"];
+    if (qWk && typeof qWk.remaining_fraction === "number") {
+      const pct = Math.round(qWk.remaining_fraction * 100);
+      parts.push(`📅 Wk: ${pct}%`);
+    }
+
+    // 5. Git Branch & Dirty status
     if (data.vcs?.branch) {
       const dirtyFlag = data.vcs.dirty ? "*" : "";
       parts.push(`🌿 ${data.vcs.branch}${dirtyFlag}`);
     }
 
-    // 5. Workspace / Project folder
+    // 6. Workspace / Project folder
     const workspacePath =
       data.workspace?.current_dir ||
       data.workspace?.workspace ||
@@ -112,7 +119,7 @@ process.stdin.on("end", () => {
       }
     }
 
-    // 6. Session Duration + Local Clock
+    // 7. Session Duration + Local Clock
     const durationStr = getSessionDurationStr();
     const now = new Date();
     const timeStr =
